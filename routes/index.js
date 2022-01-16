@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
+const m_yoyaku = require("../model/yoyakus");
 const yoyakuweb = require("../util/yoyakuweb");
 const common = require("../util/common");
 
@@ -78,15 +79,18 @@ router.post("/yoyakus", function (req, res) {
             inObj.tanka = linecontents[21];
             inObj.caution = linecontents[22];
             inObj.memo = linecontents[23];
+            inObj.yyyymmdd_created = yyyymmddhhmmss_proc;
             (async () => {
-              const retObjYoyakuinsert = await m_yoyaku.insert(inObj);
-              logger.info(`会議室予約情報ID：${inObj.id}`);
+              await m_yoyaku.insert(inObj);
+              logger.info(`予約情報ID：${inObj.id}`);
             })();
+            // id設定用プレフィックスに+1
             max_id_yoyaku += 1;
           }
         });
+
+        // 終了時には処理した対象ファイルをリネームする
         src.on("end", () => {
-          // 対象ファイルを処理した場合は対象ファイルをリネーム
           fs.rename(
             "C:\\download\\customer\\" + targetfilename,
             "C:\\download\\customer\\old_" + targetfilename,
