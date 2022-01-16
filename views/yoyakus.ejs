@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>予約確認書メール</title>
+  <%- include("./common/stylesheets.ejs") %>
+</head>
+
+<body>
+  <div>
+    <p>登録日/更新日:<%= yyyymmdd_addupd_start %>　～　<%= yyyymmdd_addupd_end %></p>
+    <p>利用日:<%= yyyymmdd_riyou_start %>　～　<%= yyyymmdd_riyou_end %></p>
+  </div>
+</body>
+<%- include("./common/javascripts.ejs") %>
+
+</html>

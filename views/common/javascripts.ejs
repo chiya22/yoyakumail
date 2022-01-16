@@ -1,0 +1,35 @@
+<!-- 
+flatpickr
+https://flatpickr.js.org/
+-->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@latest/dist/plugins/monthSelect/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ja.js"></script>
+<script>
+const config = {
+  enableTime: true,
+  noCalendar: true,
+  time_24hr: true,
+  dateFormat: "H:i",
+  minuteIncrement: 15,
+  defaultHour: 0,
+  defaultMinute: 0,
+}
+flatpickr('.flatpickr', config);
+const config1 = {
+  static: false,
+  locale: "ja",
+  plugins: [new monthSelectPlugin({shorthand: true, dateFormat: "Y/m"})]
+}
+flatpickr('.flatpickr1', config1);
+const config2 = {
+  dateFormat: "Y/m/d",
+}
+flatpickr('.flatpickr2', config2);
+</script>
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js'></script>
+<script>
+  new WOW().init();
+</script>
+

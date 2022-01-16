@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>予約確認書メール</title>
+  <%- include("./common/stylesheets.ejs") %>
+</head>
+
+<body>
+  <div>
+    <form action="/yoyakus" method="POST" name="jyoukenform">
+      登録日/更新日：<input type="text" name="yyyymmdd_addupd_start" value="20220112" /> ～ <input type="text" name="yyyymmdd_addupd_end" value="20220112" />
+      利用日：<input type="text" name="yyyymmdd_riyou_start" value="20220113" /> ～ <input type="text" name="yyyymmdd_riyou_end" value="20230113" />
+      <input type="submit" value="予約情報取得" />
+    </form>
+  </div>
+</body>
+<%- include("./common/javascripts.ejs") %>
+
+</html>

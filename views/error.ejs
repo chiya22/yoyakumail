@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>エラー</title>
+    <%- include("./common/stylesheets.ejs") %>
+</head>
+
+<body>
+    <div class="container-top">
+        <div class="stacktrace">
+            <% if (error.status === 404) { %>
+            <p>指定されたページは存在しません。（<%= error.status %>）</p>
+            <% } else if (error.status === 403) { %>
+            <p>承認されていません。（<%= error.status %>）</p>
+            <% }else{ %>
+            <p>何らかのエラーが発生しました。管理者へお知らせください。（<%= error.status %>）</p>
+            <% }; %>
+            <div class="stacktrace-text">
+                <p><%= message %></p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
