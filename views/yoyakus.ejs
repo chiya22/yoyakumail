@@ -8,9 +8,18 @@
 
 <body>
   <div>
-    <p>登録日/更新日:<%= yyyymmdd_addupd_start %>　～　<%= yyyymmdd_addupd_end %></p>
-    <p>利用日:<%= yyyymmdd_riyou_start %>　～　<%= yyyymmdd_riyou_end %></p>
+    <p>登録日/更新日:<%= searchinfo.yyyymmdd_addupd_start %>　～　<%= searchinfo.yyyymmdd_addupd_end %></p>
+    <p>利用日:<%= searchinfo.yyyymmdd_riyou_start %>　～　<%= searchinfo.yyyymmdd_riyou_end %></p>
   </div>
+  <!-- 予約情報 -->
+  <div>
+    <% if (yoyakus) { %>
+      <%  yoyakus.forEach( yoyaku => { %>
+        ID:<a href="/yoyakus/<%= yoyaku.id %>"><%= yoyaku.id_kanri %></a>
+      <% }) %>
+    <% } %>
+  </div>
+
 </body>
 <%- include("./common/javascripts.ejs") %>
 

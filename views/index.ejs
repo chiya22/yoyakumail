@@ -7,6 +7,7 @@
 </head>
 
 <body>
+  <!-- 検索条件 -->
   <div>
     <form action="/yoyakus" method="POST" name="jyoukenform">
       登録日/更新日：<input type="text" name="yyyymmdd_addupd_start" value="20220112" /> ～ <input type="text" name="yyyymmdd_addupd_end" value="20220112" />
@@ -14,6 +15,16 @@
       <input type="submit" value="予約情報取得" />
     </form>
   </div>
+
+  <!-- 検索情報 -->
+  <div>
+    <% if (searchinfos) { %>
+      <%  searchinfos.forEach( searchinfo => { %>
+        ID:<a href="/yoyakus/<%= searchinfo.id %>"><%= searchinfo.id %></a><a href="/yoyakudelete/<%= searchinfo.id %>">削除</a>
+      <% }) %>
+    <% } %>
+  </div>
+
 </body>
 <%- include("./common/javascripts.ejs") %>
 

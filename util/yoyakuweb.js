@@ -1,4 +1,3 @@
-const req = require("express/lib/request");
 const log4js = require("log4js");
 const logger = log4js.configure("./config/log4js-config.json").getLogger();
 const puppeteer = require("puppeteer");
@@ -102,6 +101,41 @@ const dlyoyakuinfo = async (yyyymmdd_addupd_start,yyyymmdd_addupd_end,yyyymmdd_r
   logger.info(`予約情報ダウンロード終了`);
   
 };
+
+
+// 決済情報アップロード
+// const upkessaiinfo = async (id => {
+
+  // const browser = await puppeteer.launch({ headless: false });
+
+  // let page = await browser.newPage();
+
+  // await page.goto(process.env.KESSAI_URL, { waitUntil: "domcontentloaded" });
+
+  // // ログイン
+  // await page.type('input[name="kamei_id"]', process.env.KESSAI_KAMEI_ID);
+  // await page.type('input[name="user_id"]', process.env.KESSAI_RIYOU_ID);
+  // await page.type('input[name="user_id"]', process.env.KESSAI_PASSWORD);
+  // await page.click(
+  //   "#fra_maindsk > form > center > table:nth-child(5) > tbody > tr > td > input[type=submit]"
+  // );
+
+  // アップロードファイルの作成
+
+
+
+
+  // アップロード
+
+
+
+// };
+
+// 決済情報ダウンロード
+// const dlkessaiinfo = async (id) => {
+
+// };
+
 
 module.exports = {
   dlyoyakuinfo,

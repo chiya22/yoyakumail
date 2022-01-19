@@ -1,4 +1,6 @@
 const knex = require("../db/knex.js").connect();
+const log4js = require("log4js");
+const logger = log4js.configure("./config/log4js-config.json").getLogger();
 
 const findPKey = async (id) => {
   try {
@@ -18,11 +20,23 @@ const find = async () => {
   }
 };
 
+// 検索条件IDで抽出
+const findByIdSearch = async ( id_search ) => {
+  try {
+    const retObj = await knex.from("yoyakus").where("id_search",id_search).orderBy("id", "asc");
+    return retObj;
+  } catch (err) {
+    throw err;
+  }
+};
+
 const insert = async (inObj) => {
   try {
     const query =
       'insert into yoyakus values ("' +
       inObj.id +
+      '","' +
+      inObj.id_search +
       '","' +
       inObj.id_kanri +
       '","' +
@@ -71,20 +85,36 @@ const insert = async (inObj) => {
       inObj.caution +
       '", "' +
       inObj.memo +
+      '", "' +
+      inObj.yyyymmddhhmmss_created +
       '")';
     const retObj = await knex.raw(query);
+    logger.info(query);
     return retObj[0];
   } catch (err) {
+    logger.info(err);
     throw err;
   }
 };
 
-const remove = async (inObj) => {
+const remove = async (id) => {
   try {
-    const query = 'delete from yoyakus where id = "' + inObj.id + '"';
+    const query = 'delete from yoyakus where id = "' + id + '"';
     const retObj = await knex.raw(query);
     return retObj[0];
   } catch (err) {
+    log.error(err.message);
+    throw err;
+  }
+};
+
+const removeByIdSearch = async (id) => {
+  try {
+    const query = 'delete from yoyakus where id_search = "' + id + '"';
+    const retObj = await knex.raw(query);
+    return retObj[0];
+  } catch (err) {
+    log.error(err.message);
     throw err;
   }
 };
@@ -92,6 +122,8 @@ const remove = async (inObj) => {
 module.exports = {
   find: find,
   findPKey: findPKey,
+  findByIdSearch: findByIdSearch,
   insert: insert,
   remove: remove,
+  removeByIdSearch: removeByIdSearch,
 };
