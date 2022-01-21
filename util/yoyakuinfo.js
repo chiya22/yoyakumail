@@ -6,6 +6,8 @@ const fs = require("fs");
 const iconv = require("iconv-lite");
 const readline = require("readline");
 
+const common = require("./common");
+
 const m_yoyakus = require("../model/yoyakus");
 
 if (process.env.NODE_ENV !== "production") {
@@ -140,15 +142,15 @@ const filetodb = (yyyymmddhhmmss_proc) => {
           inObj.time_start = linecontents[3];
           inObj.time_end = linecontents[4];
           inObj.price = linecontents[5] ? linecontents[5] : 0;
-          inObj.ymd_uketuke = linecontents[6].replace(/\//g, "");
+          inObj.yyyymmdd_uketuke = linecontents[6].replace(/\//g, "");
           inObj.status_shiharai = linecontents[7];
-          inObj.nm_nyuryoku = linecontents[8];
-          inObj.nm_riyousha = linecontents[9];
+          inObj.nm_nyuryoku = common.hankaku2Zenkaku(linecontents[8]);
+          inObj.nm_riyousha = common.hankaku2Zenkaku(linecontents[9]);
           inObj.nm_room_seishiki = linecontents[10];
           inObj.type_room = linecontents[11];
           inObj.no_keiyakusha = linecontents[12];
-          inObj.nm_keiyakusha = linecontents[13];
-          inObj.nm_tantousha = linecontents[14];
+          inObj.nm_keiyakusha = common.hankaku2Zenkaku(linecontents[13]);
+          inObj.nm_tantousha = common.hankaku2Zenkaku(linecontents[14]);
           inObj.telno = linecontents[15];
           inObj.faxno = linecontents[16];
           inObj.email = linecontents[17];

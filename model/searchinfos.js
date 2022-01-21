@@ -5,7 +5,7 @@ const logger = log4js.configure("./config/log4js-config.json").getLogger();
 const findPKey = async (id) => {
   try {
     const retObj = await knex.from("searchinfos").where({ id: id });
-    return retObj;
+    return retObj[0];
   } catch (err) {
     throw err;
   }
@@ -46,6 +46,18 @@ const insert = async (inObj) => {
   }
 };
 
+// ステータス更新
+const updateStatus = async (id, status) => {
+  try {
+    const query = 'update searchinfos set status = "' + status + '" where id = "' + id + '"';
+    const retObj = await knex.raw(query);
+    return retObj
+  } catch (err) {
+    throw err;
+  }
+};
+
+
 const remove = async (id) => {
   try {
     const query = 'delete from searchinfos where id = "' + id + '"';
@@ -61,5 +73,6 @@ module.exports = {
   find: find,
   findPKey: findPKey,
   insert: insert,
+  updateStatus:updateStatus,
   remove: remove,
 };

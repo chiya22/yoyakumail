@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>決済情報</title>
+  <%- include("./common/stylesheets.ejs") %>
+</head>
+
+<body>
+  <div>
+    お客様番号：<%= kessai.id_customer %>
+    検索情報ID：<%= kessai.id_search %>
+    支払方法：<%= kessai.to_pay %>
+    顧客名1:<%= kessai.nm_customer_1 %>
+    顧客名2:<%= kessai.nm_customer_2 %>
+    電話番号：<%= kessai.telno %>
+    料金：<%= kessai.price %>
+    支払期限日：<%= kessai.yyyymmdd_kigen %>
+    結果：<%= kessai.result %>
+    データID：<%= kessai.id_data %>
+    払込票URL：<%= kessai.url_cvs %>
+    メッセージ：<%= kessai.message %>
+  </div>
+</body>
+<%- include("./common/javascripts.ejs") %>
+
+</html>

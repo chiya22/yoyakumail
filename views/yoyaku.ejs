@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>予約情報</title>
+  <%- include("./common/stylesheets.ejs") %>
+</head>
+
+<body>
+  <div>
+    ID：<%= yoyaku.id %>
+    ID_検索：<%= yoyaku.id_search %>
+    ID_管理:<%= yoyaku.id_kanri %>
+    会議室名：<%= yoyaku.nm_room %>
+    予約年月日：<%= yoyaku.yyyymmdd_yoyaku %>
+    開始時間：<%= yoyaku.time_start %>
+    終了時間：<%= yoyaku.time_end %>
+    金額：<%= yoyaku.price %>
+    受付年月日：<%= yoyaku.yyyymmdd_uketuke %>
+    支払状況：<%= yoyaku.status_shiharai %>
+    入力名：<%= yoyaku.nm_yoyaku %>
+    利用者名：<%= yoyaku.nm_riyousha %>
+    会議室名（正式）：<%= yoyaku.nm_room_seishiki %>
+    部屋タイプ：<%= yoyaku.type_room %>
+    契約番号：<%= yoyaku.no_keiyaku %>
+    契約名：<%= yoyaku.nm_keiyaku %>
+    担当者名：<%= yoyaku.nm_tantou %>
+    電話番号：<%= yoyaku.telno %>
+    FAX番号：<%= yoyaku.faxno %>
+    メールアドレス：<%= yoyaku.email %>
+    区分：<%= yoyaku.kubun %>
+    住所：<%= yoyaku.address %>
+    数量：<%= yoyaku.quantity %>
+    単価：<%= yoyaku.tanka %>
+    注意事項：<%= yoyaku.caution %>
+    メモ：<%= yoyaku.memo %>
+    作成年月日時分秒：<%= yoyaku.yyyymmddhhmmss_created %>
+  </div>
+
+</body>
+<%- include("./common/javascripts.ejs") %>
+
+</html>

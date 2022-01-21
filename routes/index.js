@@ -3,16 +3,16 @@ const router = express.Router();
 
 const m_searchinfos = require("../model/searchinfos");
 const m_yoyakus = require("../model/yoyakus");
+const m_kessais = require("../model/kessais");
 
 const common = require("../util/common")
 const yoyakuinfo = require("../util/yoyakuinfo");
 
 const log4js = require("log4js");
-const yoyakus = require("../model/yoyakus");
 const logger = log4js.configure("./config/log4js-config.json").getLogger();
 
 // 検索条件の一覧を表示する
-router.get("/", function (req, res) {
+router.get("/", (req, res) => {
   (async () => {
     const searchinfos = await m_searchinfos.find();
     res.render("index", {
@@ -21,40 +21,8 @@ router.get("/", function (req, res) {
   })();
 });
 
-// 検索条件の一覧から1つの検索条件をクリックした際に、その検索条件に紐づけ予約情報を表示する
-router.get("/yoyakus/:id", function (req, res) {
-  (async () => {
-
-    // idより予約一覧を取得し、返却する
-    const searchinfo = await m_searchinfos.findPKey(req.params.id); // 検索条件
-    const yoyakus = await m_yoyakus.findByIdSearch(req.params.id); // 予約情報
-
-    res.render("yoyakus", {
-      searchinfo: searchinfo[0],
-      yoyakus: yoyakus,
-    });
-
-  })();
-});
-
-// 対象検索条件IDの情報を削除する
-router.get("/yoyakudelete/:id", function (req, res) {
-  (async () => {
-
-    // idより予約一覧を取得し、返却する
-    await m_yoyakus.removeByIdSearch(req.params.id); // 予約情報
-    await m_searchinfos.remove(req.params.id); // 検索条件
-
-    // 検索条件情報の一覧を取得する
-    await m_searchinfos.find();
-
-    res.redirect("/");
-
-  })();
-});
-
-// 検索条件の登録
-router.post("/yoyakus", function (req, res) {
+// 検索条件を新規登録し、対象となる予約情報をダウンロードして登録する
+router.post("/yoyakus", (req, res) => {
   (async () => {
 
     const yyyymmdd_addupd_start = req.body.yyyymmdd_addupd_start;
@@ -88,6 +56,107 @@ router.post("/yoyakus", function (req, res) {
   })();
 });
 
-router.post("/kessais", function (req, res) {});
+// 検索条件に紐づく予約情報一覧を表示する
+router.get("/yoyakus/:id", (req, res) => {
+  (async () => {
+
+    // idより予約一覧を取得し、返却する
+    const searchinfo = await m_searchinfos.findPKey(req.params.id); // 検索条件
+    const yoyakus = await m_yoyakus.findByIdSearch(req.params.id); // 予約情報
+
+    res.render("yoyakus", {
+      searchinfo: searchinfo,
+      yoyakus: yoyakus,
+    });
+
+  })();
+});
+
+// 予約情報を取得する
+router.get("/yoyaku/:id", (req,res) => {
+  (async () => {
+
+    // idより予約情報を取得し、返却する
+    const yoyaku = await m_yoyakus.findPKey(req.params.id); // 予約情報
+
+    res.render("yoyaku", {
+      yoyaku: yoyaku,
+    });
+  })();
+})
+
+// 対象検索条件IDの情報を削除する
+router.get("/yoyakudelete/:id", (req, res) => {
+  (async () => {
+
+    // idより予約一覧を取得し、返却する
+    await m_yoyakus.removeByIdSearch(req.params.id); // 予約情報
+    await m_kessais.removeByIdSearch(req.params.id);  // 決済情報
+    await m_searchinfos.remove(req.params.id);       // 検索条件
+
+    // 検索条件情報の一覧を取得する
+    await m_searchinfos.find();
+
+    res.redirect("/");
+
+  })();
+});
+
+// 対象検索条件IDの情報をもとに決済を行う
+router.get("/kessaiscreate/:id", (req,res) => {
+  (async () => {
+
+    // 予約情報をもとに、決済情報を登録する
+    await m_kessais.insertfromyoyakus(req.params.id)
+
+    // ファイルへ書き出す
+    
+
+    // 電算システムへアップロードする
+
+
+    // 電算システムよりダウンロードする
+
+
+    // ダウンロードしたファイルより、テーブルへ情報を反映する
+
+    // 検索条件情報のステータスを更新する
+    await m_searchinfos.updateStatus(req.params.id, '2');
+
+    res.redirect("/");
+
+  })();
+});
+
+// 検索条件に紐づく決済情報一覧を表示する
+router.get("/kessais/:id", (req, res) => {
+  (async () => {
+
+    // idより決済一覧を取得し、返却する
+    const searchinfo = await m_searchinfos.findPKey(req.params.id); // 検索条件
+    const kessais = await m_kessais.findByIdSearch(req.params.id); // 決済情報
+
+    res.render("kessais", {
+      searchinfo: searchinfo,
+      kessais: kessais,
+    });
+
+  })();
+});
+
+// 決済情報を表示する
+router.get("/kessai/:id", (req,res) => {
+  (async () => {
+
+    const id_search = req.params.id.split("_")[0];
+    const id_customer = req.params.id.split("_")[1];
+
+    const kessai = await m_kessais.findPKey(id_search, id_customer);
+
+    res.render("kessai", {
+      kessai: kessai,
+    });
+  })();
+});
 
 module.exports = router;

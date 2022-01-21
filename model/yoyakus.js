@@ -5,7 +5,7 @@ const logger = log4js.configure("./config/log4js-config.json").getLogger();
 const findPKey = async (id) => {
   try {
     const retObj = await knex.from("yoyakus").where({ id: id });
-    return retObj;
+    return retObj[0];
   } catch (err) {
     throw err;
   }
@@ -50,7 +50,7 @@ const insert = async (inObj) => {
       '", "' +
       inObj.price +
       '", "' +
-      inObj.ymd_uketuke +
+      inObj.yyyymmdd_uketuke +
       '", "' +
       inObj.status_shiharai +
       '", "' +

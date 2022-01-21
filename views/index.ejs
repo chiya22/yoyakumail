@@ -20,7 +20,26 @@
   <div>
     <% if (searchinfos) { %>
       <%  searchinfos.forEach( searchinfo => { %>
-        ID:<a href="/yoyakus/<%= searchinfo.id %>"><%= searchinfo.id %></a><a href="/yoyakudelete/<%= searchinfo.id %>">削除</a>
+        <div>
+          <h1><b>ID:<%= searchinfo.id %>登録日／更新日：<%= searchinfo.yyyymmdd_addupd_start %>～<%= searchinfo.yyyymmdd_addupd_end %>｜利用日：<%= searchinfo.yyyymmdd_riyou_start %>～<%= searchinfo.yyyymmdd_riyou_end %></b></h1>
+          <div>
+            <a href="/yoyakus/<%= searchinfo.id %>">予約情報一覧</a>
+          </div>
+          <div>
+            <a href="/yoyakudelete/<%= searchinfo.id %>">削除</a>
+          </div>
+        <% if (searchinfo.status === '1') { %>
+            <!-- 予約情報取得済み-->
+            <div>
+              <a href="/kessaiscreate/<%= searchinfo.id %>">決済情報取得</a>
+            </div>
+          <% } else { %>
+            <!-- 決済情報取得済み-->
+            <div>
+              <a href="/kessais/<%= searchinfo.id %>">決済情報一覧</a>
+            </div>
+          <% } %>
+        </div>
       <% }) %>
     <% } %>
   </div>

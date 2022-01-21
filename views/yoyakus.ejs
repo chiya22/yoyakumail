@@ -1,26 +1,21 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <title>予約情報一覧</title>
+    <%- include("./common/stylesheets.ejs") %>
+  </head>
 
-<head>
-  <title>予約確認書メール</title>
-  <%- include("./common/stylesheets.ejs") %>
-</head>
-
-<body>
-  <div>
-    <p>登録日/更新日:<%= searchinfo.yyyymmdd_addupd_start %>　～　<%= searchinfo.yyyymmdd_addupd_end %></p>
-    <p>利用日:<%= searchinfo.yyyymmdd_riyou_start %>　～　<%= searchinfo.yyyymmdd_riyou_end %></p>
-  </div>
-  <!-- 予約情報 -->
-  <div>
-    <% if (yoyakus) { %>
-      <%  yoyakus.forEach( yoyaku => { %>
-        ID:<a href="/yoyakus/<%= yoyaku.id %>"><%= yoyaku.id_kanri %></a>
-      <% }) %>
-    <% } %>
-  </div>
-
-</body>
-<%- include("./common/javascripts.ejs") %>
-
+  <body>
+    <div>
+      <p>登録日/更新日:<%= searchinfo.yyyymmdd_addupd_start %>　～　<%= searchinfo.yyyymmdd_addupd_end %></p>
+      <p>利用日:<%= searchinfo.yyyymmdd_riyou_start %>　～　<%= searchinfo.yyyymmdd_riyou_end %></p>
+    </div>
+    <!-- 予約情報 -->
+    <div>
+      <% if (yoyakus) { %> <% yoyakus.forEach( yoyaku => { %>
+      <div>ID:<a href="/yoyaku/<%= yoyaku.id %>"><%= yoyaku.id_kanri %></a></div>
+      <% }) %> <% } %>
+    </div>
+  </body>
+  <%- include("./common/javascripts.ejs") %>
 </html>

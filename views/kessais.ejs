@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>決済情報一覧</title>
+  <%- include("./common/stylesheets.ejs") %>
+</head>
+
+<body>
+  <div>
+    <p>登録日/更新日:<%= searchinfo.yyyymmdd_addupd_start %>　～　<%= searchinfo.yyyymmdd_addupd_end %></p>
+    <p>利用日:<%= searchinfo.yyyymmdd_riyou_start %>　～　<%= searchinfo.yyyymmdd_riyou_end %></p>
+  </div>
+  <!-- 予約情報 -->
+  <div>
+    <% if (kessais) { %>
+      <%  kessais.forEach( kessai => { %>
+        <div>
+          ID:<a href="/kessai/<%= kessai.id_search %>_<%= kessai.id_customer %>"><%= kessai.id_customer %></a>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+
+</body>
+<%- include("./common/javascripts.ejs") %>
+
+</html>
