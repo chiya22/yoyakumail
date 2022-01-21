@@ -7,6 +7,7 @@ const m_kessais = require("../model/kessais");
 
 const common = require("../util/common")
 const yoyakuinfo = require("../util/yoyakuinfo");
+const kessaiinfo = require("../util/kessaiinfo");
 
 const log4js = require("log4js");
 const logger = log4js.configure("./config/log4js-config.json").getLogger();
@@ -110,15 +111,16 @@ router.get("/kessaiscreate/:id", (req,res) => {
     await m_kessais.insertfromyoyakus(req.params.id)
 
     // ファイルへ書き出す
+    const outFileName = await kessaiinfo.outputFile(req.params.id);
     
-
     // 電算システムへアップロードする
-
+    // await kessaiinfo.upkessaiinfo(req.params.id, outFileName);
 
     // 電算システムよりダウンロードする
-
+    // const inFileName = await kessaiinfo.dlkessaiinfo(req.params.id);
 
     // ダウンロードしたファイルより、テーブルへ情報を反映する
+    // await kessaiinfo.updkessaiinfo(req.params.id, inFileName)
 
     // 検索条件情報のステータスを更新する
     await m_searchinfos.updateStatus(req.params.id, '2');
