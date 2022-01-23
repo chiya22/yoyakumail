@@ -77,6 +77,18 @@ const insertfromyoyakus = async (id_search) => {
   }
 }
 
+// PK（管理ID、検索情報ID）をキーに決済結果ダウンロードファイルの内容を更新する
+const updatekessaisBydlinfo = async (inObj) => {
+  try {
+    const query = 'update kessais set result = "' + inObj.result + '", id_data = "' + inObj.id_data + '", url_cvs = "' + inObj.url_cvs + '", message = "' + inObj.message + '" where id_customer = "' + inObj.customer + '" and id_search = "' + inObj.id_search + '"';
+    const retObj = await knex.raw(query);
+    return retObj[0];
+  } catch (err) {
+    log.error(err.message);
+    throw err;
+  }
+}
+
 const remove = async (id) => {
   try {
     const query = 'delete from kessais where id_customer = "' + id + '"';
@@ -100,11 +112,12 @@ const removeByIdSearch = async (id) => {
 };
 
 module.exports = {
-  find: find,
-  findPKey: findPKey,
-  findByIdSearch: findByIdSearch,
-  insert: insert,
-  insertfromyoyakus:insertfromyoyakus,
-  remove: remove,
-  removeByIdSearch: removeByIdSearch,
+  find,
+  findPKey,
+  findByIdSearch,
+  insert,
+  insertfromyoyakus,
+  updatekessaisBydlinfo,
+  remove,
+  removeByIdSearch,
 };

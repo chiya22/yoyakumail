@@ -32,15 +32,18 @@ const hankaku2Zenkaku = (str) => {
     };
 
     const reg = new RegExp('(' + Object.keys(kanaMap).join('|') + ')', 'g');
+
     return str
-            .replace(reg, function (match) {
-                return kanaMap[match];
-            })
-            .replace(/ﾞ/g, '゛')
-            .replace(/ﾟ/g, '゜')
-            .replace(/[A-Za-z0-9]/g, (s) => {
-              return String.fromCharCode(s.charCodeAt(0) + 0xFEE0);
-          });
+          .replace(reg, (match) => kanaMap[match])
+          .replace(/ﾞ/g, '゛')
+          .replace(/ﾟ/g, '゜')
+          .replace(/[A-Za-z0-9!-~]/g, (s) => String.fromCharCode(s.charCodeAt(0) + 0xFEE0))
+          .replace(/\"/g, "”")
+          .replace(/'/g, "’")
+          .replace(/`/g, "‘")
+          .replace(/\\/g, "￥")
+          .replace(/ /g, "　")
+          .replace(/~/g, "〜");
 };
 
 module.exports = {

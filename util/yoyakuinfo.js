@@ -16,6 +16,7 @@ if (process.env.NODE_ENV !== "production") {
 
 //　予約情報ダウンロード
 const dlyoyakuinfo = async (yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd_riyou_start, yyyymmdd_riyou_end) => {
+  
   const browser = await puppeteer.launch({ headless: false });
 
   let page = await browser.newPage();
@@ -64,7 +65,7 @@ const dlyoyakuinfo = async (yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd
   // 「検索」ボタンをクリック
   await page.click("body > div:nth-child(4) > form > table:nth-child(1) > tbody > tr > td:nth-child(4) > input");
 
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(3000);
 
   // Promptが出たら必ずOKとする
   page.on("dialog", async (dialog) => {
@@ -94,7 +95,7 @@ const dlyoyakuinfo = async (yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd
   await page.$eval('form[name="formlist"]', (form) => form.submit());
 
   await logger.info(`予約情報をダウンロードしました`);
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(5000);
   await browser.close();
 
   logger.info(`予約情報ダウンロード終了`);

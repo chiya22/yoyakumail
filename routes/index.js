@@ -111,13 +111,13 @@ router.get("/kessaiscreate/:id", (req,res) => {
     await m_kessais.insertfromyoyakus(req.params.id)
 
     // ファイルへ書き出す
-    const outFileName = await kessaiinfo.outputFile(req.params.id);
+    // const outFileName = await kessaiinfo.outputFile(req.params.id);
     
     // 電算システムへアップロードする
     // await kessaiinfo.upkessaiinfo(req.params.id, outFileName);
 
     // 電算システムよりダウンロードする
-    // const inFileName = await kessaiinfo.dlkessaiinfo(req.params.id);
+    const inFileName = await kessaiinfo.dlkessaiinfo(req.params.id);
 
     // ダウンロードしたファイルより、テーブルへ情報を反映する
     // await kessaiinfo.updkessaiinfo(req.params.id, inFileName)
