@@ -30,6 +30,16 @@ const findByIdSearch = async ( id_search ) => {
   }
 };
 
+// お客様IDで抽出
+const findByIdSearchAndCustomer = async ( id_search, id_customer ) => {
+  try {
+    const retObj = await knex.from("yoyakus").where({"id_search":id_search,"id_customer":id_customer}).orderBy("id", "asc");
+    return retObj;
+  } catch (err) {
+    throw err;
+  }
+};
+
 const insert = async (inObj) => {
   try {
     const query =
@@ -37,6 +47,8 @@ const insert = async (inObj) => {
       inObj.id +
       '","' +
       inObj.id_search +
+      '", "' +
+      inObj.id_customer +
       '","' +
       inObj.id_kanri +
       '","' +
@@ -88,8 +100,8 @@ const insert = async (inObj) => {
       '", "' +
       inObj.yyyymmddhhmmss_created +
       '")';
-    const retObj = await knex.raw(query);
     logger.info(query);
+    const retObj = await knex.raw(query);
     return retObj[0];
   } catch (err) {
     logger.info(err);
@@ -100,10 +112,11 @@ const insert = async (inObj) => {
 const remove = async (id) => {
   try {
     const query = 'delete from yoyakus where id = "' + id + '"';
+    logger.info(query);
     const retObj = await knex.raw(query);
     return retObj[0];
   } catch (err) {
-    log.error(err.message);
+    logger.error(err.message);
     throw err;
   }
 };
@@ -111,19 +124,21 @@ const remove = async (id) => {
 const removeByIdSearch = async (id) => {
   try {
     const query = 'delete from yoyakus where id_search = "' + id + '"';
+    logger.info(query);
     const retObj = await knex.raw(query);
     return retObj[0];
   } catch (err) {
-    log.error(err.message);
+    logger.error(err.message);
     throw err;
   }
 };
 
 module.exports = {
-  find: find,
-  findPKey: findPKey,
-  findByIdSearch: findByIdSearch,
-  insert: insert,
-  remove: remove,
-  removeByIdSearch: removeByIdSearch,
+  find,
+  findPKey,
+  findByIdSearch,
+  findByIdSearchAndCustomer,
+  insert,
+  remove,
+  removeByIdSearch,
 };

@@ -8,6 +8,7 @@ const m_kessais = require("../model/kessais");
 const common = require("../util/common")
 const yoyakuinfo = require("../util/yoyakuinfo");
 const kessaiinfo = require("../util/kessaiinfo");
+const mailinfo = require("../util/mailinfo");
 
 const log4js = require("log4js");
 const logger = log4js.configure("./config/log4js-config.json").getLogger();
@@ -107,23 +108,39 @@ router.get("/yoyakudelete/:id", (req, res) => {
 router.get("/kessaiscreate/:id", (req,res) => {
   (async () => {
 
+    let retValue = '';
+
     // 予約情報をもとに、決済情報を登録する
-    await m_kessais.insertfromyoyakus(req.params.id)
+    // await m_kessais.insertfromyoyakus(req.params.id)
 
     // ファイルへ書き出す
     // const outFileName = await kessaiinfo.outputFile(req.params.id);
     
     // 電算システムへアップロードする
-    // await kessaiinfo.upkessaiinfo(req.params.id, outFileName);
+    // retvalue = await kessaiinfo.upkessaiinfo(req.params.id, outFileName);
+    // retvalue = await kessaiinfo.upkessaiinfo(req.params.id, "c:\\download\\customer\\kessaiinfo20220129093147.csv");
+    // if (retValue.includes("エラー")) {
+    //   console.log(retValue);
+    //   res.redirect("/");
+    // }
 
     // 電算システムよりダウンロードする
-    const inFileName = await kessaiinfo.dlkessaiinfo(req.params.id);
+    // retValue = await kessaiinfo.dlkessaiinfo(req.params.id);
+
+    // if (retValue.includes("エラー")) {
+    //   console.log(retValue);
+    //   res.redirect("/");
+    // }
 
     // ダウンロードしたファイルより、テーブルへ情報を反映する
-    // await kessaiinfo.updkessaiinfo(req.params.id, inFileName)
+    // await kessaiinfo.updkessaiinfo(req.params.id, retValue);
+    // await kessaiinfo.updkessaiinfo(req.params.id, "22012904174.csv");
+
+    // メール文章を作成する
+    // await mailinfo.setMailContent(req.params.id);
 
     // 検索条件情報のステータスを更新する
-    await m_searchinfos.updateStatus(req.params.id, '2');
+    // await m_searchinfos.updateStatusAndTime(req.params.id, '2', commo.getTodayTime());
 
     res.redirect("/");
 
@@ -158,6 +175,22 @@ router.get("/kessai/:id", (req,res) => {
     res.render("kessai", {
       kessai: kessai,
     });
+  })();
+});
+
+// メールを送信する
+router.get("/sendmail/:id", (req,res) => {
+  (async () => {
+
+    const id_search = rew.params.id;
+
+    await mailinfo.sendMail(id_search);
+
+    // 検索条件情報のステータスを更新する
+    await m_searchinfos.updateStatusAndTime(req.params.id, '3', common.getTodayTime());
+
+    res.redirect("/");
+
   })();
 });
 

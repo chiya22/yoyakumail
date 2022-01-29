@@ -36,7 +36,7 @@ const insert = async (inObj) => {
       '", "' +
       inObj.status +
       '", "' +
-      inObj.yyyymmddhhmmss_created +
+      inObj.yyyymmddhhmmss_created_yoyakus +
       '")';
     logger.info(query);
     const retObj = await knex.raw(query);
@@ -46,10 +46,18 @@ const insert = async (inObj) => {
   }
 };
 
-// ステータス更新
-const updateStatus = async (id, status) => {
+// ステータスと処理時間の更新
+const updateStatusAndTime = async (id, status, yyyymmddhhmmss) => {
+
   try {
-    const query = 'update searchinfos set status = "' + status + '" where id = "' + id + '"';
+    if (status === '1') {
+      const query = 'update searchinfos set status = "' + status + '" yyyymmddhhmmss_created_yoyakus = "' + yyyymmddhhmmss + '" where id = "' + id + '"';
+    } else if (status === '2') {
+      const query = 'update searchinfos set status = "' + status + '" yyyymmddhhmmss_created_kessais = "' + yyyymmddhhmmss + '" where id = "' + id + '"';
+    } else if (status ==='3') {
+      const query = 'update searchinfos set status = "' + status + '" yyyymmddhhmmss_sended_mails = "' + yyyymmddhhmmss + '" where id = "' + id + '"';
+    }
+    logger.info(query);
     const retObj = await knex.raw(query);
     return retObj
   } catch (err) {
@@ -57,22 +65,21 @@ const updateStatus = async (id, status) => {
   }
 };
 
-
 const remove = async (id) => {
   try {
     const query = 'delete from searchinfos where id = "' + id + '"';
     const retObj = await knex.raw(query);
     return retObj[0];
   } catch (err) {
-    log.error(err.message);
+    logger.error(err.message);
     throw err;
   }
 };
 
 module.exports = {
-  find: find,
-  findPKey: findPKey,
-  insert: insert,
-  updateStatus:updateStatus,
-  remove: remove,
+  find,
+  findPKey,
+  insert,
+  updateStatusAndTime,
+  remove,
 };

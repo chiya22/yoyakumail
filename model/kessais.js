@@ -56,8 +56,8 @@ const insert = async (inObj) => {
       '", "' +
       inObj.message +
       '")';
-    const retObj = await knex.raw(query);
     logger.info(query);
+    const retObj = await knex.raw(query);
     return retObj[0];
   } catch (err) {
     throw err;
@@ -68,9 +68,9 @@ const insert = async (inObj) => {
 const insertfromyoyakus = async (id_search) => {
 
   try {
-    const query = 'INSERT INTO kessais ( id_customer, to_pay, nm_customer_1, nm_customer_2, telno, price, yyyymmdd_kigen, id_search) SELECT CONCAT("R",y.id_kanri,"-",y.yyyymmdd_uketuke,"-",y.yyyymmdd_yoyaku) AS id_customer,"800" AS to_pay,LEFT(concat(MID(y.nm_riyousha,INSTR(y.nm_riyousha,"　")+1,30),"　",y.nm_tantousha),10) AS nm_customer_1,MID(CONCAT(MID(y.nm_riyousha,INSTR(y.nm_riyousha,"　")+1,30),"　",y.nm_tantousha),11,10) AS nm_customer_2,y.telno AS telno,SUM(y.price) AS price,DATE_FORMAT(CURDATE() + 8,"%Y%m%d") AS yyyymmdd_kigen,y.id_search AS id_search FROM yoyakus y GROUP BY y.id_kanri, y.yyyymmdd_yoyaku, "800", y.nm_tantousha, y.telno, date_format(CURDATE() + 8,"%Y%m%d"), y.yyyymmdd_uketuke, id_search HAVING y.id_search = "' + id_search + '"'
-    const retObj = await knex.raw(query);
+    const query = 'INSERT INTO kessais ( id_customer, to_pay, nm_customer_1, nm_customer_2, telno, price, yyyymmdd_kigen, id_search, nm_keiyaku, nm_tantousha, yyyymmdd_yoyaku, yyyymmdd_uketuke, email ) SELECT y.id_customer AS id_customer,"800" AS to_pay,LEFT(concat(MID(y.nm_riyousha,INSTR(y.nm_riyousha,"　")+1,30),"　",y.nm_tantousha),10) AS nm_customer_1,MID(CONCAT(MID(y.nm_riyousha,INSTR(y.nm_riyousha,"　")+1,30),"　",y.nm_tantousha),11,10) AS nm_customer_2,y.telno AS telno,SUM(y.price) AS price,DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 8 DAY),"%Y%m%d") AS yyyymmdd_kigen,y.id_search AS id_search, MAX(y.nm_keiyaku) as nm_keiyaku, MAX(y.nm_tantousha) as nm_tantousha, MAX(y.yyyymmdd_yoyaku) as yyyymmdd_yoyaku, MAX(y.yyyymmdd_uketuke) as yyyymmdd_uketuke, MAX(y.email) as email FROM yoyakus y GROUP BY y.id_customer, "800", y.nm_tantousha, y.telno, DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 8 DAY),"%Y%m%d"), id_search HAVING y.id_search = "' + id_search + '"'
     logger.info(query);
+    const retObj = await knex.raw(query);
     return retObj;
   } catch(err) {
     throw err;
@@ -80,11 +80,24 @@ const insertfromyoyakus = async (id_search) => {
 // PK（管理ID、検索情報ID）をキーに決済結果ダウンロードファイルの内容を更新する
 const updatekessaisBydlinfo = async (inObj) => {
   try {
-    const query = 'update kessais set result = "' + inObj.result + '", id_data = "' + inObj.id_data + '", url_cvs = "' + inObj.url_cvs + '", message = "' + inObj.message + '" where id_customer = "' + inObj.customer + '" and id_search = "' + inObj.id_search + '"';
+    const query = 'update kessais set result = "' + inObj.result + '", id_data = "' + inObj.id_data + '", url_cvs = "' + inObj.url_cvs + '", message = "' + inObj.message + '" where id_customer = "' + inObj.id_customer + '" and id_search = "' + inObj.id_search + '"';
+    logger.info(query);
     const retObj = await knex.raw(query);
     return retObj[0];
   } catch (err) {
-    log.error(err.message);
+    logger.error(err.message);
+    throw err;
+  }
+}
+
+const updatekessaisByMailinfo = async (inObj) => {
+  try {
+    const query = 'update kessais set mail_subject = "' + inObj.mail_subject + '", mail_body = "' + inObj.mail_body + '" where id_customer = "' + inObj.id_customer + '" and id_search = "' + inObj.id_search + '"';
+    // logger.info(query);
+    const retObj = await knex.raw(query);
+    return retObj[0];
+  } catch (err) {
+    logger.error(err.message);
     throw err;
   }
 }
@@ -95,7 +108,7 @@ const remove = async (id) => {
     const retObj = await knex.raw(query);
     return retObj[0];
   } catch (err) {
-    log.error(err.message);
+    logger.error(err.message);
     throw err;
   }
 };
@@ -106,7 +119,7 @@ const removeByIdSearch = async (id) => {
     const retObj = await knex.raw(query);
     return retObj[0];
   } catch (err) {
-    log.error(err.message);
+    logger.error(err.message);
     throw err;
   }
 };
@@ -118,6 +131,7 @@ module.exports = {
   insert,
   insertfromyoyakus,
   updatekessaisBydlinfo,
+  updatekessaisByMailinfo,
   remove,
   removeByIdSearch,
 };
