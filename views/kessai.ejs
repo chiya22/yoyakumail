@@ -21,6 +21,7 @@
     払込票URL：<%= kessai.url_cvs %>
     メッセージ：<%= kessai.message %>
   </div>
+  <a href="/kessai/sendmail/<%= kessai.id_search %>_<%= kessai.id_customer %>">メール送信</a>
 </body>
 <%- include("./common/javascripts.ejs") %>
 

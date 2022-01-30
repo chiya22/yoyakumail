@@ -90,6 +90,7 @@ const updatekessaisBydlinfo = async (inObj) => {
   }
 }
 
+//PK（管理ID、検索情報ID）をキーに決済情報のメール部分を更新する
 const updatekessaisByMailinfo = async (inObj) => {
   try {
     const query = 'update kessais set mail_subject = "' + inObj.mail_subject + '", mail_body = "' + inObj.mail_body + '" where id_customer = "' + inObj.id_customer + '" and id_search = "' + inObj.id_search + '"';
@@ -100,6 +101,18 @@ const updatekessaisByMailinfo = async (inObj) => {
     logger.error(err.message);
     throw err;
   }
+}
+
+//PK（管理ID、検索情報ID）をキーにメール送信年月日時分秒を更新する
+const updatekessaisToSendMail = async ( id_search, id_customer, time) => {
+ try {
+   const query = 'update kessais set yyyymmddhhmmss_sended_mail = "' + time + '" where id_customer = "' + id_customer + '" and id_search = "' + id_search + '";'
+    logger.info(query);
+    const retObj = await knex.raw(query);
+ } catch (err) {
+  logger.error(err.message);
+  throw err;
+ }
 }
 
 const remove = async (id) => {
@@ -132,6 +145,7 @@ module.exports = {
   insertfromyoyakus,
   updatekessaisBydlinfo,
   updatekessaisByMailinfo,
+  updatekessaisToSendMail,
   remove,
   removeByIdSearch,
 };

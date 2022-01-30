@@ -144,8 +144,8 @@ const setMailContent = async (id_search) => {
   });
 }
 
-//  決済情報をもとに、メールを送信する
-const sendMail = async ( id_search)=> {
+//  検索情報ID配下のすべての決済情報をもとに、メールを送信する
+const sendMailByIdSearch = async ( id_search)=> {
 
   // 対象となる決済情報を取得
   const kessais = await m_kessais.findByIdSearch(id_search);
@@ -153,12 +153,31 @@ const sendMail = async ( id_search)=> {
   kessais.forEach( (kessai) => {
     //　メール送信対象の場合
     if (kessai.isSendMail === '1') {
+
+      // テスト用でToを書き換え
       send('yoshida@yamori.jp', kessai.mail_subject, kessai.mail_body);
+
       // send(kessai.email, kessai.mail_subject, kessai.mail_body);
+      
     }
     logger.info(`送信先：${kessai.nm_keiyaku} <${email}>`)
   })
 
+};
+
+//  決済情報をもとに、メールを送信する
+const sendMail = async ( id_search, id_cutomer)=> {
+
+  // 対象となる決済情報を取得
+  const kessai = await m_kessais.findPKey(id_search, id_cutomer);
+
+  //　メール送信対象の場合
+  if (kessai.isSendMail === '1') {
+    send('yoshida@yamori.jp', kessai.mail_subject, kessai.mail_body);
+    // send(kessai.email, kessai.mail_subject, kessai.mail_body);
+    await m_kessais.updatekessaisToSendMail(id_search,id_cutomer,common.getTodayTime());
+  }
+  logger.info(`送信先：${kessai.nm_keiyaku} <${email}>`)
 };
 
 // private
@@ -197,5 +216,6 @@ const send = (mail_to,title, content) => {
 
 module.exports = {
   setMailContent,
+  sendMailByIdSearch,
   sendMail,
 };

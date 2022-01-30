@@ -4,6 +4,7 @@ const router = express.Router();
 const m_searchinfos = require("../model/searchinfos");
 const m_yoyakus = require("../model/yoyakus");
 const m_kessais = require("../model/kessais");
+const m_logininfo = require("../model/logininfo");
 
 const common = require("../util/common")
 const yoyakuinfo = require("../util/yoyakuinfo");
@@ -17,11 +18,24 @@ const logger = log4js.configure("./config/log4js-config.json").getLogger();
 router.get("/", (req, res) => {
   (async () => {
     const searchinfos = await m_searchinfos.find();
+    const logininfo = await m_logininfo.find();
     res.render("index", {
       searchinfos: searchinfos,
+      logininfo: logininfo,
     });
   })();
 });
+
+// ログイン用のパスワードを更新する
+router.post("/changepwd", (req,res) => {
+  (async () => {
+
+    const password = req.body.pass;
+    await m_logininfo.update(password);
+
+    res.redirect("/");
+  })();
+})
 
 // 検索条件を新規登録し、対象となる予約情報をダウンロードして登録する
 router.post("/yoyakus", (req, res) => {
@@ -46,7 +60,7 @@ router.post("/yoyakus", (req, res) => {
     inObjSearch.yyyymmdd_riyou_start = yyyymmdd_riyou_start;
     inObjSearch.yyyymmdd_riyou_end = yyyymmdd_riyou_end;
     inObjSearch.status = "1";
-    inObjSearch.yyyymmddhhmmss_created = yyyymmddhhmmss_proc;
+    inObjSearch.yyyymmddhhmmss_created_yoyakus = yyyymmddhhmmss_proc;
     await m_searchinfos.insert(inObjSearch);
     logger.info(`検索条件情報ID：${inObjSearch.id}`);
 
@@ -178,13 +192,28 @@ router.get("/kessai/:id", (req,res) => {
   })();
 });
 
+// 決済情報をメール送信する
+router.get("/kessai/:id", (req,res) => {
+  (async () => {
+
+    const id_search = req.params.id.split("_")[0];
+    const id_customer = req.params.id.split("_")[1];
+
+    await mailinfo.sendMail(id_search, id_customer);
+
+    res.redirect(`/kessais/${id_search}`);
+
+  })();
+});
+
+
 // メールを送信する
-router.get("/sendmail/:id", (req,res) => {
+router.get("/kessai/sendmail/:id", (req,res) => {
   (async () => {
 
     const id_search = rew.params.id;
 
-    await mailinfo.sendMail(id_search);
+    await mailinfo.sendMailByIdSearch(id_search);
 
     // 検索条件情報のステータスを更新する
     await m_searchinfos.updateStatusAndTime(req.params.id, '3', common.getTodayTime());

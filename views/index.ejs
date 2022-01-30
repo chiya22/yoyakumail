@@ -15,7 +15,6 @@
       <input type="submit" value="予約情報取得" />
     </form>
   </div>
-
   <!-- 検索情報 -->
   <div>
     <% if (searchinfos) { %>
@@ -42,6 +41,13 @@
         </div>
       <% }) %>
     <% } %>
+  </div>
+  <!-- ログイン情報 -->
+  <div>
+    <form action="/changepwd" method="post">
+      <input type="text" name="pass" value="<%= logininfo.password %>" />
+      <input type="submit" value="パスワード変更" />
+    </form>
   </div>
 
 </body>

@@ -23,7 +23,7 @@ const find = async () => {
 const insert = async (inObj) => {
   try {
     const query =
-      'insert into searchinfos values ("' +
+      'insert into searchinfos ( id, yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd_riyou_start, yyyymmdd_riyou_end, status, yyyymmddhhmmss_created_yoyakus ) values ("' +
       inObj.id +
       '","' +
       inObj.yyyymmdd_addupd_start +

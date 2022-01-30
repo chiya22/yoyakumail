@@ -9,6 +9,7 @@ const readline = require("readline");
 const common = require("./common");
 
 const m_kessais = require("../model/kessais");
+const m_logininfo = require("../model/logininfo");
 
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
@@ -46,9 +47,13 @@ const upkessaiinfo = async (id_search, upFilename) => {
   await page.waitForTimeout(process.env.WAITTIME);
 
   // ログイン
-  await page.type('input[name="kamei_id"]', process.env.KESSAI_KAMEI_ID);
-  await page.type('input[name="user_id"]', process.env.KESSAI_RIYOU_ID);
-  await page.type('input[name="pass"]', process.env.KESSAI_PASSWORD);
+  const logininfo = await m_logininfo.find();
+  await page.type('input[name="kamei_id"]', logininfo.id_kamei);
+  await page.type('input[name="user_id"]', logininfo.id_riyou);
+  await page.type('input[name="pass"]', logininfo.password);
+  // await page.type('input[name="kamei_id"]', process.env.KESSAI_KAMEI_ID);
+  // await page.type('input[name="user_id"]', process.env.KESSAI_RIYOU_ID);
+  // await page.type('input[name="pass"]', process.env.KESSAI_PASSWORD);
   await page.click("#fra_maindsk > form > center > table:nth-child(5) > tbody > tr > td > input[type=submit]");
 
   await page.waitForTimeout(process.env.WAITTIME);
@@ -124,9 +129,13 @@ const dlkessaiinfo = async (id_search) => {
   await page.waitForTimeout(process.env.WAITTIME);
 
   // ログイン
-  await page.type('input[name="kamei_id"]', process.env.KESSAI_KAMEI_ID);
-  await page.type('input[name="user_id"]', process.env.KESSAI_RIYOU_ID);
-  await page.type('input[name="pass"]', process.env.KESSAI_PASSWORD);
+  const logininfo = await m_logininfo.find();
+  await page.type('input[name="kamei_id"]', logininfo.id_kamei);
+  await page.type('input[name="user_id"]', logininfo.id_riyou);
+  await page.type('input[name="pass"]', logininfo.password);
+  // await page.type('input[name="kamei_id"]', process.env.KESSAI_KAMEI_ID);
+  // await page.type('input[name="user_id"]', process.env.KESSAI_RIYOU_ID);
+  // await page.type('input[name="pass"]', process.env.KESSAI_PASSWORD);
   await page.click("#fra_maindsk > form > center > table:nth-child(5) > tbody > tr > td > input[type=submit]");
 
   await page.waitForTimeout(process.env.WAITTIME);
