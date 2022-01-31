@@ -51,9 +51,6 @@ const upkessaiinfo = async (id_search, upFilename) => {
   await page.type('input[name="kamei_id"]', logininfo.id_kamei);
   await page.type('input[name="user_id"]', logininfo.id_riyou);
   await page.type('input[name="pass"]', logininfo.password);
-  // await page.type('input[name="kamei_id"]', process.env.KESSAI_KAMEI_ID);
-  // await page.type('input[name="user_id"]', process.env.KESSAI_RIYOU_ID);
-  // await page.type('input[name="pass"]', process.env.KESSAI_PASSWORD);
   await page.click("#fra_maindsk > form > center > table:nth-child(5) > tbody > tr > td > input[type=submit]");
 
   await page.waitForTimeout(process.env.WAITTIME);
@@ -88,13 +85,27 @@ const upkessaiinfo = async (id_search, upFilename) => {
 
   await page.waitForTimeout(process.env.WAITTIME);
 
-  const errmsg = await page.$eval("#fra_main > center:nth-child(2) > div",el => el.innerHTML);
-  let errmsgdetail = await page.$eval("#fra_main > center:nth-child(2) > table > tbody", el => el.textContent);
+
+  const errmsg = await page.evaluate( () => {
+    const err = document.querySelector("#fra_main > center:nth-child(2) > div");
+    if (err) {
+      return err.innerHTML;
+    } else {
+      return "";
+    }
+  });
+  const errmsgdetail = await page.evaluate( () => {
+    const err = document.querySelector("#fra_main > center:nth-child(2) > table > tbody");
+    if (err) {
+      return err.textContent.replace("\n", "").replace(" ", "").replace(" ","");
+    } else {
+      return "";
+    }
+  });
 
   if (errmsg) {
 
     await browser.close();
-    errmsgdetail = errmsgdetail.replace("\n", "").replace(" ", "").replace(" ","");
     return `[err]アップロードエラー：${errmsg} | ${errmsgdetail}`
 
   } else {
@@ -133,9 +144,6 @@ const dlkessaiinfo = async (id_search) => {
   await page.type('input[name="kamei_id"]', logininfo.id_kamei);
   await page.type('input[name="user_id"]', logininfo.id_riyou);
   await page.type('input[name="pass"]', logininfo.password);
-  // await page.type('input[name="kamei_id"]', process.env.KESSAI_KAMEI_ID);
-  // await page.type('input[name="user_id"]', process.env.KESSAI_RIYOU_ID);
-  // await page.type('input[name="pass"]', process.env.KESSAI_PASSWORD);
   await page.click("#fra_maindsk > form > center > table:nth-child(5) > tbody > tr > td > input[type=submit]");
 
   await page.waitForTimeout(process.env.WAITTIME);
@@ -151,7 +159,7 @@ const dlkessaiinfo = async (id_search) => {
   await page.waitForTimeout(process.env.WAITTIME);
 
   // コメントに検索IDを設定
-  // await page.type('input[name="comm"]', id_search);
+  await page.type('input[name="comm"]', id_search);
 
   // ダウンロード先を修正
   await page._client.send("Page.setDownloadBehavior", {
@@ -164,7 +172,15 @@ const dlkessaiinfo = async (id_search) => {
   await page.click("#fra_main > center:nth-child(3) > form:nth-child(2) > table:nth-child(4) > tbody > tr > td > input[type=button]");
 
   // エラーメッセージ表示領域より表示されているメッセージを取得
-  const errmsg = await page.$eval("#fra_main > center:nth-child(3) > div", el => el.innerHTML);
+  const errmsg = await page.evaluate( () => {
+    const err = document.querySelector("#fra_main > center:nth-child(3) > div");
+    if (err) {
+      return err.innerHTML;
+    } else {
+      return "";
+    }
+  });
+  // const errmsg = await page.$eval("#fra_main > center:nth-child(3) > div", el => el.innerHTML);
 
   // エラーメッセージが表示されている場合
   if (errmsg) {

@@ -21,6 +21,18 @@
     払込票URL：<%= kessai.url_cvs %>
     メッセージ：<%= kessai.message %>
   </div>
+  <div>
+    <p><%= kessai.mail_subject %></p>
+    <% if (kessai.isCvs === '1') { %>
+      <textarea name="mailbody_cvs" cols="100" rows="20">
+        <%= kessai.mail_body_cvs %>
+      </textarea>
+    <% } else { %>
+      <textarea name="mailbody" cols="100" rows="20">
+        <%= kessai.mail_body %>
+      </textarea>
+    <% } %>
+  </div>
   <a href="/kessai/sendmail/<%= kessai.id_search %>_<%= kessai.id_customer %>">メール送信</a>
 </body>
 <%- include("./common/javascripts.ejs") %>

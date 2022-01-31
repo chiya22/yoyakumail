@@ -4,7 +4,10 @@ const logger = log4js.configure("./config/log4js-config.json").getLogger();
 
 const findPKey = async (id_search, id_customer) => {
   try {
-    const retObj = await knex.from("kessais").where({ id_search: id_search }, { id_customer: id_customer});
+    const retObj = await knex.from("kessais").where({ 
+      id_search: id_search,
+      id_customer: id_customer
+    });
     return retObj[0];
   } catch (err) {
     throw err;
@@ -93,7 +96,7 @@ const updatekessaisBydlinfo = async (inObj) => {
 //PK（管理ID、検索情報ID）をキーに決済情報のメール部分を更新する
 const updatekessaisByMailinfo = async (inObj) => {
   try {
-    const query = 'update kessais set mail_subject = "' + inObj.mail_subject + '", mail_body = "' + inObj.mail_body + '" where id_customer = "' + inObj.id_customer + '" and id_search = "' + inObj.id_search + '"';
+    const query = 'update kessais set mail_subject = "' + inObj.mail_subject + '", mail_body = "' + inObj.mail_body + '", mail_body_cvs = "' + inObj.mail_body_cvs + '" where id_customer = "' + inObj.id_customer + '" and id_search = "' + inObj.id_search + '"';
     // logger.info(query);
     const retObj = await knex.raw(query);
     return retObj[0];
@@ -113,6 +116,18 @@ const updatekessaisToSendMail = async ( id_search, id_customer, time) => {
   logger.error(err.message);
   throw err;
  }
+}
+
+//PK（管理ID、検索情報ID）をキーにコンビニ決済対象、メール送信対象を更新する
+const updatekessaisToisCvsAndisSendMail = async (id_search, id_customer, isCvs, isSendMail ) => {
+  try {
+    const query = 'update kessais set isCvs = "' + isCvs + '", isSendMail = "' + isSendMail + '" where id_customer = "' + id_customer + '" and id_search = "' + id_search + '";'
+     logger.info(query);
+     const retObj = await knex.raw(query);
+  } catch (err) {
+   logger.error(err.message);
+   throw err;
+  }
 }
 
 const remove = async (id) => {
@@ -146,6 +161,7 @@ module.exports = {
   updatekessaisBydlinfo,
   updatekessaisByMailinfo,
   updatekessaisToSendMail,
+  updatekessaisToisCvsAndisSendMail,
   remove,
   removeByIdSearch,
 };

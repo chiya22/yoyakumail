@@ -161,7 +161,7 @@ const filetodb = (yyyymmddhhmmss_proc) => {
           inObj.tanka = linecontents[21] ? linecontents[21] : 0;
           inObj.caution = linecontents[22];
           inObj.memo = linecontents[23];
-          inObj.yyyymmddhhmmss_created_yoyakus = yyyymmddhhmmss_proc;
+          inObj.yyyymmddhhmmss_created = yyyymmddhhmmss_proc;
           inObj.id_customer = "R" + inObj.id_kanri + "-" + inObj.yyyymmdd_uketuke + "-" + inObj.yyyymmdd_yoyaku;
 
           (async () => {

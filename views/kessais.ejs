@@ -13,15 +13,51 @@
   </div>
   <!-- 予約情報 -->
   <div>
+    <form action="/kessais/update" method="POST" name="formKessaiUpdate">
     <% if (kessais) { %>
       <%  kessais.forEach( kessai => { %>
         <div>
-          ID:<a href="/kessai/<%= kessai.id_search %>_<%= kessai.id_customer %>"><%= kessai.id_customer %></a>
+          <%
+          let isCvsChecked = "";
+          if (kessai.isCvs === "1") {
+            isCvsChecked = "checked";
+          }
+          let isSendMailChecked = "";
+          if (kessai.isSendMail === "1") {
+            isSendMailChecked = "checked";
+          }
+          %>
+          <input type="checkbox" name="_isCvs" value="1" <%= isCvsChecked %> />コンビニ決済
+          <input type="checkbox" name="_isSendMail" value="1" <%= isSendMailChecked %> />メール送信
+          ID:<a href="/kessai/<%= kessai.id_search %>_<%= kessai.id_customer %>"><%= kessai.id_customer %></a><%= kessai.nm_keiyaku %>
+          <p><%= kessai.yyyymmddhhmmss_sended_mail %></p>
+          <input type="hidden" name="isCvs" value="">
+          <input type="hidden" name="isSendMail" value="">
+          <input type="hidden" name="id_customer" value="<%= kessai.id_customer %>">
+          <input type="hidden" name="id_search" value="<%= kessai.id_search %>">
         </div>
       <% }) %>
+      <input class="updatekessai" type="button" value="更新" />
     <% } %>
+    </form>
   </div>
-
+  <script>
+    // コンビニ決済対象、メール送信対象を設定
+    let updatebtn = document.getElementsByClassName("updatekessai")[0];
+    updatebtn.addEventListener('click', () => {
+      for (let i = 0; i < document.formKessaiUpdate.isCvs.length; i++) {
+        if (document.formKessaiUpdate._isCvs[i].checked) {
+          document.formKessaiUpdate.isCvs[i].value = "1";
+        }
+      }
+      for (let i = 0; i < document.formKessaiUpdate.isSendMail.length; i++) {
+        if (document.formKessaiUpdate._isSendMail[i].checked) {
+          document.formKessaiUpdate.isSendMail[i].value = "1";
+        }
+      }
+      document.formKessaiUpdate.submit();
+    });
+  </script>
 </body>
 <%- include("./common/javascripts.ejs") %>
 
