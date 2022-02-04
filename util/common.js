@@ -1,3 +1,13 @@
+const getYYYYMMDD = (date) => {
+
+  let tmp;
+  tmp = '' + date.getFullYear();
+  tmp += '' + ('0' + (date.getMonth() + 1)).slice(-2);
+  tmp += '' + ('0' + date.getDate()).slice(-2);
+  return tmp
+
+}
+
 const getTodayTime = () => {
     const d = new Date();
     let mm = ('00' + (d.getMonth() + 1)).slice(-2);
@@ -6,6 +16,18 @@ const getTodayTime = () => {
     let mi = ('00' + d.getMinutes()).slice(-2);
     let ss = ('00' + d.getSeconds()).slice(-2);
     return d.getFullYear() + mm + dd + hh + mi + ss;
+  }
+
+  const getNextday = () => {
+    let date = new Date();
+    date.setDate(date.getDate() + 1);
+    return getYYYYMMDD(date);
+  }
+
+  const getNextYearday = () => {
+    let date = new Date();
+    date.setFullYear(date.getFullYear() + 1);
+    return getYYYYMMDD(date);
   }
 
 const hankaku2Zenkaku = (str) => {
@@ -46,7 +68,19 @@ const hankaku2Zenkaku = (str) => {
           .replace(/~/g, "〜");
 };
 
+const sleep = (time) => {
+  return new Promise((resolve, reject) => {
+      setTimeout(() => {
+          resolve()
+      }, time)
+  })
+};
+
+
 module.exports = {
   getTodayTime,
+  getNextday,
+  getNextYearday,
   hankaku2Zenkaku,
+  sleep,
 };

@@ -1,0 +1,20 @@
+<head>
+    <div class="header">
+        <div class="header-wrapper">
+            <div class="header-left">
+                <a class="header-logo" href="/"><img src="/static/images/building_logo.svg"></a>
+            </div>
+            <div class="header-right">
+                  <!-- ログイン情報 -->
+                  <% if (isTop) { %>
+                    <form action="/changepwd" method="post">
+                    <input class="header-form__item-style" type="text" name="pass" value="<%= logininfo.password %>" />
+                    <input class="btn-action" type="submit" value="パスワード変更" />
+                    </form>
+                  <% } %>
+            </div>
+        </div>
+        <!-- /.header-wrapper -->
+    </div>
+    <!-- /.header -->
+</head>

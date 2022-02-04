@@ -2,54 +2,56 @@
 <html>
 
 <head>
-  <title>予約確認書メール</title>
+  <title>予約確認書メールシステム</title>
   <%- include("./common/stylesheets.ejs") %>
 </head>
 
 <body>
-  <!-- 検索条件 -->
-  <div>
-    <form action="/yoyakus" method="POST" name="jyoukenform">
-      登録日/更新日：<input type="text" name="yyyymmdd_addupd_start" value="20220112" /> ～ <input type="text" name="yyyymmdd_addupd_end" value="20220112" />
-      利用日：<input type="text" name="yyyymmdd_riyou_start" value="20220113" /> ～ <input type="text" name="yyyymmdd_riyou_end" value="20230113" />
-      <input type="submit" value="予約情報取得" />
-    </form>
-  </div>
-  <!-- 検索情報 -->
-  <div>
-    <% if (searchinfos) { %>
-      <%  searchinfos.forEach( searchinfo => { %>
-        <div>
-          <h1><b>ID:<%= searchinfo.id %>登録日／更新日：<%= searchinfo.yyyymmdd_addupd_start %>～<%= searchinfo.yyyymmdd_addupd_end %>｜利用日：<%= searchinfo.yyyymmdd_riyou_start %>～<%= searchinfo.yyyymmdd_riyou_end %></b></h1>
-          <div>
-            <a href="/yoyakus/<%= searchinfo.id %>">予約情報一覧</a>
-          </div>
-          <div>
-            <a href="/yoyakudelete/<%= searchinfo.id %>">削除</a>
-          </div>
-        <% if (searchinfo.status === '1') { %>
-            <!-- 予約情報取得済み-->
-            <div>
-              <a href="/kessaiscreate/<%= searchinfo.id %>">決済情報取得</a>
+  <%- include("./common/header.ejs", {isTop: true}); %>
+  <div class="main">
+    <div class="main__wrapper">
+      <!-- 検索条件 -->
+      <div class="area_header">
+        <div class="area_searchjyouken">
+          <form action="/yoyakus" method="POST" name="jyoukenform">
+            <div class="searchform__row">
+              <label class="searchform__item-label">登録日／更新日</label><input type="text" class="searchform__item-style  flatpickr3" name="yyyymmdd_addupd_start" value="<%= curYyyymmdd %>">　～　<input type="text" class="searchform__item-style flatpickr3" name="yyyymmdd_addupd_end" value="<%= curYyyymmdd %>">
             </div>
-          <% } else { %>
-            <!-- 決済情報取得済み-->
-            <div>
-              <a href="/kessais/<%= searchinfo.id %>">決済情報一覧</a>
+            <div class="searchform__row">
+              <label class="searchform__item-label">利用日</label><input type="text" class="searchform__item-style flatpickr3" name="yyyymmdd_riyou_start" value="<%= curYyyymmdd_plus1Day %>">　～　<input type="text" class="searchform__item-style flatpickr3" name="yyyymmdd_riyou_end" value="<%= curYyyymmdd_plus1Year %>">
             </div>
-          <% } %>
+            <input class="btn-action" type="submit" value="予約情報取得" />
+          </form>
         </div>
-      <% }) %>
-    <% } %>
+      </div>
+      <!-- 検索情報 -->
+      <div class="area_searchinfos">
+        <% if (searchinfos) { %>
+          <%  searchinfos.forEach( searchinfo => { %>
+            <div class="area_searchinfo">
+              <p class="searchinfo-title"><%= `${searchinfo.id.slice(1,5)}年${searchinfo.id.slice(5,7)}月${searchinfo.id.slice(7,9)}日　${searchinfo.id.slice(9,11)}時${searchinfo.id.slice(11,13)}分${searchinfo.id.slice(13,15)}秒` %></p>
+              <div class="searchinfo-left">
+                <p class="searchinfo_text"><span class="label">登録日／更新日</span><%= `${searchinfo.yyyymmdd_addupd_start.slice(0,4)}年${searchinfo.yyyymmdd_addupd_start.slice(4,6)}月${searchinfo.yyyymmdd_addupd_start.slice(6,8)}日` %>～<%= `${searchinfo.yyyymmdd_addupd_end.slice(0,4)}年${searchinfo.yyyymmdd_addupd_end.slice(4,6)}月${searchinfo.yyyymmdd_addupd_end.slice(6,8)}日` %></p>
+                <p class="searchinfo_text"><span class="label">利用日</span><%= `${searchinfo.yyyymmdd_riyou_start.slice(0,4)}年${searchinfo.yyyymmdd_riyou_start.slice(4,6)}月${searchinfo.yyyymmdd_riyou_start.slice(6,8)}日` %>～<%= `${searchinfo.yyyymmdd_riyou_end.slice(0,4)}年${searchinfo.yyyymmdd_riyou_end.slice(4,6)}月${searchinfo.yyyymmdd_riyou_end.slice(6,8)}日` %></p>
+              </div>
+              <div class="searchinfo-right">
+                <a class="btn-action" href="/yoyakus/<%= searchinfo.id %>">予約情報一覧</a>
+                <!-- 1：予約情報取得済 2:決済情報取得済み 3.メール送信済み -->
+                <% if (searchinfo.status === '1') { %>
+                  <!-- 予約情報取得済み-->
+                    <a class="btn-action" href="/kessaiscreate/<%= searchinfo.id %>">決済情報取得</a>
+                <% } else { %>
+                  <!-- 決済情報取得済み-->
+                    <a class="btn-action" href="/kessais/<%= searchinfo.id %>">決済情報一覧</a>
+                <% } %>
+                <a class="btn-action-second" href="/yoyakudelete/<%= searchinfo.id %>">削除</a>
+                </div>
+            </div>
+          <% }) %>
+        <% } %>
+      </div>
+    </div>
   </div>
-  <!-- ログイン情報 -->
-  <div>
-    <form action="/changepwd" method="post">
-      <input type="text" name="pass" value="<%= logininfo.password %>" />
-      <input type="submit" value="パスワード変更" />
-    </form>
-  </div>
-
 </body>
 <%- include("./common/javascripts.ejs") %>
 

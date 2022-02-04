@@ -7,34 +7,71 @@
 </head>
 
 <body>
-  <div>
-    ID：<%= yoyaku.id %>
-    ID_検索：<%= yoyaku.id_search %>
-    ID_管理:<%= yoyaku.id_kanri %>
-    会議室名：<%= yoyaku.nm_room %>
-    予約年月日：<%= yoyaku.yyyymmdd_yoyaku %>
-    開始時間：<%= yoyaku.time_start %>
-    終了時間：<%= yoyaku.time_end %>
-    金額：<%= yoyaku.price %>
-    受付年月日：<%= yoyaku.yyyymmdd_uketuke %>
-    支払状況：<%= yoyaku.status_shiharai %>
-    入力名：<%= yoyaku.nm_yoyaku %>
-    利用者名：<%= yoyaku.nm_riyousha %>
-    会議室名（正式）：<%= yoyaku.nm_room_seishiki %>
-    部屋タイプ：<%= yoyaku.type_room %>
-    契約番号：<%= yoyaku.no_keiyaku %>
-    契約名：<%= yoyaku.nm_keiyaku %>
-    担当者名：<%= yoyaku.nm_tantou %>
-    電話番号：<%= yoyaku.telno %>
-    FAX番号：<%= yoyaku.faxno %>
-    メールアドレス：<%= yoyaku.email %>
-    区分：<%= yoyaku.kubun %>
-    住所：<%= yoyaku.address %>
-    数量：<%= yoyaku.quantity %>
-    単価：<%= yoyaku.tanka %>
-    注意事項：<%= yoyaku.caution %>
-    メモ：<%= yoyaku.memo %>
-    作成年月日時分秒：<%= yoyaku.yyyymmddhhmmss_created %>
+  <%- include("./common/header.ejs", {isTop: false}); %>
+  <div class="main">
+    <div class="main__wrapper">
+      <div class="area_header">
+        <a class="btn-back" href="<%= `/yoyakus/${yoyaku.id_search}` %>">戻る</a>
+      </div>
+      <div class="yoyaku-title">
+        【予約情報】<%= yoyaku.no_keiyaku %> <%= yoyaku.nm_riyousha %>　<%= yoyaku.nm_room_seishiki %> <%= `${yoyaku.time_start.slice(0,2)}:${yoyaku.time_start.slice(2,4)}` %>-<%= `${yoyaku.time_end.slice(0,2)}:${yoyaku.time_end.slice(2,4)}` %> <%= `${yoyaku.price.toLocaleString()}円` %>        
+      </div>
+      <dl class="yoyaku-dl">
+        <dt class=>ID</dt>
+        <dd><%= yoyaku.id %></dd>
+        <dt>検索情報ID</dt>
+        <dd><%= yoyaku.id_search %></dd>
+        <dt>管理ID</dt>
+        <dd><%= yoyaku.id_kanri %></dd>
+        <dt><%= `${yoyaku.type_room === '9'?'会議室名':'備品名'}`　%></dt>
+        <dd><%= yoyaku.nm_room %></dd>
+        <dt>予約年月日</dt>
+        <dd><%= yoyaku.yyyymmdd_yoyaku %></dd>
+        <dt>開始時間</dt>
+        <dd><%= yoyaku.time_start %></dd>
+        <dt>終了時間</dt>
+        <dd><%= yoyaku.time_end %></dd>
+        <dt>金額</dt>
+        <dd><%= yoyaku.price %></dd>
+        <dt>受付年月日</dt>
+        <dd><%= yoyaku.yyyymmdd_uketuke %></dd>
+        <dt>支払状況</dt>
+        <dd><%= yoyaku.status_shiharai %></dd>
+        <dt>入力名</dt>
+        <dd><%= yoyaku.nm_yoyaku %></dd>
+        <dt>利用者名</dt>
+        <dd><%= yoyaku.nm_riyousha %></dd>
+        <dt>会議室名（正式）</dt>
+        <dd><%= yoyaku.nm_room_seishiki %></dd>
+        <dt>部屋タイプ</dt>
+        <dd><%= yoyaku.type_room %></dd>
+        <dt>契約番号</dt>
+        <dd><%= yoyaku.no_keiyaku %></dd>
+        <dt>契約名</dt>
+        <dd><%= yoyaku.nm_keiyaku %></dd>
+        <dt>担当者名</dt>
+        <dd><%= yoyaku.nm_tantou %></dd>
+        <dt>電話番号</dt>
+        <dd><%= yoyaku.telno %></dd>
+        <dt>FAX番号</dt>
+        <dd><%= yoyaku.faxno %></dd>
+        <dt>メールアドレス</dt>
+        <dd><%= yoyaku.email %></dd>
+        <dt>区分</dt>
+        <dd><%= yoyaku.kubun %></dd>
+        <dt>住所</dt>
+        <dd><%= yoyaku.address %></dd>
+        <dt>数量</dt>
+        <dd><%= yoyaku.quantity %></dd>
+        <dt>単価</dt>
+        <dd><%= yoyaku.tanka %></dd>
+        <dt>注意事項</dt>
+        <dd><%= yoyaku.caution %></dd>
+        <dt>メモ</dt>
+        <dd><%= yoyaku.memo %></dd>
+        <dt>作成年月日時分秒</dt>
+        <dd><%= yoyaku.yyyymmddhhmmss_created %></dd>
+      </dl>
   </div>
 
 </body>

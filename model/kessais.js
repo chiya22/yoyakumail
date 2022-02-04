@@ -130,9 +130,9 @@ const updatekessaisToisCvsAndisSendMail = async (id_search, id_customer, isCvs, 
   }
 }
 
-const remove = async (id) => {
+const remove = async (id_search, id_customer) => {
   try {
-    const query = 'delete from kessais where id_customer = "' + id + '"';
+    const query = 'delete from kessais where id_customer = "' + id_customer + '" and id_search = "' + id_search + '"';
     const retObj = await knex.raw(query);
     return retObj[0];
   } catch (err) {
@@ -141,9 +141,9 @@ const remove = async (id) => {
   }
 };
 
-const removeByIdSearch = async (id) => {
+const removeByIdSearch = async (id_search) => {
   try {
-    const query = 'delete from kessais where id_search = "' + id + '"';
+    const query = 'delete from kessais where id_search = "' + id_search + '"';
     const retObj = await knex.raw(query);
     return retObj[0];
   } catch (err) {

@@ -35,7 +35,7 @@ const outputFile = async (id_search) => {
 }
 
 // 電算システムへ決済依頼データをアップロードする
-const upkessaiinfo = async (id_search, upFilename) => {
+const upkessaiinfo = async (id_search, upFilepath) => {
 
   const browser = await puppeteer.launch({ headless: false });
 
@@ -71,7 +71,7 @@ const upkessaiinfo = async (id_search, upFilename) => {
 
   // アップロードファイルを設定
   const inputUploadfile = await page.$('input[type="file"]');
-  inputUploadfile.uploadFile(upFilename);
+  inputUploadfile.uploadFile(upFilepath);
 
   await page.waitForTimeout(process.env.WAITTIME);
 
@@ -115,15 +115,17 @@ const upkessaiinfo = async (id_search, upFilename) => {
     await page.waitForTimeout(process.env.WAITTIME);
   
     // 「アップロード」が完了したらファイル名をoldにする
-    fs.rename(process.env.KESSAI_DL_PATH + "\\" + upFilename, process.env.KESSAI_DL_PATH + "\\old_" + upFilename, (err) => {
+    const upFilename = upFilepath.split('\\').slice(-1);
+    fs.rename(process.env.KESSAI_DL_PATH + "\\" + upFilename[0], process.env.KESSAI_DL_PATH + "\\old_" + upFilename[0], (err) => {
       if (err) {
-        logger.info(`${upFilename}ファイルは存在しません：${new Date()}`);
+        logger.info(`${upFilename[0]}ファイルは存在しません：${new Date()}`);
         throw err;
       }
     });
   
     await browser.close();
-    return null;
+
+    return "";
   }
 }
 

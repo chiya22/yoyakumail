@@ -7,39 +7,67 @@
 </head>
 
 <body>
-  <div>
-    <p>登録日/更新日:<%= searchinfo.yyyymmdd_addupd_start %>　～　<%= searchinfo.yyyymmdd_addupd_end %></p>
-    <p>利用日:<%= searchinfo.yyyymmdd_riyou_start %>　～　<%= searchinfo.yyyymmdd_riyou_end %></p>
-  </div>
-  <!-- 予約情報 -->
-  <div>
-    <form action="/kessais/update" method="POST" name="formKessaiUpdate">
-    <% if (kessais) { %>
-      <%  kessais.forEach( kessai => { %>
-        <div>
-          <%
-          let isCvsChecked = "";
-          if (kessai.isCvs === "1") {
-            isCvsChecked = "checked";
-          }
-          let isSendMailChecked = "";
-          if (kessai.isSendMail === "1") {
-            isSendMailChecked = "checked";
-          }
-          %>
-          <input type="checkbox" name="_isCvs" value="1" <%= isCvsChecked %> />コンビニ決済
-          <input type="checkbox" name="_isSendMail" value="1" <%= isSendMailChecked %> />メール送信
-          ID:<a href="/kessai/<%= kessai.id_search %>_<%= kessai.id_customer %>"><%= kessai.id_customer %></a><%= kessai.nm_keiyaku %>
-          <p><%= kessai.yyyymmddhhmmss_sended_mail %></p>
-          <input type="hidden" name="isCvs" value="">
-          <input type="hidden" name="isSendMail" value="">
-          <input type="hidden" name="id_customer" value="<%= kessai.id_customer %>">
-          <input type="hidden" name="id_search" value="<%= kessai.id_search %>">
+  <%- include("./common/header.ejs", {isTop: false}); %>
+  <div class="main">
+    <div class="main__wrapper">
+      <div class="area_header">
+        <a class="btn-back" href="/">戻る</a>
+        <input class="btn-action updatekessai" type="button" value="更新" />
+        <div class="area_searchinfo">
+          <p class="searchinfo-title"><%= `${searchinfo.id.slice(1,5)}年${searchinfo.id.slice(5,7)}月${searchinfo.id.slice(7,9)}日　${searchinfo.id.slice(9,11)}時${searchinfo.id.slice(11,13)}分${searchinfo.id.slice(13,15)}秒` %></p>
+          <p class="searchinfo_text"><span class="label">登録日／更新日</span><%= `${searchinfo.yyyymmdd_addupd_start.slice(0,4)}年${searchinfo.yyyymmdd_addupd_start.slice(4,6)}月${searchinfo.yyyymmdd_addupd_start.slice(6,8)}日` %>～<%= `${searchinfo.yyyymmdd_addupd_end.slice(0,4)}年${searchinfo.yyyymmdd_addupd_end.slice(4,6)}月${searchinfo.yyyymmdd_addupd_end.slice(6,8)}日` %></p>
+          <p class="searchinfo_text"><span class="label">利用日</span><%= `${searchinfo.yyyymmdd_riyou_start.slice(0,4)}年${searchinfo.yyyymmdd_riyou_start.slice(4,6)}月${searchinfo.yyyymmdd_riyou_start.slice(6,8)}日` %>～<%= `${searchinfo.yyyymmdd_riyou_end.slice(0,4)}年${searchinfo.yyyymmdd_riyou_end.slice(4,6)}月${searchinfo.yyyymmdd_riyou_end.slice(6,8)}日` %></p>
         </div>
-      <% }) %>
-      <input class="updatekessai" type="button" value="更新" />
-    <% } %>
-    </form>
+      </div>
+      <div class="area_kessais">
+        <form action="/kessais/update" method="POST" name="formKessaiUpdate">
+        <% if (kessais) { %>
+          <%  kessais.forEach( kessai => { %>
+              <%
+              let isCvsChecked = "";
+              if (kessai.isCvs === "1") {
+                isCvsChecked = "checked";
+              }
+              let isSendMailChecked = "";
+              if (kessai.isSendMail === "1") {
+                isSendMailChecked = "checked";
+              }
+              %>
+              <div class="kessais-kessai">
+                <div class="kessais-kessai-checkbox">
+                  <input type="checkbox" name="_isCvs" id="_isCvs<%= kessai.id_customer + kessai.id_search %>" value="1" <%= isCvsChecked %> /><label class="checkbox_label" for="_isCvs<%= kessai.id_customer + kessai.id_search %>">コンビニ決済</label>
+                  <input type="checkbox" name="_isSendMail" id="_isSendMail<%= kessai.id_customer + kessai.id_search %>" value="1" <%= isCvsChecked %> /><label class="checkbox_label" for="_isSendMail<%= kessai.id_customer + kessai.id_search %>">メール送信</label>
+                </div>
+                <a href="/kessai/<%= kessai.id_search %>_<%= kessai.id_customer %>">
+                  <div class="kessais-kessai-title"><%= kessai.nm_keiyaku %></div>
+                  <div class="kessais-kessai-content">
+                    <%= `${kessai.yyyymmdd_yoyaku.slice(0,4)}年${kessai.yyyymmdd_yoyaku.slice(4,6)}月${kessai.yyyymmdd_yoyaku.slice(6,8)}日 | ${kessai.price.toLocaleString()}円 | 支払期限日：${kessai.yyyymmdd_kigen.slice(0,4)}年${kessai.yyyymmdd_kigen.slice(4,6)}月${kessai.yyyymmdd_kigen.slice(6,8)}日` %>
+                  </div>
+                  <div class="kessais-kessai-yoyakus">
+                    <p class="kessais-kessai-yoyakus-title"> === 予約情報 ===</p>
+                    <% kessai.yoyakus.forEach( yoyaku => { %>
+                      <div class="kessais-kessai-yoyakus-yoyaku">
+                        <!-- <p class="tag"><%= `${yoyaku.type_room === '9'?'備品×'+yoyaku.quantity:'部屋'} `%></p> -->
+                        <p class="tag"><%= yoyaku.status_shiharai %></p>
+                        <%= yoyaku.no_keiyaku %> <%= yoyaku.nm_riyousha %> | 
+                        <%= yoyaku.nm_room_seishiki %> | 
+                        <%= `${yoyaku.yyyymmdd_yoyaku.slice(0,4)}年${yoyaku.yyyymmdd_yoyaku.slice(4,6)}月${yoyaku.yyyymmdd_yoyaku.slice(6,8)}日` %> <%= `${yoyaku.time_start.slice(0,2)}:${yoyaku.time_start.slice(2,4)}` %>-<%= `${yoyaku.time_end.slice(0,2)}:${yoyaku.time_end.slice(2,4)}` %> | 
+                        <%= `${yoyaku.price.toLocaleString()}円` %>
+                      </div>
+                    <% }) %>
+                  </div>
+                </a>
+                <p><%= kessai.yyyymmddhhmmss_sended_mail %></p>
+                <input type="hidden" name="isCvs" value="">
+                <input type="hidden" name="isSendMail" value="">
+                <input type="hidden" name="id_customer" value="<%= kessai.id_customer %>">
+                <input type="hidden" name="id_search" value="<%= kessai.id_search %>">
+              </div>
+          <% }) %>
+        <% } %>
+        </form>
+      </div>
+    </div>
   </div>
   <script>
     // コンビニ決済対象、メール送信対象を設定

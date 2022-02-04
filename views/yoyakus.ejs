@@ -6,15 +6,36 @@
   </head>
 
   <body>
-    <div>
-      <p>登録日/更新日:<%= searchinfo.yyyymmdd_addupd_start %>　～　<%= searchinfo.yyyymmdd_addupd_end %></p>
-      <p>利用日:<%= searchinfo.yyyymmdd_riyou_start %>　～　<%= searchinfo.yyyymmdd_riyou_end %></p>
-    </div>
-    <!-- 予約情報 -->
-    <div>
-      <% if (yoyakus) { %> <% yoyakus.forEach( yoyaku => { %>
-      <div>ID:<a href="/yoyaku/<%= yoyaku.id %>"><%= yoyaku.id_kanri %></a></div>
-      <% }) %> <% } %>
+    <%- include("./common/header.ejs", {isTop: false}); %>
+    <div class="main">
+      <div class="main__wrapper">
+        <div class="area_header">
+          <a class="btn-back" href="/">戻る</a>
+          <div class="area_searchinfo">
+            <p class="searchinfo-title"><%= `${searchinfo.id.slice(1,5)}年${searchinfo.id.slice(5,7)}月${searchinfo.id.slice(7,9)}日　${searchinfo.id.slice(9,11)}時${searchinfo.id.slice(11,13)}分${searchinfo.id.slice(13,15)}秒` %></p>
+            <p class="searchinfo_text"><span class="label">登録日／更新日</span><%= `${searchinfo.yyyymmdd_addupd_start.slice(0,4)}年${searchinfo.yyyymmdd_addupd_start.slice(4,6)}月${searchinfo.yyyymmdd_addupd_start.slice(6,8)}日` %>～<%= `${searchinfo.yyyymmdd_addupd_end.slice(0,4)}年${searchinfo.yyyymmdd_addupd_end.slice(4,6)}月${searchinfo.yyyymmdd_addupd_end.slice(6,8)}日` %></p>
+            <p class="searchinfo_text"><span class="label">利用日</span><%= `${searchinfo.yyyymmdd_riyou_start.slice(0,4)}年${searchinfo.yyyymmdd_riyou_start.slice(4,6)}月${searchinfo.yyyymmdd_riyou_start.slice(6,8)}日` %>～<%= `${searchinfo.yyyymmdd_riyou_end.slice(0,4)}年${searchinfo.yyyymmdd_riyou_end.slice(4,6)}月${searchinfo.yyyymmdd_riyou_end.slice(6,8)}日` %></p>
+          </div>
+      </div>
+      <div class="area_yoyakus">
+          <% if (yoyakus) { %>
+            <% yoyakus.forEach( yoyaku => { %>
+            <a href="/yoyaku/<%= yoyaku.id %>">
+            <div class="<%= yoyaku.type_room==='9'?'yoyakus-bihin':'yoyakus-yoyaku' %>">
+              <div class="yoyakus-yoyaku-content">
+                <p class="tag"><%= `${yoyaku.type_room === '9'?'備品×'+yoyaku.quantity:'部屋'} `%></p>
+                <p class="tag"><%= yoyaku.status_shiharai %></p>
+                <%= yoyaku.no_keiyaku %> <%= yoyaku.nm_riyousha %> | 
+                <%= yoyaku.nm_room_seishiki %> | 
+                <%= `${yoyaku.yyyymmdd_yoyaku.slice(0,4)}年${yoyaku.yyyymmdd_yoyaku.slice(4,6)}月${yoyaku.yyyymmdd_yoyaku.slice(6,8)}日` %> <%= `${yoyaku.time_start.slice(0,2)}:${yoyaku.time_start.slice(2,4)}` %>-<%= `${yoyaku.time_end.slice(0,2)}:${yoyaku.time_end.slice(2,4)}` %> | 
+                <%= `${yoyaku.price.toLocaleString()}円` %>
+              </div>
+            </div>
+            </a>
+            <% }) %>
+          <% } %>
+        </div>
+      </div>
     </div>
   </body>
   <%- include("./common/javascripts.ejs") %>

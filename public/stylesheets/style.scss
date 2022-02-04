@@ -1,0 +1,407 @@
+$base-color: #cd5e42;
+$list-color: #E6D7D2;
+$list-hover-color: #F8DFD2;
+$second-color: #8a8a8a;
+
+html {
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+body {
+  font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+  color: #333;
+}
+pre {
+  font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+  letter-spacing: 0.8px;
+}
+
+// ヘッダー
+.header {
+  width: 100%;
+  height: 60px;
+  background-color: #fff;
+  position: fixed;
+  z-index:999;
+  .header-wrapper {
+    max-width: 900px;
+    min-width: 900px;
+    width: 95%;
+    height: 100%;
+    padding: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 auto;
+    .header-left {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      .header-logo {
+        display: inline-block;
+        background-color: #fff;
+        padding: 5px 10px;
+        width: 300px;
+        height: auto;
+      }
+    }
+    .header-right {
+      display: inline-block;
+      .header-form__item-style {
+        color: #8a8a8a;
+        display: inline-block;
+        width: 200px;
+        height: 30px;
+        padding: 10px 5%;
+        border: 1px solid #ccc;
+        border-radius: 27px;
+        background-clip: padding-box;
+        background-color: #fff;
+        font-size: 12px;
+        letter-spacing: 0.8px;
+        &:focus {
+          outline: none;
+          border: 1px solid $base-color;
+          color: $base-color;
+        }
+      }
+    }
+  }
+}
+
+
+
+// メイン領域
+.main {
+  width: 100%;
+}
+// メイン領域のコンテンツを格納する領域
+.main__wrapper {
+  padding-top: 60px;
+  width: 95%;
+  max-width: 900px;
+  min-width: 900px;
+  margin: 0 auto 30px auto;
+}
+// アクションボタン配置領域
+.area_header {
+  position: sticky;
+  top: 60px;
+  display: block;
+  width: 100%;
+  background-color: #fff;
+  padding: 10px 0;
+  z-index: 999;
+}
+
+// 検索条件入力画面－入力条件行
+.searchform__row {
+  display: inline-block;
+  padding: 5px;
+}
+// 検索条件入力項目－テキスト
+.searchform__item-style {
+  color: #8a8a8a;
+  display: inline-block;
+  width: 100px;
+  height: 25px;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 27px;
+  background-clip: padding-box;
+  background-color: #fff;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  &:focus {
+    outline: none;
+    border: 1px solid $base-color;
+    color: $base-color;
+  }
+}
+// 検索条件入力項目－ラベル
+.searchform__item-label {
+  font-size: 12px;
+  font-weight: bold;
+  color: $base-color;
+  margin: 0 10px;
+  padding:5px 0;
+}
+
+//　検索情報領域
+.area_searchinfo {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin: 25px 0 10px 0;
+  padding: 0.5em 1em;
+  border: solid 1px $base-color;
+  border-radius: 8px;
+}
+//　検索情報領域－右側
+.searchinfo-right {
+  flex:auto;
+  text-align: right;
+}
+//　検索情報－タイトル
+.area_searchinfo .searchinfo-title {
+  position: absolute;
+  display: inline-block;
+  top: -10px;
+  left: 10px;
+  padding: 0 9px;
+  line-height: 1;
+  font-size: 16px;
+  background: #fff;
+  color: $base-color;
+  font-weight: bold;
+}
+//　検索情報－タイトル
+.searchinfo-title p {
+  padding: 0;
+  margin: 0;
+}
+// 検索情報-ラベル
+.label {
+  display: inline-block;
+  border: 1px solid $base-color;
+  border-radius: 15px;
+  width: 130px;
+  padding: 5px 0 3px 0;
+  text-align: center;
+  margin-right: 10px;
+}
+//　検索情報－文字列
+.searchinfo_text {
+  color: $base-color;
+  display: block;
+  margin-top:5px;
+  padding: 5px;
+  font-size: 12px;
+  letter-spacing: 0.8px;
+}
+
+// 予約一覧情報　予約情報領域
+.yoyakus-yoyaku {
+  color: $base-color;
+  display: inline-block;
+  letter-spacing: 0.8px;
+  background-color: $list-color;
+  padding: 10px;
+  margin: 10px 0;
+  font-size: 12px;
+  width: 100%;
+  border-radius: 10px;
+  &:hover {
+    background-color: $list-hover-color;
+  }
+}
+// 予約一覧情報　備品情報領域
+.yoyakus-bihin {
+  color: $base-color;
+  display: inline-block;
+  letter-spacing: 0.8px;
+  background-color: #cfcfcf;
+  padding: 10px;
+  margin: 10px 0;
+  font-size: 12px;
+  width: 100%;
+  border-radius: 10px;
+  &:hover {
+    background-color: $list-hover-color;
+  }
+}
+// 予約情報　タイトル
+.yoyaku-title,.kessai-title {
+  padding: 0.5em;
+  color: $base-color;
+  border-bottom: solid 2px $base-color;
+  font-size: 12pt;
+  margin: 10px auto;
+  font-weight: bold;
+}
+//　予約情報　詳細
+.yoyaku-dl, .kessai-dl {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  // margin-top: 20px;
+  dt {
+    width: 20%;
+    text-align: right;
+    padding: 5px 10px 5px 0;
+    font-weight: normal;
+    font-size: 12px;
+    color: $base-color;
+    font-weight: bold;
+  }
+  dd {
+    width: 30%;
+    padding: 5px 5px;
+    font-size: 12px;
+  }
+  .oneline-dd {
+    width: 80%;
+    padding: 5px 5px;
+    font-size: 12px;
+  }
+}
+
+// 決済一覧情報　決済情報
+.kessais-kessai {
+  color: $base-color;
+  display: inline-block;
+  letter-spacing: 0.8px;
+  background-color: $list-color;
+  padding: 0px 10px 20px 10px;
+  margin: 10px 0;
+  font-size: 12px;
+  width: 100%;
+  border-radius: 10px;
+  border-top: solid 10px $base-color;
+  &:hover {
+    background-color: $list-hover-color;
+  }
+}
+// 決済一覧情報　決済情報のチェックボックス
+.kessais-kessai-checkbox {
+  margin-bottom:5px;
+}
+// 決済一覧情報　決済情報のタイトル
+.kessais-kessai-title {
+  padding: 0.5em;
+  color: $base-color;
+  border-bottom: solid 2px $base-color;
+  font-size: 12pt;
+  margin: 0 0 15px 0;
+  font-weight: bold;
+}
+// 決済一覧情報　決済情報のコンテンツ
+.kessais-kessai-content {
+  margin-left: 20px;
+}
+// 決済一覧情報　決済情報内の予約一覧情報
+.kessais-kessai-yoyakus {
+  margin: 10px 0 0 2%;
+  padding: 5px;
+  background-color: #fff;
+  border-radius: 15px;
+  width:98%;
+}
+// 決済一覧情報　
+.kessais-kessai-yoyakus-title {
+  padding: 10px 0 0 10px;
+  letter-spacing: 0.8px;
+  font-weight: bold;
+ }
+// 決済一覧情報　決済情報内の予約情報
+.kessais-kessai-yoyakus-yoyaku {
+  margin: 10px;
+}
+
+
+
+
+// タグ
+.tag {
+  display: inline-block;
+  color: #fff;
+  background-color: $base-color;
+  border-radius: 28px;
+  font-size: 12px;
+  padding: 3px 7px 1px;
+  margin-right: 2px;
+  font-weight: normal;
+}
+// チェックボックス
+.checkbox_label {
+  display: inline-block;
+  position: relative;
+  margin: 10px 0;
+  padding: 6px 15px 4px 28px;
+  // border: 3px solid #fff;
+  border-radius: 50px;
+  color: #fff;
+  background-color: $second-color;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color .1s, box-shadow .1s;
+  font-size: 12px;
+  &::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 6px;
+    bottom: 5px;
+    left: 10px;
+    width: 12px;
+    height: 12px;
+    border: 1px solid #fff;
+    border-radius: 20px;
+    // transition: background-color .1s;
+  }
+}
+input[type="checkbox"] {
+  position: absolute;
+  left: -9999px;
+}
+input:checked + .checkbox_label {
+  background-color: $base-color;
+}
+input:checked + .checkbox_label::before {
+  background-color: #fff;
+}
+
+// アクションボタン（submit,aなど）
+.btn-action {
+  display: inline-block;
+  padding: 8px 20px 6px 20px;
+  border-radius: 19px;
+  background-clip: padding-box;
+  background-color: $base-color;
+  border: 1px solid transparent;
+  color: #fff;
+  text-align: center;
+  font-size: 0.75rem;
+  &:hover {
+    background-color: #fff;
+    color: $base-color;
+    border: 1px solid $base-color;
+  }
+}
+// アクションボタン（第2候補のボタン用）
+.btn-action-second {
+  display: inline-block;
+  padding: 8px 20px 6px 20px;
+  border-radius: 19px;
+  background-clip: padding-box;
+  background-color: $second-color;
+  border: 1px solid transparent;
+  color: #fff;
+  text-align: center;
+  font-size: 0.75rem;
+  &:hover {
+    background-color: #fff;
+    color: $second-color;
+    border: 1px solid $second-color;
+  }
+}
+// 戻るボタン
+.btn-back {
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 19px;
+  background-clip: padding-box;
+  background-color: #fff;
+  border: 1px solid $base-color;
+  color:$base-color;
+  font-weight: bold;
+  text-align: center;
+  font-size: 0.75rem;
+  &:hover {
+    background-color: $base-color;
+    color: #fff;
+    border: 1px solid transparent;
+  }
+}

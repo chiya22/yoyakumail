@@ -13,7 +13,7 @@ const findPKey = async (id) => {
 
 const find = async () => {
   try {
-    const retObj = await knex.from("searchinfos").orderBy("id", "asc");
+    const retObj = await knex.from("searchinfos").orderBy("id", "desc");
     return retObj;
   } catch (err) {
     throw err;
