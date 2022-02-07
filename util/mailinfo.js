@@ -157,35 +157,36 @@ const sendMailByIdSearch = async ( id_search)=> {
     //　メール送信対象の場合
     if ((kessai.isSendMail === '1') && (kessai.yyyymmddhhmmss_sended_mail == null)) {
 
-      // テスト用でToを書き換え
-      send('yoshida@yamori.jp', kessai.mail_subject, kessai.mail_body);
-      // send(kessai.email, kessai.mail_subject, kessai.mail_body);
+      send(kessai.email, kessai.mail_subject, kessai.mail_body);
       
       // メール送信時間を設定
       (async () => {
-        await m_kessais.updatekessaisToSendMail(id_search,kessai.id_customer,common.getTodayTime());
+        await m_kessais.updatekessaiToSendMail(id_search,kessai.id_customer,common.getTodayTime());
+        await logger.info(`送信先：${kessai.nm_keiyaku} <${kessai.email}>`)
       })();
     }
-    logger.info(`送信先：${kessai.nm_keiyaku} <${email}>`)
+    // logger.info(`送信先：${kessai.nm_keiyaku} <${kessai.email}>`)
   })
 
 };
 
-//  決済情報をもとに、メールを送信する
+//  決済情報をもとに、メールを再送信する
 const sendMail = async ( id_search, id_cutomer)=> {
 
   // 対象となる決済情報を取得
   const kessai = await m_kessais.findPKey(id_search, id_cutomer);
 
   //　メール送信対象の場合
-  if ((kessai.isSendMail === '1') && (kessai.yyyymmddhhmmss_sended_mail == null )) {
-    send('yoshida@yamori.jp', `【テスト】${kessai.mail_subject}`, kessai.mail_body);
-    // send(kessai.email, kessai.mail_subject, kessai.mail_body);
+  if (kessai.isSendMail === '1') {
+
+    send(kessai.email, kessai.mail_subject, kessai.mail_body);
 
     // メール送信時間を設定
-    await m_kessais.updatekessaisToSendMail(id_search,id_cutomer,common.getTodayTime());
+    const setTimeValue = kessai.yyyymmddhhmmss_resended_mail? `${kessai.yyyymmddhhmmss_resended_mail}|${common.getTodayTime()}`: common.getTodayTime();
+    await m_kessais.updatekessaiToReSendMail(id_search,id_cutomer,setTimeValue);
+    await logger.info(`送信先：${kessai.nm_keiyaku} <${kessai.email}>`);
+
   }
-  logger.info(`送信先：${kessai.nm_keiyaku} <${kessai.email}>`)
 };
 
 // private
@@ -208,8 +209,12 @@ const send = (mail_to,title, content) => {
   // メール情報
   let message = {
       from: process.env.MAIL_FROM,
-      to: mail_to,
-      subject: title,
+      // テスト用として宛先を強制的に変更
+      to: 'yoshida@yamori.jp',
+      // to: mail_to,
+      // テスト用として件名に【テスト】を追加
+      subject: `【テスト】${title}`,
+      // subject: title,
       text: content,
   };
 

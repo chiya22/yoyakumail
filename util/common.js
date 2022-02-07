@@ -18,9 +18,9 @@ const getTodayTime = () => {
     return d.getFullYear() + mm + dd + hh + mi + ss;
   }
 
-  const getNextday = () => {
+  const getBeforeday = () => {
     let date = new Date();
-    date.setDate(date.getDate() + 1);
+    date.setDate(date.getDate() - 1);
     return getYYYYMMDD(date);
   }
 
@@ -79,7 +79,7 @@ const sleep = (time) => {
 
 module.exports = {
   getTodayTime,
-  getNextday,
+  getBeforeday,
   getNextYearday,
   hankaku2Zenkaku,
   sleep,

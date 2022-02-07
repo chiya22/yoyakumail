@@ -15,10 +15,10 @@
         <div class="area_searchjyouken">
           <form action="/yoyakus" method="POST" name="jyoukenform">
             <div class="searchform__row">
-              <label class="searchform__item-label">登録日／更新日</label><input type="text" class="searchform__item-style  flatpickr3" name="yyyymmdd_addupd_start" value="<%= curYyyymmdd %>">　～　<input type="text" class="searchform__item-style flatpickr3" name="yyyymmdd_addupd_end" value="<%= curYyyymmdd %>">
+              <label class="searchform__item-label">登録日／更新日</label><input type="text" class="searchform__item-style  flatpickr3" name="yyyymmdd_addupd_start" value="<%= curYyyymmdd_minus1Day %>">　～　<input type="text" class="searchform__item-style flatpickr3" name="yyyymmdd_addupd_end" value="<%= curYyyymmdd_minus1Day %>">
             </div>
             <div class="searchform__row">
-              <label class="searchform__item-label">利用日</label><input type="text" class="searchform__item-style flatpickr3" name="yyyymmdd_riyou_start" value="<%= curYyyymmdd_plus1Day %>">　～　<input type="text" class="searchform__item-style flatpickr3" name="yyyymmdd_riyou_end" value="<%= curYyyymmdd_plus1Year %>">
+              <label class="searchform__item-label">利用日</label><input type="text" class="searchform__item-style flatpickr3" name="yyyymmdd_riyou_start" value="<%= curYyyymmdd %>">　～　<input type="text" class="searchform__item-style flatpickr3" name="yyyymmdd_riyou_end" value="<%= curYyyymmdd_plus1Year %>">
             </div>
             <input class="btn-action" type="submit" value="予約情報取得" />
           </form>
@@ -43,6 +43,11 @@
                 <% } else { %>
                   <!-- 決済情報取得済み-->
                     <a class="btn-action" href="/kessais/<%= searchinfo.id %>">決済情報一覧</a>
+                    <% if (searchinfo.yyyymmddhhmmss_sended_mails) { %>
+                    <span class="btn-disabled">メール送信済</span>
+                    <% } else { %>
+                    <a class="btn-action" href="/kessais/sendmail/<%= searchinfo.id %>">メール送信</a>
+                    <% } %>
                 <% } %>
                 <a class="btn-action-second" href="/yoyakudelete/<%= searchinfo.id %>">削除</a>
                 </div>

@@ -212,7 +212,9 @@ pre {
   }
 }
 // 予約情報　タイトル
-.yoyaku-title,.kessai-title {
+// 決済情報　タイトル
+// メール情報タイトル
+.yoyaku-title,.kessai-title, .mail-title {
   padding: 0.5em;
   color: $base-color;
   border-bottom: solid 2px $base-color;
@@ -221,7 +223,9 @@ pre {
   font-weight: bold;
 }
 //　予約情報　詳細
-.yoyaku-dl, .kessai-dl {
+//　決済情報　詳細
+//　メール情報　詳細
+.yoyaku-dl, .kessai-dl, .mail-dl {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -298,6 +302,11 @@ pre {
 .kessais-kessai-yoyakus-yoyaku {
   margin: 10px;
 }
+//
+.kessais-kessai-resendmail {
+  padding-top: 20px;
+  text-align: right;
+}
 
 
 
@@ -352,6 +361,9 @@ input:checked + .checkbox_label {
 input:checked + .checkbox_label::before {
   background-color: #fff;
 }
+input:disabled + .checkbox_label {
+  cursor: default;
+}
 
 // アクションボタン（submit,aなど）
 .btn-action {
@@ -396,7 +408,7 @@ input:checked + .checkbox_label::before {
   background-color: #fff;
   border: 1px solid $base-color;
   color:$base-color;
-  font-weight: bold;
+  // font-weight: bold;
   text-align: center;
   font-size: 0.75rem;
   &:hover {
@@ -404,4 +416,23 @@ input:checked + .checkbox_label::before {
     color: #fff;
     border: 1px solid transparent;
   }
+}
+//非活性ボタン
+.btn-disabled {
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 19px;
+  background-clip: padding-box;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid transparent;
+  color: #fff;
+  // font-weight: bold;
+  text-align: center;
+  font-size: 0.75rem;
+  cursor: default;
+}
+
+.isDisabled {
+  pointer-events: none;
+  cursor: default;
 }

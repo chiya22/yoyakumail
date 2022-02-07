@@ -167,7 +167,7 @@ const dlkessaiinfo = async (id_search) => {
   await page._client.send("Page.setDownloadBehavior", {
     behavior: "allow",
     // downloadPath: process.env.KESSAI_DL_PATH,
-    downloadPath: "C:\\download\\customer",
+    downloadPath: "C:\\download\\yoyakumail",
   });
 
   // 検索ボタンをクリック
@@ -190,18 +190,21 @@ const dlkessaiinfo = async (id_search) => {
     return `[err]ダウンロードエラー:${errmsg}`;
 
   } else {
-    await page.click("#fra_main > center:nth-child(3) > form:nth-child(4) > table > tbody > tr:nth-child(2) > td:nth-child(1) > input[type=button]");
 
-    // ファイル名取得
-    const filename = await page.$eval("#fra_main > center:nth-child(3) > form:nth-child(4) > table > tbody > tr:nth-child(2) > td:nth-child(2)", el => el.innerHTML);
+  await page.waitForTimeout(process.env.WAITTIME);
 
-    await page.waitForTimeout(process.env.WAITTIME);
+  await page.click("#fra_main > center:nth-child(3) > form:nth-child(4) > table > tbody > tr:nth-child(2) > td:nth-child(1) > input[type=button]");
 
-    await logger.info(`決済結果データをダウンロードしました`);
-    await page.waitForTimeout(process.env.WAITTIME);
-    await browser.close();
+  // ファイル名取得
+  const filename = await page.$eval("#fra_main > center:nth-child(3) > form:nth-child(4) > table > tbody > tr:nth-child(2) > td:nth-child(2)", el => el.innerHTML);
 
-    return filename + ".csv";
+  await page.waitForTimeout(process.env.WAITTIME);
+
+  await logger.info(`決済結果データをダウンロードしました`);
+  await page.waitForTimeout(process.env.WAITTIME);
+  await browser.close();
+
+  return filename + ".csv";
 
   }
 }

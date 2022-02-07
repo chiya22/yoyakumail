@@ -75,7 +75,7 @@ const dlyoyakuinfo = async (yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd
   // ダウンロード先を修正
   await page._client.send("Page.setDownloadBehavior", {
     behavior: "allow",
-    downloadPath: "C:\\download\\customer",
+    downloadPath: "C:\\download\\yoyakumail",
   });
 
   // 隠し項目へ値を設定

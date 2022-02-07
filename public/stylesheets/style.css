@@ -211,7 +211,7 @@ pre {
   background-color: #F8DFD2;
 }
 
-.yoyaku-title, .kessai-title {
+.yoyaku-title, .kessai-title, .mail-title {
   padding: 0.5em;
   color: #cd5e42;
   border-bottom: solid 2px #cd5e42;
@@ -220,13 +220,13 @@ pre {
   font-weight: bold;
 }
 
-.yoyaku-dl, .kessai-dl {
+.yoyaku-dl, .kessai-dl, .mail-dl {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
 }
 
-.yoyaku-dl dt, .kessai-dl dt {
+.yoyaku-dl dt, .kessai-dl dt, .mail-dl dt {
   width: 20%;
   text-align: right;
   padding: 5px 10px 5px 0;
@@ -236,13 +236,13 @@ pre {
   font-weight: bold;
 }
 
-.yoyaku-dl dd, .kessai-dl dd {
+.yoyaku-dl dd, .kessai-dl dd, .mail-dl dd {
   width: 30%;
   padding: 5px 5px;
   font-size: 12px;
 }
 
-.yoyaku-dl .oneline-dd, .kessai-dl .oneline-dd {
+.yoyaku-dl .oneline-dd, .kessai-dl .oneline-dd, .mail-dl .oneline-dd {
   width: 80%;
   padding: 5px 5px;
   font-size: 12px;
@@ -300,6 +300,11 @@ pre {
   margin: 10px;
 }
 
+.kessais-kessai-resendmail {
+  padding-top: 20px;
+  text-align: right;
+}
+
 .tag {
   display: inline-block;
   color: #fff;
@@ -352,6 +357,10 @@ input:checked + .checkbox_label::before {
   background-color: #fff;
 }
 
+input:disabled + .checkbox_label {
+  cursor: default;
+}
+
 .btn-action {
   display: inline-block;
   padding: 8px 20px 6px 20px;
@@ -396,7 +405,6 @@ input:checked + .checkbox_label::before {
   background-color: #fff;
   border: 1px solid #cd5e42;
   color: #cd5e42;
-  font-weight: bold;
   text-align: center;
   font-size: 0.75rem;
 }
@@ -405,4 +413,22 @@ input:checked + .checkbox_label::before {
   background-color: #cd5e42;
   color: #fff;
   border: 1px solid transparent;
+}
+
+.btn-disabled {
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 19px;
+  background-clip: padding-box;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid transparent;
+  color: #fff;
+  text-align: center;
+  font-size: 0.75rem;
+  cursor: default;
+}
+
+.isDisabled {
+  pointer-events: none;
+  cursor: default;
 }

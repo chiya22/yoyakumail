@@ -12,10 +12,13 @@
     <div class="main__wrapper">
       <div class="area_header">
         <a class="btn-back" href="<%= `/kessais/${kessai.id_search}` %>">戻る</a>
-        <a class="btn-action" href="/kessai/sendmail/<%= kessai.id_search %>_<%= kessai.id_customer %>">メール送信</a>
+        <% if (kessai.yyyymmddhhmmss_sended_mail) { %>
+          <a class="btn-action" href="/kessai/sendmail/<%= kessai.id_search %>_<%= kessai.id_customer %>">メール再送信</a>
+        <% } %>
       </div>
       <div class="kessai-title">
-        【決済情報】<%= kessai.id_cutomer %> <%= kessai.nm_keiyaku %>　<%= `${kessai.price.toLocaleString()}円` %>
+        【決済情報】<%= kessai.id_cutomer %> <%= kessai.nm_keiyaku %>　
+        <%= `${kessai.yyyymmdd_yoyaku.slice(0,4)}年${kessai.yyyymmdd_yoyaku.slice(4,6)}月${kessai.yyyymmdd_yoyaku.slice(6,8)}日  ${kessai.price.toLocaleString()}円`　%>
       </div>
       <dl class="kessai-dl">
         <dt>お客様番号</dt>
@@ -54,24 +57,33 @@
         <dd><%= kessai.isCvs %></dd>
         <dt>メール送信対象</dt>
         <dd class="oneline-dd"><%= kessai.isSendMail %></dd>
+      </dl>
+      <div class="yoyaku-title">【メール情報】</div>
+      <dl class="mail-dl">
         <dt>メールアドレス</dt>
-        <dd class="oneline-dd"><%= kessai.email %></dd>
-        <dt>メール）件名</dt>
-        <dd class="oneline-dd"><%= kessai.mail_subject %></dd>
-        <dt>メール）本文</dt>
-        <dd class="oneline-dd">
-          <textarea name="mailbody" cols="100" rows="80">
-            <%= kessai.mail_body %>
-          </textarea>
-        </dd>
-        <dt>メール）本文 コンビニ決済用</dt>
-        <dd class="oneline-dd"  >
-          <textarea name="mailbody_cvs" cols="100" rows="80">
-            <%= kessai.mail_body_cvs %>
-          </textarea>
-        </dd>
+        <div class="oneline-dd"><%= kessai.email %></div>
+        <dt>件名</dt>
+        <div class="oneline-dd"><%= kessai.mail_subject %></div>
         <dt>メール送信年月日時分秒</dt>
-        <dd><%= kessai.yyyymmddhhmmss_sended_mail %></dd>
+        <div class="oneline-dd"><%= kessai.yyyymmddhhmmss_sended_mail %></div>
+        <dt>メール再送信年月日時分秒</dt>
+        <div class="oneline-dd"><%= kessai.yyyymmddhhmmss_resended_mail %></div>
+        <dt><%= `${kessai.isCvs === '1'?'メール本文（コンビニ決済用）':'メール本文'}` %></dt>
+        <dd class="oneline-dd"></dd>
+        <dt></dt>
+        <% if (kessai.isCvs === '1'){ %>
+          <dd class="oneline-dd">
+            <textarea name="mailbody" cols="100" rows="80">
+              <%= kessai.mail_body_cvs %>
+            </textarea>
+          </dd>
+        <% } else { %>
+          <dd class="oneline-dd">
+            <textarea name="mailbody" cols="100" rows="80">
+              <%= kessai.mail_body %>
+            </textarea>
+          </dd>
+        <% } %>
       </dl>
     </div>
   </div>

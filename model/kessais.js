@@ -107,17 +107,29 @@ const updatekessaisByMailinfo = async (inObj) => {
 }
 
 //PK（管理ID、検索情報ID）をキーにメール送信年月日時分秒を更新する
-const updatekessaisToSendMail = async ( id_search, id_customer, time) => {
- try {
-   const query = 'update kessais set yyyymmddhhmmss_sended_mail = "' + time + '" where id_customer = "' + id_customer + '" and id_search = "' + id_search + '";'
-    logger.info(query);
-    const retObj = await knex.raw(query);
- } catch (err) {
-  logger.error(err.message);
-  throw err;
+const updatekessaiToSendMail = async ( id_search, id_customer, time) => {
+  try {
+    const query = 'update kessais set yyyymmddhhmmss_sended_mail = "' + time + '" where id_customer = "' + id_customer + '" and id_search = "' + id_search + '";'
+     logger.info(query);
+     const retObj = await knex.raw(query);
+  } catch (err) {
+   logger.error(err.message);
+   throw err;
+  }
  }
-}
 
+ //PK（管理ID、検索情報ID）をキーにメール再送信年月日時分秒を更新する
+const updatekessaiToReSendMail = async ( id_search, id_customer, time) => {
+  try {
+    const query = 'update kessais set yyyymmddhhmmss_resended_mail = "' + time + '" where id_customer = "' + id_customer + '" and id_search = "' + id_search + '";'
+     logger.info(query);
+     const retObj = await knex.raw(query);
+  } catch (err) {
+   logger.error(err.message);
+   throw err;
+  }
+ }
+ 
 //PK（管理ID、検索情報ID）をキーにコンビニ決済対象、メール送信対象を更新する
 const updatekessaisToisCvsAndisSendMail = async (id_search, id_customer, isCvs, isSendMail ) => {
   try {
@@ -160,7 +172,8 @@ module.exports = {
   insertfromyoyakus,
   updatekessaisBydlinfo,
   updatekessaisByMailinfo,
-  updatekessaisToSendMail,
+  updatekessaiToSendMail,
+  updatekessaiToReSendMail,
   updatekessaisToisCvsAndisSendMail,
   remove,
   removeByIdSearch,

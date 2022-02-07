@@ -22,12 +22,12 @@ router.get("/", (req, res) => {
     const logininfo = await m_logininfo.find();
 
     const curYyyymmdd = common.getTodayTime().slice(0,8);
-    const curYyyymmdd_plus1Day = common.getNextday();
+    const curYyyymmdd_minus1Day = common.getBeforeday();
     const curYyyymmdd_plus1Year = common.getNextYearday();
 
     res.render("index", {
       curYyyymmdd:curYyyymmdd,
-      curYyyymmdd_plus1Day:curYyyymmdd_plus1Day,
+      curYyyymmdd_minus1Day:curYyyymmdd_minus1Day,
       curYyyymmdd_plus1Year:curYyyymmdd_plus1Year,
       searchinfos: searchinfos,
       logininfo: logininfo,
@@ -149,7 +149,8 @@ router.get("/kessaiscreate/:id", (req,res) => {
       res.redirect("/");
     }
 
-    // 電算システムでURLが付与されるまで待機（10秒）
+    // 電算システムでURLが付与されるまで待機
+    // await common.sleep(process.env.WAITTIME);
     await common.sleep(10000);
 
     // 電算システムよりダウンロードする
@@ -161,6 +162,8 @@ router.get("/kessaiscreate/:id", (req,res) => {
 
     // ダウンロードしたファイルより、テーブルへ情報を反映する
     await kessaiinfo.updkessaiinfo(req.params.id, retValue);
+
+    await common.sleep(5000);
 
     // メール文章を作成する
     await mailinfo.setMailContent(req.params.id);
@@ -251,7 +254,7 @@ router.get("/kessai/sendmail/:id", (req,res) => {
 
     await mailinfo.sendMail(id_search, id_customer);
 
-    res.redirect(`/kessais/${id_search}`);
+    res.redirect(`/kessai/${id_search}_${id_customer}`);
 
   })();
 });
