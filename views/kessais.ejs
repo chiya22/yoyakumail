@@ -10,6 +10,16 @@
   <%- include("./common/header.ejs", {isTop: false}); %>
   <div class="main">
     <div class="main__wrapper">
+      <!-- メッセージ -->
+      <div class="flashes">
+        <% if (flashMessages) { %>
+          <% if (flashMessages.success) { %>
+          <div class="flash success"><%= flashMessages.success %></div>
+          <% } else if (flashMessages.error) { %>
+          <div class="flash error"><%= flashMessages.error %></div>
+          <% } %>
+        <% } %>
+      </div>      
       <div class="area_header">
         <a class="btn-back" href="/">戻る</a>
         <% if (!searchinfo.yyyymmddhhmmss_sended_mails) { %>

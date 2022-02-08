@@ -436,3 +436,21 @@ input:disabled + .checkbox_label {
   pointer-events: none;
   cursor: default;
 }
+
+// フラッシュメッセージ
+.flashes {
+  display:inline-block;
+  padding: 10px 30px;
+  border-radius: 15px;
+  background-color: $list-color;
+}
+.flash {
+  font-size:12px;
+}
+.success {
+  color:#000
+}
+.error {
+  color:$base-color;
+  font-weight: bold;
+}

@@ -432,3 +432,23 @@ input:disabled + .checkbox_label {
   pointer-events: none;
   cursor: default;
 }
+
+.flashes {
+  display: inline-block;
+  padding: 10px 30px;
+  border-radius: 15px;
+  background-color: #E6D7D2;
+}
+
+.flash {
+  font-size: 12px;
+}
+
+.success {
+  color: #000;
+}
+
+.error {
+  color: #cd5e42;
+  font-weight: bold;
+}

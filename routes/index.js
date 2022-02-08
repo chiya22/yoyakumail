@@ -40,9 +40,15 @@ router.post("/changepwd", (req,res) => {
   (async () => {
 
     const password = req.body.pass;
-    await m_logininfo.update(password);
-
-    res.redirect("/");
+    try {
+      await m_logininfo.update(password);
+      req.flash("success","パスワードを変更しました。");
+      res.redirect("/");
+      
+    } catch (err) {
+      req.flash("error",err.message);
+      res.redirect("/");
+    }
   })();
 })
 
@@ -58,26 +64,34 @@ router.post("/yoyakus", (req, res) => {
     // ID用プレフィックス
     const yyyymmddhhmmss_proc = common.getTodayTime();
 
-    // 予約システムより指定した期間の予約情報をダウンロード
-    await yoyakuinfo.dlyoyakuinfo(yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd_riyou_start, yyyymmdd_riyou_end);
+    try {
+      // 予約システムより指定した期間の予約情報をダウンロード
+      await yoyakuinfo.dlyoyakuinfo(yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd_riyou_start, yyyymmdd_riyou_end);
 
-    // 検索条件情報を登録する
-    let inObjSearch = {};
-    inObjSearch.id = "Y" + yyyymmddhhmmss_proc;
-    inObjSearch.yyyymmdd_addupd_start = yyyymmdd_addupd_start;
-    inObjSearch.yyyymmdd_addupd_end = yyyymmdd_addupd_end;
-    inObjSearch.yyyymmdd_riyou_start = yyyymmdd_riyou_start;
-    inObjSearch.yyyymmdd_riyou_end = yyyymmdd_riyou_end;
-    inObjSearch.status = "1";
-    inObjSearch.yyyymmddhhmmss_created_yoyakus = yyyymmddhhmmss_proc;
-    await m_searchinfos.insert(inObjSearch);
-    logger.info(`検索条件情報ID：${inObjSearch.id}`);
+      // 検索条件情報を登録する
+      let inObjSearch = {};
+      inObjSearch.id = "Y" + yyyymmddhhmmss_proc;
+      inObjSearch.yyyymmdd_addupd_start = yyyymmdd_addupd_start;
+      inObjSearch.yyyymmdd_addupd_end = yyyymmdd_addupd_end;
+      inObjSearch.yyyymmdd_riyou_start = yyyymmdd_riyou_start;
+      inObjSearch.yyyymmdd_riyou_end = yyyymmdd_riyou_end;
+      inObjSearch.status = "1";
+      inObjSearch.yyyymmddhhmmss_created_yoyakus = yyyymmddhhmmss_proc;
+      await m_searchinfos.insert(inObjSearch);
+      logger.info(`検索条件情報ID：${inObjSearch.id}`);
 
-    // ダウンロードしたファイルより予約情報をテーブルへ登録する
-    let yoyakulist = [];
-    yoyakulist = await yoyakuinfo.filetodb(yyyymmddhhmmss_proc);
+      // ダウンロードしたファイルより予約情報をテーブルへ登録する
+      let yoyakulist = [];
+      yoyakulist = await yoyakuinfo.filetodb(yyyymmddhhmmss_proc);
+      
+      req.flash("success","予約情報を取得しました。");
 
-    res.redirect("/");
+      res.redirect("/");
+    } catch (err) {
+      req.flash("error",err);
+      res.redirect("/");
+    }
+
   })();
 });
 
@@ -114,15 +128,22 @@ router.get("/yoyaku/:id", (req,res) => {
 router.get("/yoyakudelete/:id", (req, res) => {
   (async () => {
 
-    // idより予約一覧を取得し、返却する
-    await m_yoyakus.removeByIdSearch(req.params.id); // 予約情報
-    await m_kessais.removeByIdSearch(req.params.id);  // 決済情報
-    await m_searchinfos.remove(req.params.id);       // 検索条件
+    try {
+      // idより予約一覧を取得し、返却する
+      await m_yoyakus.removeByIdSearch(req.params.id); // 予約情報
+      await m_kessais.removeByIdSearch(req.params.id);  // 決済情報
+      await m_searchinfos.remove(req.params.id);       // 検索条件
 
-    // 検索条件情報の一覧を取得する
-    await m_searchinfos.find();
+      // 検索条件情報の一覧を取得する
+      await m_searchinfos.find();
 
-    res.redirect("/");
+      req.flash("success", `検索条件情報を削除しました。(${req.params.id})`);
+      res.redirect("/");
+
+    } catch (error) {
+      req.flash("error", err.message);
+      res.redirect("/");
+    }
 
   })();
 });
@@ -131,47 +152,55 @@ router.get("/yoyakudelete/:id", (req, res) => {
 router.get("/kessaiscreate/:id", (req,res) => {
   (async () => {
 
-    let retValue = '';
+    try {
 
-    // 前回処理時の決済情報がある場合は削除する
-    await m_kessais.removeByIdSearch(req.params.id);
+      let retValue = '';
 
-    // 予約情報をもとに、決済情報を登録する
-    await m_kessais.insertfromyoyakus(req.params.id)
+      // 前回処理時の決済情報がある場合は削除する
+      await m_kessais.removeByIdSearch(req.params.id);
+  
+      // 予約情報をもとに、決済情報を登録する
+      await m_kessais.insertfromyoyakus(req.params.id)
+  
+      // ファイルへ書き出す
+      const outFilePath = await kessaiinfo.outputFile(req.params.id);
+      
+      // 電算システムへアップロードする
+      retvalue = await kessaiinfo.upkessaiinfo(req.params.id, outFilePath);
+      if (retValue.includes("エラー")) {
+        console.log(retValue);
+        res.redirect("/");
+      }
+  
+      // 電算システムでURLが付与されるまで待機
+      // await common.sleep(process.env.WAITTIME);
+      await common.sleep(10000);
+  
+      // 電算システムよりダウンロードする
+      retValue = await kessaiinfo.dlkessaiinfo(req.params.id);
+      if (retValue.includes("エラー")) {
+        console.log(retValue);
+        res.redirect("/");
+      }
+  
+      // ダウンロードしたファイルより、テーブルへ情報を反映する
+      await kessaiinfo.updkessaiinfo(req.params.id, retValue);
+  
+      await common.sleep(5000);
+  
+      // メール文章を作成する
+      await mailinfo.setMailContent(req.params.id);
+  
+      // 検索条件情報のステータスを更新する
+      await m_searchinfos.updateStatusAndTime(req.params.id, '2', common.getTodayTime());
 
-    // ファイルへ書き出す
-    const outFilePath = await kessaiinfo.outputFile(req.params.id);
-    
-    // 電算システムへアップロードする
-    retvalue = await kessaiinfo.upkessaiinfo(req.params.id, outFilePath);
-    if (retValue.includes("エラー")) {
-      console.log(retValue);
+      req.flash("success",`決済情報を取得しました。(${req.params.id})`);
+      res.redirect("/");
+
+    } catch (error) {
+      req.flash("success",error.message);
       res.redirect("/");
     }
-
-    // 電算システムでURLが付与されるまで待機
-    // await common.sleep(process.env.WAITTIME);
-    await common.sleep(10000);
-
-    // 電算システムよりダウンロードする
-    retValue = await kessaiinfo.dlkessaiinfo(req.params.id);
-    if (retValue.includes("エラー")) {
-      console.log(retValue);
-      res.redirect("/");
-    }
-
-    // ダウンロードしたファイルより、テーブルへ情報を反映する
-    await kessaiinfo.updkessaiinfo(req.params.id, retValue);
-
-    await common.sleep(5000);
-
-    // メール文章を作成する
-    await mailinfo.setMailContent(req.params.id);
-
-    // 検索条件情報のステータスを更新する
-    await m_searchinfos.updateStatusAndTime(req.params.id, '2', common.getTodayTime());
-
-    res.redirect("/");
 
   })();
 });
@@ -200,17 +229,24 @@ router.get("/kessais/:id", (req, res) => {
 router.post("/kessais/update", (req,res) => {
   (async () => {
 
-    // 更新値を取得
-    const id_search_list = req.body.id_search;
-    const id_customer_list = req.body.id_customer;
-    const isCvs_list = req.body.isCvs;
-    const isSendMail_list = req.body.isSendMail;
+    try {
+      // 更新値を取得
+      const id_search_list = req.body.id_search;
+      const id_customer_list = req.body.id_customer;
+      const isCvs_list = req.body.isCvs;
+      const isSendMail_list = req.body.isSendMail;
 
-    for (let i = 0; i < id_customer_list.length; i++) {
-      await m_kessais.updatekessaisToisCvsAndisSendMail(id_search_list[i], id_customer_list[i], isCvs_list[i], isSendMail_list[i]);
+      for (let i = 0; i < id_customer_list.length; i++) {
+        await m_kessais.updatekessaisToisCvsAndisSendMail(id_search_list[i], id_customer_list[i], isCvs_list[i], isSendMail_list[i]);
+      }
+
+      req.flash("success","更新しました。");
+      res.redirect(`/kessais/${id_search_list[0]}`);
+
+    } catch (error) {
+      req.flash("error",error.message);
+      res.redirect(`/kessais/${id_search_list[0]}`);
     }
-
-    res.redirect(`/kessais/${id_search_list[0]}`);
 
   })();
 });
@@ -234,13 +270,21 @@ router.get("/kessai/:id", (req,res) => {
 router.get("/kessais/sendmail/:id", (req,res) => {
   (async () => {
 
-    const id_search = req.params.id;
-    await mailinfo.sendMailByIdSearch(id_search);
+    try {
 
-    // 検索条件情報のステータスを更新する
-    await m_searchinfos.updateStatusAndTime(req.params.id, '3', common.getTodayTime());
+      const id_search = req.params.id;
+      await mailinfo.sendMailByIdSearch(id_search);
+  
+      // 検索条件情報のステータスを更新する
+      await m_searchinfos.updateStatusAndTime(req.params.id, '3', common.getTodayTime());
+  
+      req.flash("success", `すべてのメールを送信しました。(${id_search})`);
+      res.redirect("/");
 
-    res.redirect("/");
+    } catch (error) {
+      req.flash("error", error.message);
+      res.redirect("/");
+    }
 
   })();
 });
@@ -249,12 +293,19 @@ router.get("/kessais/sendmail/:id", (req,res) => {
 router.get("/kessai/sendmail/:id", (req,res) => {
   (async () => {
 
-    const id_search = req.params.id.split("_")[0];
-    const id_customer = req.params.id.split("_")[1];
-
-    await mailinfo.sendMail(id_search, id_customer);
-
-    res.redirect(`/kessai/${id_search}_${id_customer}`);
+    try {
+      const id_search = req.params.id.split("_")[0];
+      const id_customer = req.params.id.split("_")[1];
+  
+      await mailinfo.sendMail(id_search, id_customer);
+  
+      req.flash("success",`メールを再送信しました。(${id_customer})`)
+      res.redirect(`/kessai/${id_search}_${id_customer}`);
+  
+    } catch (error) {
+      req.flash("error", error.message);
+      res.redirect(`/kessai/${id_search}_${id_customer}`);
+    }
 
   })();
 });
