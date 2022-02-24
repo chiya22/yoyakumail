@@ -7,19 +7,27 @@
 </head>
 
 <body>
+  <!-- 処理中メッセージ -->
+  <div class="msg">
+    <div class="msgarea">
+      <i class="bx bx-tada"><p class="msgarea__text">処理中です</p></i>
+    </div>
+  </div>
   <%- include("./common/header.ejs", {isTop: true}); %>
   <div class="main">
     <div class="main__wrapper">
       <!-- メッセージ -->
-      <div class="flashes">
-        <% if (flashMessages) { %>
+      <% if (flashMessages) { %>
           <% if (flashMessages.success) { %>
-          <div class="flash success"><%= flashMessages.success %></div>
+            <div class="flashes">
+              <div class="flash success"><%= flashMessages.success %></div>
+            </div>
           <% } else if (flashMessages.error) { %>
-          <div class="flash error"><%= flashMessages.error %></div>
+            <div class="flashes">
+              <div class="flash error"><%= flashMessages.error %></div>
+            </div>
           <% } %>
-        <% } %>
-      </div>      
+      <% } %>
       <!-- 検索条件 -->
       <div class="area_header">
         <div class="area_searchjyouken">
@@ -30,7 +38,8 @@
             <div class="searchform__row">
               <label class="searchform__item-label">利用日</label><input type="text" class="searchform__item-style flatpickr3" name="yyyymmdd_riyou_start" value="<%= curYyyymmdd %>">　～　<input type="text" class="searchform__item-style flatpickr3" name="yyyymmdd_riyou_end" value="<%= curYyyymmdd_plus1Year %>">
             </div>
-            <input class="btn-action" type="submit" value="予約情報取得" />
+            <input id="btnGetYoyaku" class="btn-action" type="button" value="予約情報取得" />
+            <!-- <input id="btnGetYoyaku" class="btn-action" type="submit" value="予約情報取得" /> -->
           </form>
         </div>
       </div>
@@ -49,7 +58,7 @@
                 <!-- 1：予約情報取得済 2:決済情報取得済み 3.メール送信済み -->
                 <% if (searchinfo.status === '1') { %>
                   <!-- 予約情報取得済み-->
-                    <a class="btn-action" href="/kessaiscreate/<%= searchinfo.id %>">決済情報取得</a>
+                    <a class="btn-action btnGetKessai" href="/kessaiscreate/<%= searchinfo.id %>">決済情報取得</a>
                 <% } else { %>
                   <!-- 決済情報取得済み-->
                     <a class="btn-action" href="/kessais/<%= searchinfo.id %>">決済情報一覧</a>
@@ -67,6 +76,26 @@
       </div>
     </div>
   </div>
+  <script>
+    // 予約情報取得ボタン
+    let btnGetYoyaku = document.getElementById("btnGetYoyaku");
+    btnGetYoyaku.addEventListener("click", (e) => {
+      scrollTo(0, 0);
+      let msg = document.getElementsByClassName("msg")[0];
+      msg.style.visibility = "visible";
+      document.jyoukenform.submit();
+    },false);
+    // 決済情報取得ボタン
+    let btnsGetKessai = document.getElementsByClassName("btnGetKessai");
+    for (let i=0; i<btnsGetKessai.length; i++) {
+      btnsGetKessai[i].addEventListener("click", (e) => {
+        scrollTo(0, 0);
+        let msg = document.getElementsByClassName("msg")[0];
+        msg.style.visibility = "visible";
+        // e.preventDefault();
+      })
+    }
+  </script>
 </body>
 <%- include("./common/javascripts.ejs") %>
 

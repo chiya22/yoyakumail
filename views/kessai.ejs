@@ -10,18 +10,21 @@
   <%- include("./common/header.ejs", {isTop: false}); %>
   <div class="main">
     <div class="main__wrapper">
-      <!-- メッセージ -->
-      <div class="flashes">
-        <% if (flashMessages) { %>
-          <% if (flashMessages.success) { %>
+    <!-- メッセージ -->
+    <% if (flashMessages) { %>
+      <% if (flashMessages.success) { %>
+        <div class="flashes">
           <div class="flash success"><%= flashMessages.success %></div>
-          <% } else if (flashMessages.error) { %>
+        </div>
+      <% } else if (flashMessages.error) { %>
+        <div class="flashes">
           <div class="flash error"><%= flashMessages.error %></div>
-          <% } %>
-        <% } %>
-      </div>      
+        </div>
+      <% } %>
+    <% } %>
       <div class="area_header">
         <a class="btn-back" href="<%= `/kessais/${kessai.id_search}` %>">戻る</a>
+        <a class="btn-action" href="<%= `/kessai/edit/${kessai.id_search}_${kessai.id_customer}` %>">メール文編集</a>
         <% if (kessai.yyyymmddhhmmss_sended_mail) { %>
           <a class="btn-action" href="/kessai/sendmail/<%= kessai.id_search %>_<%= kessai.id_customer %>">メール再送信</a>
         <% } %>
@@ -83,15 +86,11 @@
         <dt></dt>
         <% if (kessai.isCvs === '1'){ %>
           <dd class="oneline-dd">
-            <textarea name="mailbody" cols="100" rows="80">
-              <%= kessai.mail_body_cvs %>
-            </textarea>
+            <pre class="mail_body"><%= kessai.mail_body_cvs %></pre>
           </dd>
         <% } else { %>
           <dd class="oneline-dd">
-            <textarea name="mailbody" cols="100" rows="80">
-              <%= kessai.mail_body %>
-            </textarea>
+            <pre class="mail_body"><%= kessai.mail_body %></pre>
           </dd>
         <% } %>
       </dl>

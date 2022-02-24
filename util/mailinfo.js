@@ -49,11 +49,11 @@ const setMailContent = async (id_search) => {
 
       mailbody_before += "ご利用者名： " + nm_keiyaku + " " + kessai.nm_tantousha + "様\r\n"
       mailbody_before += "ご連絡先： " + kessai.email + "\r\n"
-      mailbody_before += "ご予約受付日： " + common.getTodayTime().slice(0,4) + "年" + common.getTodayTime().slice(4,6) + "月" + common.getTodayTime().slice(6,8) + "日\r\n"
-      mailbody_before += "ご利用日： " + kessai.yyyymmdd_yoyaku +"\r\n"
+      mailbody_before += `ご予約受付日：${common.getTodayTime().slice(0,4)}年${common.getTodayTime().slice(4,6)}月${common.getTodayTime().slice(6,8)}日\r\n`
+      mailbody_before += `ご利用日： ${kessai.yyyymmdd_yoyaku.slice(0,4)}年${kessai.yyyymmdd_yoyaku.slice(4,6)}月${kessai.yyyymmdd_yoyaku.slice(6,8)}日\r\n`
       mailbody_before += "利用施設：\r\n"
       mailbody_before += meisai + "\r\n\r\n"
-      mailbody_before += "ご利用料金合計： " + kessai.price + "円(税込)\r\n"
+      mailbody_before += "ご利用料金合計： " + kessai.price.toLocaleString() + "円(税込)\r\n"
       mailbody_before += "\r\n"
   
       // メール本文（コンビニ決済対象）
@@ -197,7 +197,11 @@ const send = (mail_to,title, content) => {
   const smtp_config = {
       host: process.env.MAIL_HOST,
       port: process.env.MAIL_PORT,
-      secure: true,
+      secure: false,
+      requireTLS: false,
+      tls: {
+        rejectUnauthorized: false,
+      },
       auth: {
           user: process.env.MAIL_USER,
           pass: process.env.MAIL_PASS,

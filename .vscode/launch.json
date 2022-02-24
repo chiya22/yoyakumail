@@ -11,10 +11,14 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\bin\\www",
+            // "program": "${workspaceFolder}\\bin\\www",
+            //
+            // 「--tls-min-v1.0」をオプションに設定するため
+            //　ランタイム環境の実行を行う
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+              "start"
+            ],
         }
     ]
-
-
-    
 }

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>決済情報</title>
+  <%- include("./common/stylesheets.ejs") %>
+</head>
+
+<body>
+  <%- include("./common/header.ejs", {isTop: false}); %>
+  <div class="main">
+    <div class="main__wrapper">
+    <!-- メッセージ -->
+    <% if (flashMessages) { %>
+      <% if (flashMessages.success) { %>
+      <div class="flashes">
+        <div class="flash success"><%= flashMessages.success %></div>
+      </div>
+      <% } else if (flashMessages.error) { %>
+      <div class="flashes">
+        <div class="flash error"><%= flashMessages.error %></div>
+      </div>
+      <% } %>
+    <% } %>
+      <form method="post" action="/kessai/save">
+        <div class="area_header">
+          <a class="btn-back" href="<%= `/kessai/${kessai.id_search}_${kessai.id_customer}` %>">戻る</a>
+          <input type="hidden" name="id_search" value="<%= kessai.id_search %>">
+          <input type="hidden" name="id_customer" value="<%= kessai.id_customer %>">
+          <input type="hidden" name="isCvs" value="<%= kessai.isCvs %>">
+          <input type="submit" value="保存" class="btn-action">
+        </div>
+        <div class="kessai-title">
+          【決済情報】<%= kessai.id_cutomer %> <%= kessai.nm_keiyaku %>　
+          <%= `${kessai.yyyymmdd_yoyaku.slice(0,4)}年${kessai.yyyymmdd_yoyaku.slice(4,6)}月${kessai.yyyymmdd_yoyaku.slice(6,8)}日  ${kessai.price.toLocaleString()}円`　%>
+        </div>
+        <dl class="kessai-dl">
+          <dt>お客様番号</dt>
+          <dd><%= kessai.id_customer %></dd>
+          <dt>検索情報ID</dt>
+          <dd><%= kessai.id_search %></dd>
+          <dt>支払方法</dt>
+          <dd><%= kessai.to_pay %></dd>
+          <dt>顧客名１</dt>
+          <dd><%= kessai.nm_customer1 %></dd>
+          <dt>顧客名２</dt>
+          <dd><%= kessai.nm_customer2 %></dd>
+          <dt>電話番号</dt>
+          <dd><%= kessai.telno %></dd>
+          <dt>料金</dt>
+          <dd><%= kessai.price %></dd>
+          <dt>支払期限</dt>
+          <dd><%= kessai.yyyymmdd_kigen %></dd>
+          <dt>結果</dt>
+          <dd><%= kessai.result %></dd>
+          <dt>データID</dt>
+          <dd><%= kessai.id_data %></dd>
+          <dt>払込票URL</dt>
+          <dd class="oneline-dd"><%= kessai.url_cvs %></dd>
+          <dt>メッセージ</dt>
+          <dd class="oneline-dd"><%= kessai.messagae %></dd>
+          <dt>契約名</dt>
+          <dd class="oneline-dd"><%= kessai.nm_keiyaku %></dd>
+          <dt>担当者名</dt>
+          <dd><%= kessai.nm_tantousha %></dd>
+          <dt>予約年月日</dt>
+          <dd><%= kessai.yyyymmdd_yoyaku %></dd>
+          <dt>受付年月日</dt>
+          <dd><%= kessai.yyyymmdd_uketuke %></dd>
+          <dt>コンビニ決済対象</dt>
+          <dd><%= kessai.isCvs %></dd>
+          <dt>メール送信対象</dt>
+          <dd class="oneline-dd"><%= kessai.isSendMail %></dd>
+        </dl>
+        <div class="yoyaku-title">【メール情報】</div>
+        <dl class="mail-dl">
+          <dt>メールアドレス</dt>
+          <div class="oneline-dd"><%= kessai.email %></div>
+          <dt>件名</dt>
+          <div class="oneline-dd"><%= kessai.mail_subject %></div>
+          <dt>メール送信年月日時分秒</dt>
+          <div class="oneline-dd"><%= kessai.yyyymmddhhmmss_sended_mail %></div>
+          <dt>メール再送信年月日時分秒</dt>
+          <div class="oneline-dd"><%= kessai.yyyymmddhhmmss_resended_mail %></div>
+          <dt><%= `${kessai.isCvs === '1'?'メール本文（コンビニ決済用）':'メール本文'}` %></dt>
+          <dd class="oneline-dd"></dd>
+          <dt></dt>
+          <% if (kessai.isCvs === '1'){ %>
+            <dd class="oneline-dd">
+              <textarea name="mail_body" class="mail_body_edit" cols="100" rows="80"><%= kessai.mail_body_cvs %></textarea>
+            </dd>
+          <% } else { %>
+            <dd class="oneline-dd">
+              <textarea name="mail_body" class="mail_body_edit" cols="100" rows="80"><%= kessai.mail_body %></textarea>
+            </dd>
+          <% } %>
+        </dl>
+      </form>
+    </div>
+  </div>
+</body>
+<%- include("./common/javascripts.ejs") %>
+
+</html>

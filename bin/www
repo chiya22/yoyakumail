@@ -9,7 +9,7 @@ if (process.env.NODE_ENV !== 'production') {
  */
 
 var app = require('../app');
-var debug = require('debug')('timecard:server');
+var debug = require('debug')('yoyakumail:server');
 var http = require('http');
 
 /**

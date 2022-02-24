@@ -174,7 +174,7 @@ router.get("/kessaiscreate/:id", (req,res) => {
   
       // 電算システムでURLが付与されるまで待機
       // await common.sleep(process.env.WAITTIME);
-      await common.sleep(10000);
+      await common.sleep(60000);
   
       // 電算システムよりダウンロードする
       retValue = await kessaiinfo.dlkessaiinfo(req.params.id);
@@ -182,7 +182,7 @@ router.get("/kessaiscreate/:id", (req,res) => {
         console.log(retValue);
         res.redirect("/");
       }
-  
+
       // ダウンロードしたファイルより、テーブルへ情報を反映する
       await kessaiinfo.updkessaiinfo(req.params.id, retValue);
   
@@ -265,6 +265,50 @@ router.get("/kessai/:id", (req,res) => {
     });
   })();
 });
+
+// 決済情報の編集画面へ遷移する
+router.get("/kessai/edit/:id", (req,res) => {
+  (async () => {
+
+    const id_search = req.params.id.split("_")[0];
+    const id_customer = req.params.id.split("_")[1];
+
+    const kessai = await m_kessais.findPKey(id_search, id_customer);
+
+    res.render("kessaiform", {
+      kessai: kessai,
+    });
+  })();
+});
+
+// 決済情報のメール文を更新する
+router.post("/kessai/save", (req,res) => {
+  (async () => {
+
+    try {
+      // 更新値を取得
+      const id_search = req.body.id_search;
+      const id_customer = req.body.id_customer;
+      const mail_body = req.body.mail_body;
+      // const mail_body_cvs = req.body.mail_body_cvs;
+      const isCvs = req.body.isCvs;
+
+      await m_kessais.updatekessaisToMailBody(id_search, id_customer, isCvs, mail_body);
+
+      req.flash("success","メール文を更新しました。");
+      res.redirect(`/kessai/${id_search}_${id_customer}`);
+
+    } catch (error) {
+      req.flash("error",error.message);
+      res.redirect(`/kessai/${id_search}_${id_customer}`);
+    }
+
+  })();
+
+});
+
+
+
 
 // 検索情報IDに紐づいた決済情報すべてに対してメールを送信する
 router.get("/kessais/sendmail/:id", (req,res) => {

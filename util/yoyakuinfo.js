@@ -17,6 +17,7 @@ if (process.env.NODE_ENV !== "production") {
 //　予約情報ダウンロード
 const dlyoyakuinfo = async (yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd_riyou_start, yyyymmdd_riyou_end) => {
   
+  // ★ヘッドレス設定
   const browser = await puppeteer.launch({ headless: false });
 
   let page = await browser.newPage();
@@ -177,7 +178,7 @@ const filetodb = (yyyymmddhhmmss_proc) => {
 
       // 終了時には処理した対象ファイルをリネームする
       src.on("end", () => {
-        fs.rename(process.env.YOYAKU_DL_PATH + "\\" + targetfilename, process.env.YOYAKU_DL_PATH + "\\old_" + targetfilename, (err) => {
+        fs.rename(process.env.YOYAKU_DL_PATH + "\\" + targetfilename, process.env.YOYAKU_DL_PATH + "\\old_" + common.getTodayTime() + "_" + targetfilename, (err) => {
           if (err) {
             logger.info(`${targetfilename}ファイルは存在しません：${new Date()}`);
             throw err;

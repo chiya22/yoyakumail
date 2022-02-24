@@ -18,7 +18,7 @@ pre {
   height: 60px;
   background-color: #fff;
   position: fixed;
-  z-index: 999;
+  z-index: 998;
 }
 
 .header .header-wrapper {
@@ -91,7 +91,7 @@ pre {
   width: 100%;
   background-color: #fff;
   padding: 10px 0;
-  z-index: 999;
+  z-index: 998;
 }
 
 .searchform__row {
@@ -305,6 +305,17 @@ pre {
   text-align: right;
 }
 
+.mail_body_edit {
+  background-color: #E6D7D2;
+  padding: 20px;
+  border: 1px solid #cd5e42;
+}
+
+.mail_body {
+  font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+  letter-spacing: 0.8px;
+}
+
 .tag {
   display: inline-block;
   color: #fff;
@@ -451,4 +462,29 @@ input:disabled + .checkbox_label {
 .error {
   color: #cd5e42;
   font-weight: bold;
+}
+
+.msg {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+  visibility: hidden;
+}
+
+.msgarea {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  border-radius: 15px;
+  width: 250px;
+  text-align: center;
+}
+
+.msgarea__text {
+  font-size: 18px;
+  padding: 20px;
 }

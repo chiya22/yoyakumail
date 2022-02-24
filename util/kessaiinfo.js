@@ -10,6 +10,7 @@ const common = require("./common");
 
 const m_kessais = require("../model/kessais");
 const m_logininfo = require("../model/logininfo");
+const { env } = require("process");
 
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
@@ -37,6 +38,7 @@ const outputFile = async (id_search) => {
 // 電算システムへ決済依頼データをアップロードする
 const upkessaiinfo = async (id_search, upFilepath) => {
 
+  // ★ヘッドレス設定
   const browser = await puppeteer.launch({ headless: false });
 
   let page = await browser.newPage();
@@ -132,6 +134,7 @@ const upkessaiinfo = async (id_search, upFilepath) => {
 // 電算システムから決済結果データをダウンロードする
 const dlkessaiinfo = async (id_search) => {
 
+  // ★ヘッドレス設定
   const browser = await puppeteer.launch({ headless: false });
 
   let page = await browser.newPage();
@@ -163,6 +166,9 @@ const dlkessaiinfo = async (id_search) => {
   // コメントに検索IDを設定
   await page.type('input[name="comm"]', id_search);
 
+  // アップロード処理日のToに現在の日付を設定
+  await page.type("#fra_main > center:nth-child(3) > form:nth-child(2) > table.ViewTBL > tbody > tr:nth-child(1) > td > input[type=text]:nth-child(2)", common.getTodayTime().slice(0,8));
+
   // ダウンロード先を修正
   await page._client.send("Page.setDownloadBehavior", {
     behavior: "allow",
@@ -172,6 +178,8 @@ const dlkessaiinfo = async (id_search) => {
 
   // 検索ボタンをクリック
   await page.click("#fra_main > center:nth-child(3) > form:nth-child(2) > table:nth-child(4) > tbody > tr > td > input[type=button]");
+
+  await page.waitForTimeout(process.env.WAITTIME);
 
   // エラーメッセージ表示領域より表示されているメッセージを取得
   const errmsg = await page.evaluate( () => {
@@ -252,16 +260,17 @@ const updkessaiinfo = async (id_search, dlfilename) => {
 
       // 終了時には処理した対象ファイルをリネームする
       src.on("end", () => {
-        fs.rename(process.env.KESSAI_DL_PATH + "\\" + targetfilename, process.env.KESSAI_DL_PATH + "\\old_" + targetfilename, (err) => {
-          if (err) {
+        try {
+          fs.renameSync(process.env.KESSAI_DL_PATH + "\\" + targetfilename, process.env.KESSAI_DL_PATH + "\\old_" + common.getTodayTime() + "_" + targetfilename)
+        } catch(err) {
             logger.info(`${targetfilename}ファイルは存在しません：${new Date()}`);
             throw err;
-          }
-        });
+        }
       });
     }
   })
 };
+
 
 module.exports = {
   outputFile,
