@@ -39,7 +39,7 @@ const outputFile = async (id_search) => {
 const upkessaiinfo = async (id_search, upFilepath) => {
 
   // ★ヘッドレス設定
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({ headless: true });
 
   let page = await browser.newPage();
 
@@ -135,7 +135,7 @@ const upkessaiinfo = async (id_search, upFilepath) => {
 const dlkessaiinfo = async (id_search) => {
 
   // ★ヘッドレス設定
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({ headless: true });
 
   let page = await browser.newPage();
 

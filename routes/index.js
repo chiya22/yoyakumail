@@ -260,8 +260,11 @@ router.get("/kessai/:id", (req,res) => {
 
     const kessai = await m_kessais.findPKey(id_search, id_customer);
 
+    const searchinfo = await m_searchinfos.findPKey(id_search);
+
     res.render("kessai", {
       kessai: kessai,
+      searchinfo: searchinfo,
     });
   })();
 });
@@ -307,9 +310,6 @@ router.post("/kessai/save", (req,res) => {
 
 });
 
-
-
-
 // 検索情報IDに紐づいた決済情報すべてに対してメールを送信する
 router.get("/kessais/sendmail/:id", (req,res) => {
   (async () => {
@@ -343,7 +343,7 @@ router.get("/kessai/sendmail/:id", (req,res) => {
   
       await mailinfo.sendMail(id_search, id_customer);
   
-      req.flash("success",`メールを再送信しました。(${id_customer})`)
+      req.flash("success",`メールを送信しました。(${id_customer})`)
       res.redirect(`/kessai/${id_search}_${id_customer}`);
   
     } catch (error) {
@@ -353,6 +353,5 @@ router.get("/kessai/sendmail/:id", (req,res) => {
 
   })();
 });
-
 
 module.exports = router;

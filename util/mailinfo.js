@@ -29,7 +29,7 @@ const setMailContent = async (id_search) => {
       //　予約情報から明細情報を作成する
       let meisai = '';
       yoyakus.forEach( (yoyaku) => {
-        meisai += yoyaku.nm_room + "(" + yoyaku.time_start.slice(0,2) + ":" + yoyaku.time_start.slice(-2) + "-" + yoyaku.time_end.slice(0,2) + ":" + yoyaku.time_end.slice(-2) + ")   " + yoyaku.price + "円(税込)\r\n"
+        meisai += yoyaku.nm_room + "(" + yoyaku.time_start.slice(0,2) + ":" + yoyaku.time_start.slice(-2) + "-" + yoyaku.time_end.slice(0,2) + ":" + yoyaku.time_end.slice(-2) + ")   " + yoyaku.price.toLocaleString() + "円(税込)\r\n"
       });
 
       let mailbody_before = '';
@@ -157,7 +157,12 @@ const sendMailByIdSearch = async ( id_search)=> {
     //　メール送信対象の場合
     if ((kessai.isSendMail === '1') && (kessai.yyyymmddhhmmss_sended_mail == null)) {
 
-      send(kessai.email, kessai.mail_subject, kessai.mail_body);
+      // コンビニ決済有無によりbody部の設定をわける
+      if (kessai.isCvs === '1') {
+        send(kessai.email, kessai.mail_subject, kessai.mail_body_cvs);
+      } else {
+        send(kessai.email, kessai.mail_subject, kessai.mail_body);
+      }
       
       // メール送信時間を設定
       (async () => {
@@ -177,16 +182,20 @@ const sendMail = async ( id_search, id_cutomer)=> {
   const kessai = await m_kessais.findPKey(id_search, id_cutomer);
 
   //　メール送信対象の場合
-  if (kessai.isSendMail === '1') {
+  // if (kessai.isSendMail === '1') {
 
+  if (kessai.isCvs === '1') {
+    send(kessai.email, kessai.mail_subject, kessai.mail_body_cvs);
+  } else {
     send(kessai.email, kessai.mail_subject, kessai.mail_body);
-
-    // メール送信時間を設定
-    const setTimeValue = kessai.yyyymmddhhmmss_resended_mail? `${kessai.yyyymmddhhmmss_resended_mail}|${common.getTodayTime()}`: common.getTodayTime();
-    await m_kessais.updatekessaiToReSendMail(id_search,id_cutomer,setTimeValue);
-    await logger.info(`送信先：${kessai.nm_keiyaku} <${kessai.email}>`);
-
   }
+
+  // メール送信時間を設定
+  const setTimeValue = kessai.yyyymmddhhmmss_resended_mail? `${kessai.yyyymmddhhmmss_resended_mail}|${common.getTodayTime()}`: common.getTodayTime();
+  await m_kessais.updatekessaiToReSendMail(id_search,id_cutomer,setTimeValue);
+  await logger.info(`送信先：${kessai.nm_keiyaku} <${kessai.email}>`);
+
+  // }
 };
 
 // private

@@ -18,7 +18,7 @@ if (process.env.NODE_ENV !== "production") {
 const dlyoyakuinfo = async (yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd_riyou_start, yyyymmdd_riyou_end) => {
   
   // ★ヘッドレス設定
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({ headless: true });
 
   let page = await browser.newPage();
 

@@ -25,7 +25,10 @@
       <div class="area_header">
         <a class="btn-back" href="<%= `/kessais/${kessai.id_search}` %>">戻る</a>
         <a class="btn-action" href="<%= `/kessai/edit/${kessai.id_search}_${kessai.id_customer}` %>">メール文編集</a>
-        <% if (kessai.yyyymmddhhmmss_sended_mail) { %>
+        <% if ((!kessai.yyyymmddhhmmss_resended_mail) && (!kessai.yyyymmddhhmmss_sended_mail) && (searchinfo.yyyymmddhhmmss_sended_mails)) { %>
+          <a class="btn-action" href="/kessai/sendmail/<%= kessai.id_search %>_<%= kessai.id_customer %>">メール送信</a>
+        <% } %>
+        <% if ((kessai.yyyymmddhhmmss_sended_mail) || (kessai.yyyymmddhhmmss_resended_mail)) { %>
           <a class="btn-action" href="/kessai/sendmail/<%= kessai.id_search %>_<%= kessai.id_customer %>">メール再送信</a>
         <% } %>
       </div>
