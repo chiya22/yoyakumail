@@ -68,6 +68,11 @@ const hankaku2Zenkaku = (str) => {
           .replace(/~/g, "〜");
 };
 
+const zenkakuNum2hankakuNum = (str) => {
+  return str
+  .replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+}
+
 const sleep = (time) => {
   return new Promise((resolve, reject) => {
       setTimeout(() => {
@@ -82,5 +87,6 @@ module.exports = {
   getBeforeday,
   getNextYearday,
   hankaku2Zenkaku,
+  zenkakuNum2hankakuNum,
   sleep,
 };

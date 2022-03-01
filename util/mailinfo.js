@@ -43,11 +43,21 @@ const setMailContent = async (id_search) => {
       mailbody_before += "下記の内容にて承りましたのでご確認ください。\r\n"
       mailbody_before += "\r\n"
 
-      // 「契約名」「◆　契約名」「◆　１１１１　契約名」のいずれにも対応する
-      let nm_keiyaku = kessai.nm_keiyaku.slice(kessai.nm_keiyaku.indexOf("　")+1,kessai.nm_keiyaku.length);
-      nm_keiyaku = nm_keiyaku.slice(nm_keiyaku.indexOf("　")+1,nm_keiyaku.length);
+      // （表示名：XXX）があれば削除する　例）■　１２３４　株式会社ＡＡＡ（表示名：ＢＢＢ）　⇒　■　１２３４　株式会社ＡＡＡ
+      let nm_keiyaku = kessai.nm_keiyaku;
+      if (nm_keiyaku.indexOf("（表示名：") !== -1) {
+        nm_keiyaku = kessai.nm_keiyaku.slice(0,kessai.nm_keiyaku.indexOf("（表示名："));
+      }
+      // 「登録区分　登録名」の場合に「登録名」を抜き出す　例）■　１２３４　株式会社ＡＡＡ　⇒　１２３４　株式会社ＡＡＡ
+      if (nm_keiyaku.indexOf("　") !== -1) {
+        nm_keiyaku = nm_keiyaku.slice(nm_keiyaku.indexOf("　")+1);
+      }
+      // 「入居番号　登録名」の場合に「登録名」を抜き出す　例）１２３４　株式会社ＡＡＡ　⇒　株式会社ＡＡＡ
+      if (!isNaN(common.zenkakuNum2hankakuNum(nm_keiyaku.slice(0,4)))) {
+        nm_keiyaku = nm_keiyaku.slice(5);
+      }
 
-      mailbody_before += "ご利用者名： " + nm_keiyaku + " " + kessai.nm_tantousha + "様\r\n"
+      mailbody_before += "ご利用者名： " + nm_keiyaku.trim() + " " + kessai.nm_tantousha.trim() + "　様\r\n"
       mailbody_before += "ご連絡先： " + kessai.email + "\r\n"
       mailbody_before += `ご予約受付日：${common.getTodayTime().slice(0,4)}年${common.getTodayTime().slice(4,6)}月${common.getTodayTime().slice(6,8)}日\r\n`
       mailbody_before += `ご利用日： ${kessai.yyyymmdd_yoyaku.slice(0,4)}年${kessai.yyyymmdd_yoyaku.slice(4,6)}月${kessai.yyyymmdd_yoyaku.slice(6,8)}日\r\n`
