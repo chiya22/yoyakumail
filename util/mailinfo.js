@@ -168,21 +168,22 @@ const sendMailByIdSearch = async ( id_search)=> {
     if ((kessai.isSendMail === '1') && (kessai.yyyymmddhhmmss_sended_mail == null)) {
 
       // コンビニ決済有無によりbody部の設定をわける
-      if (kessai.isCvs === '1') {
-        send(kessai.email, kessai.mail_subject, kessai.mail_body_cvs);
-      } else {
-        send(kessai.email, kessai.mail_subject, kessai.mail_body);
-      }
+        if (kessai.isCvs === '1') {
+          send(kessai.email, kessai.mail_subject, kessai.mail_body_cvs);
+        } else {
+          send(kessai.email, kessai.mail_subject, kessai.mail_body);
+        }
       
-      // メール送信時間を設定
       (async () => {
-        await m_kessais.updatekessaiToSendMail(id_search,kessai.id_customer,common.getTodayTime());
-        await logger.info(`送信先：${kessai.nm_keiyaku} <${kessai.email}>`)
+        try {
+          // メール送信時間を設定
+          await m_kessais.updatekessaiToSendMail(id_search,kessai.id_customer,common.getTodayTime());
+        } catch (err) {
+          await logger.info(`[err]Error:${err}`);
+        }
       })();
     }
-    // logger.info(`送信先：${kessai.nm_keiyaku} <${kessai.email}>`)
   })
-
 };
 
 //  決済情報をもとに、メールを再送信する
@@ -216,11 +217,7 @@ const send = (mail_to,title, content) => {
   const smtp_config = {
       host: process.env.MAIL_HOST,
       port: process.env.MAIL_PORT,
-      secure: false,
-      requireTLS: false,
-      tls: {
-        rejectUnauthorized: false,
-      },
+      secure: true,
       auth: {
           user: process.env.MAIL_USER,
           pass: process.env.MAIL_PASS,
@@ -236,7 +233,7 @@ const send = (mail_to,title, content) => {
       to: 'yoshida@yamori.jp',
       // to: mail_to,
       // テスト用として件名に【テスト】を追加
-      subject: `【テスト】${title}`,
+      subject: `【吉田テスト】${title}`,
       // subject: title,
       text: content,
   };
@@ -244,10 +241,12 @@ const send = (mail_to,title, content) => {
   // メール送信
   transporter.sendMail(message, (err, response) => {
       if (err) {
-          logger.info(`[err]${err}`);
+        logger.info(`[err: ${mail_to}]${err}`);
+      } else {
+        logger.info(`send mail to ${mail_to}`);
       }
   });
-}
+};
 
 
 module.exports = {

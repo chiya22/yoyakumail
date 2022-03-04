@@ -68,8 +68,8 @@ pre {
 
 .header .header-wrapper .header-right .header-form__item-style:focus {
   outline: none;
-  border: 1px solid #cd5e42;
-  color: #cd5e42;
+  border: 1px solid #243856;
+  color: #243856;
 }
 
 .main {
@@ -115,14 +115,14 @@ pre {
 
 .searchform__item-style:focus {
   outline: none;
-  border: 1px solid #cd5e42;
-  color: #cd5e42;
+  border: 1px solid #243856;
+  color: #243856;
 }
 
 .searchform__item-label {
   font-size: 12px;
   font-weight: bold;
-  color: #cd5e42;
+  color: #243856;
   margin: 0 10px;
   padding: 5px 0;
 }
@@ -133,7 +133,7 @@ pre {
   position: relative;
   margin: 25px 0 10px 0;
   padding: 0.5em 1em;
-  border: solid 1px #cd5e42;
+  border: solid 1px #243856;
   border-radius: 8px;
 }
 
@@ -151,7 +151,7 @@ pre {
   line-height: 1;
   font-size: 16px;
   background: #fff;
-  color: #cd5e42;
+  color: #243856;
   font-weight: bold;
 }
 
@@ -162,7 +162,7 @@ pre {
 
 .label {
   display: inline-block;
-  border: 1px solid #cd5e42;
+  border: 1px solid #243856;
   border-radius: 15px;
   width: 130px;
   padding: 5px 0 3px 0;
@@ -171,7 +171,7 @@ pre {
 }
 
 .searchinfo_text {
-  color: #cd5e42;
+  color: #243856;
   display: block;
   margin-top: 5px;
   padding: 5px;
@@ -180,10 +180,10 @@ pre {
 }
 
 .yoyakus-yoyaku {
-  color: #cd5e42;
+  color: #243856;
   display: inline-block;
   letter-spacing: 0.8px;
-  background-color: #E6D7D2;
+  background-color: #c9daeb;
   padding: 10px;
   margin: 10px 0;
   font-size: 12px;
@@ -192,11 +192,11 @@ pre {
 }
 
 .yoyakus-yoyaku:hover {
-  background-color: #F8DFD2;
+  background-color: #85b4d0;
 }
 
 .yoyakus-bihin {
-  color: #cd5e42;
+  color: #243856;
   display: inline-block;
   letter-spacing: 0.8px;
   background-color: #cfcfcf;
@@ -208,13 +208,13 @@ pre {
 }
 
 .yoyakus-bihin:hover {
-  background-color: #F8DFD2;
+  background-color: #85b4d0;
 }
 
 .yoyaku-title, .kessai-title, .mail-title {
   padding: 0.5em;
-  color: #cd5e42;
-  border-bottom: solid 2px #cd5e42;
+  color: #243856;
+  border-bottom: solid 2px #243856;
   font-size: 12pt;
   margin: 10px auto;
   font-weight: bold;
@@ -232,7 +232,7 @@ pre {
   padding: 5px 10px 5px 0;
   font-weight: normal;
   font-size: 12px;
-  color: #cd5e42;
+  color: #243856;
   font-weight: bold;
 }
 
@@ -249,20 +249,20 @@ pre {
 }
 
 .kessais-kessai {
-  color: #cd5e42;
+  color: #243856;
   display: inline-block;
   letter-spacing: 0.8px;
-  background-color: #E6D7D2;
+  background-color: #c9daeb;
   padding: 0px 10px 20px 10px;
   margin: 10px 0;
   font-size: 12px;
   width: 100%;
   border-radius: 10px;
-  border-top: solid 10px #cd5e42;
+  border-top: solid 10px #243856;
 }
 
 .kessais-kessai:hover {
-  background-color: #F8DFD2;
+  background-color: #85b4d0;
 }
 
 .kessais-kessai-checkbox {
@@ -271,8 +271,8 @@ pre {
 
 .kessais-kessai-title {
   padding: 0.5em;
-  color: #cd5e42;
-  border-bottom: solid 2px #cd5e42;
+  color: #243856;
+  border-bottom: solid 2px #243856;
   font-size: 12pt;
   margin: 0 0 15px 0;
   font-weight: bold;
@@ -306,9 +306,9 @@ pre {
 }
 
 .mail_body_edit {
-  background-color: #E6D7D2;
+  background-color: #c9daeb;
   padding: 20px;
-  border: 1px solid #cd5e42;
+  border: 1px solid #243856;
 }
 
 .mail_body {
@@ -319,7 +319,7 @@ pre {
 .tag {
   display: inline-block;
   color: #fff;
-  background-color: #cd5e42;
+  background-color: #243856;
   border-radius: 28px;
   font-size: 12px;
   padding: 3px 7px 1px;
@@ -361,7 +361,7 @@ input[type="checkbox"] {
 }
 
 input:checked + .checkbox_label {
-  background-color: #cd5e42;
+  background-color: #243856;
 }
 
 input:checked + .checkbox_label::before {
@@ -377,7 +377,7 @@ input:disabled + .checkbox_label {
   padding: 8px 20px 6px 20px;
   border-radius: 19px;
   background-clip: padding-box;
-  background-color: #cd5e42;
+  background-color: #243856;
   border: 1px solid transparent;
   color: #fff;
   text-align: center;
@@ -386,8 +386,8 @@ input:disabled + .checkbox_label {
 
 .btn-action:hover {
   background-color: #fff;
-  color: #cd5e42;
-  border: 1px solid #cd5e42;
+  color: #243856;
+  border: 1px solid #243856;
 }
 
 .btn-action-second {
@@ -414,14 +414,14 @@ input:disabled + .checkbox_label {
   border-radius: 19px;
   background-clip: padding-box;
   background-color: #fff;
-  border: 1px solid #cd5e42;
-  color: #cd5e42;
+  border: 1px solid #243856;
+  color: #243856;
   text-align: center;
   font-size: 0.75rem;
 }
 
 .btn-back:hover {
-  background-color: #cd5e42;
+  background-color: #243856;
   color: #fff;
   border: 1px solid transparent;
 }
@@ -448,7 +448,7 @@ input:disabled + .checkbox_label {
   display: inline-block;
   padding: 10px 30px;
   border-radius: 15px;
-  background-color: #E6D7D2;
+  background-color: #c9daeb;
 }
 
 .flash {
@@ -460,7 +460,7 @@ input:disabled + .checkbox_label {
 }
 
 .error {
-  color: #cd5e42;
+  color: #243856;
   font-weight: bold;
 }
 
