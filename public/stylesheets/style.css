@@ -6,6 +6,7 @@ html {
 body {
   font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
   color: #333;
+  background-color: #d3eced;
 }
 
 pre {
@@ -16,7 +17,7 @@ pre {
 .header {
   width: 100%;
   height: 60px;
-  background-color: #fff;
+  background-color: #d3eced;
   position: fixed;
   z-index: 998;
 }
@@ -42,7 +43,7 @@ pre {
 
 .header .header-wrapper .header-left .header-logo {
   display: inline-block;
-  background-color: #fff;
+  background-color: #d3eced;
   padding: 5px 10px;
   width: 300px;
   height: auto;
@@ -89,7 +90,7 @@ pre {
   top: 60px;
   display: block;
   width: 100%;
-  background-color: #fff;
+  background-color: #d3eced;
   padding: 10px 0;
   z-index: 998;
 }
@@ -150,7 +151,7 @@ pre {
   padding: 0 9px;
   line-height: 1;
   font-size: 16px;
-  background: #fff;
+  background: #d3eced;
   color: #243856;
   font-weight: bold;
 }
