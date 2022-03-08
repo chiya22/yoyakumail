@@ -45,8 +45,8 @@ const setMailContent = async (id_search) => {
 
       // （表示名：XXX）があれば削除する　例）■　１２３４　株式会社ＡＡＡ（表示名：ＢＢＢ）　⇒　■　１２３４　株式会社ＡＡＡ
       let nm_keiyaku = kessai.nm_keiyaku;
-      if (nm_keiyaku.indexOf("（表示名：") !== -1) {
-        nm_keiyaku = kessai.nm_keiyaku.slice(0,kessai.nm_keiyaku.indexOf("（表示名："));
+      if (nm_keiyaku.indexOf("（表示") !== -1) {
+        nm_keiyaku = kessai.nm_keiyaku.slice(0,kessai.nm_keiyaku.indexOf("（表示"));
       }
       // 「登録区分　登録名」の場合に「登録名」を抜き出す　例）■　１２３４　株式会社ＡＡＡ　⇒　１２３４　株式会社ＡＡＡ
       if (nm_keiyaku.indexOf("　") !== -1) {
