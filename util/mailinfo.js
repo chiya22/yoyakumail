@@ -29,7 +29,11 @@ const setMailContent = async (id_search) => {
       //　予約情報から明細情報を作成する
       let meisai = '';
       yoyakus.forEach( (yoyaku) => {
-        meisai += yoyaku.nm_room + "(" + yoyaku.time_start.slice(0,2) + ":" + yoyaku.time_start.slice(-2) + "-" + yoyaku.time_end.slice(0,2) + ":" + yoyaku.time_end.slice(-2) + ")   " + yoyaku.price.toLocaleString() + "円(税込)\r\n"
+        if (yoyaku.type_room === '0') {
+          meisai += yoyaku.nm_room + "(" + yoyaku.time_start.slice(0,2) + ":" + yoyaku.time_start.slice(-2) + "-" + yoyaku.time_end.slice(0,2) + ":" + yoyaku.time_end.slice(-2) + ")   " + yoyaku.price.toLocaleString() + "円(税込)\r\n"
+        } else {
+          meisai += yoyaku.nm_room + "(" + yoyaku.time_start.slice(0,2) + ":" + yoyaku.time_start.slice(-2) + "-" + yoyaku.time_end.slice(0,2) + ":" + yoyaku.time_end.slice(-2) + ") × " + yoyaku.quantity + "  " + yoyaku.price.toLocaleString() + "円(税込)\r\n"
+        }
       });
 
       let mailbody_before = '';
