@@ -92,6 +92,44 @@
     </div>
   </div>
   <script>
+    // 最初の状況を保存しておく
+    let isCvs = [];
+    for (let i = 0; i < document.formKessaiUpdate.isCvs.length; i++) {
+      if (document.formKessaiUpdate._isCvs[i].checked) {
+        isCvs[i] = "1";
+      }
+    }
+    let isSendMail = [];
+    for (let i = 0; i < document.formKessaiUpdate.isSendMail.length; i++) {
+      if (document.formKessaiUpdate._isSendMail[i].checked) {
+        isSendMail[i] = "1";
+      }
+    }
+    // チェック用関数
+    window.onbeforeunload = (event) => {
+      let isUpd = false;
+      for (let i = 0; i < document.formKessaiUpdate.isCvs.length; i++) {
+        if ((document.formKessaiUpdate._isCvs[i].checked) && (isCvs[i] !== "1")){
+          isUpd = true;
+        }
+        if ((!document.formKessaiUpdate._isCvs[i].checked) && (isCvs[i] === "1")){
+          isUpd = true;
+        }
+      }
+      for (let i = 0; i < document.formKessaiUpdate.isSendMail.length; i++) {
+        if ((document.formKessaiUpdate._isSendMail[i].checked) && (isSendMail[i] !== "1")){
+          isUpd = true;
+        }
+        if ((!document.formKessaiUpdate._isSendMail[i].checked) && (isSendMail[i] === "1")){
+          isUpd = true;
+        }
+      }
+      if (isUpd) {
+        // chromeの場合はメッセージはシステム制御されている
+        event.returnValue = "いずれかのコンビニ決済、メール送信の設定値が変更されています。保存せずに移動しますか？"
+      }
+    }
+
     // コンビニ決済対象、メール送信対象を設定
     let updatebtn = document.getElementsByClassName("updatekessai")[0];
     updatebtn.addEventListener('click', () => {
