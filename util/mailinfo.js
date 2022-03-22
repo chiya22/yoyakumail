@@ -61,7 +61,12 @@ const setMailContent = async (id_search) => {
         nm_keiyaku = nm_keiyaku.slice(5);
       }
 
-      mailbody_before += "ご利用者名： " + nm_keiyaku.trim() + " " + kessai.nm_tantousha.trim() + "　様\r\n"
+      // 会社名と担当者名が同一の場合は、会社名のみを宛先名として出力する
+      if (nm_keiyaku.trim().replace(" ","").replace("　","") !== kessai.nm_tantousha.trim().replace(" ","").replace("　","")) {
+        mailbody_before += "ご利用者名： " + nm_keiyaku.trim() + " " + kessai.nm_tantousha.trim() + "　様\r\n"
+      } else {
+        mailbody_before += "ご利用者名： " + nm_keiyaku.trim() + "　様\r\n"
+      }
       mailbody_before += "ご連絡先： " + kessai.email + "\r\n"
       mailbody_before += `ご予約受付日：${common.getTodayTime().slice(0,4)}年${common.getTodayTime().slice(4,6)}月${common.getTodayTime().slice(6,8)}日\r\n`
       mailbody_before += `ご利用日： ${kessai.yyyymmdd_yoyaku.slice(0,4)}年${kessai.yyyymmdd_yoyaku.slice(4,6)}月${kessai.yyyymmdd_yoyaku.slice(6,8)}日\r\n`
