@@ -140,10 +140,34 @@ pre {
   border: solid 1px $base-color;
   border-radius: 8px;
 }
+.searchinfo-left {
+  width: 380px;
+}
 //　検索情報領域－右側
 .searchinfo-right {
-  flex:auto;
-  text-align: right;
+  display: flex;
+  text-align: left;
+}
+.searchinfo-right-yoyaku {
+  display: flex;
+  flex-direction: column;
+  margin-right: 15px;
+  font-size: 0.8rem;
+  text-align: center;
+}
+.searchinfo-right-kessai {
+  display: flex;
+  flex-direction: column;
+  margin-right: 15px;
+  font-size: 0.8rem;
+  text-align: center;
+}
+.searchinfo-right-mail {
+  display: flex;
+  flex-direction: column;
+  margin-right: 15px;
+  font-size: 0.8rem;
+  text-align: center;
 }
 //　検索情報－タイトル
 .area_searchinfo .searchinfo-title {

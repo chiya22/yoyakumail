@@ -54,22 +54,47 @@
                 <p class="searchinfo_text"><span class="label">利用日</span><%= `${searchinfo.yyyymmdd_riyou_start.slice(0,4)}年${searchinfo.yyyymmdd_riyou_start.slice(4,6)}月${searchinfo.yyyymmdd_riyou_start.slice(6,8)}日` %>～<%= `${searchinfo.yyyymmdd_riyou_end.slice(0,4)}年${searchinfo.yyyymmdd_riyou_end.slice(4,6)}月${searchinfo.yyyymmdd_riyou_end.slice(6,8)}日` %></p>
               </div>
               <div class="searchinfo-right">
-                <a class="btn-action" href="/yoyakus/<%= searchinfo.id %>">予約情報一覧</a>
-                <!-- 1：予約情報取得済 2:決済情報取得済み 3.メール送信済み -->
+                <div class="searchinfo-right-yoyaku">
+                  <a class="btn-action" href="/yoyakus/<%= searchinfo.id %>">予約情報一覧</a>
+                  <p style="margin-top:5px">
+                    <%= `${searchinfo.yyyymmddhhmmss_created_yoyakus.slice(0,4)}年${searchinfo.yyyymmddhhmmss_created_yoyakus.slice(4,6)}月${searchinfo.yyyymmddhhmmss_created_yoyakus.slice(6,8)}日` %><br>
+                  </p>
+                  <p style="margin-top:5px">
+                    <%= `${searchinfo.yyyymmddhhmmss_created_yoyakus.slice(8,10)}時${searchinfo.yyyymmddhhmmss_created_yoyakus.slice(10,12)}分${searchinfo.yyyymmddhhmmss_created_yoyakus.slice(-2)}秒` %>
+                  </p>
+                </div>
+                <div class="searchinfo-right-kessai">
                 <% if (searchinfo.status === '1') { %>
                   <!-- 予約情報取得済み-->
-                    <a class="btn-action btnGetKessai" href="/kessaiscreate/<%= searchinfo.id %>">決済情報取得</a>
+                  <a class="btn-action btnGetKessai" href="/kessaiscreate/<%= searchinfo.id %>">決済情報取得</a>
                 <% } else { %>
                   <!-- 決済情報取得済み-->
-                    <a class="btn-action" href="/kessais/<%= searchinfo.id %>">決済情報一覧</a>
-                    <% if (searchinfo.yyyymmddhhmmss_sended_mails) { %>
-                    <span class="btn-disabled">メール送信済</span>
-                    <% } else { %>
-                    <a class="btn-action" href="/kessais/sendmail/<%= searchinfo.id %>">メール送信</a>
-                    <% } %>
-                <% } %>
-                <a class="btn-action-second" href="/yoyakudelete/<%= searchinfo.id %>">削除</a>
+                  <a class="btn-action" href="/kessais/<%= searchinfo.id %>">決済情報一覧</a>
+                  <p style="margin-top:5px">
+                    <%= `${searchinfo.yyyymmddhhmmss_created_kessais.slice(0,4)}年${searchinfo.yyyymmddhhmmss_created_kessais.slice(4,6)}月${searchinfo.yyyymmddhhmmss_created_kessais.slice(6,8)}日` %><br>
+                  </p>
+                  <p style="margin-top:5px">
+                    <%= `${searchinfo.yyyymmddhhmmss_created_kessais.slice(8,10)}時${searchinfo.yyyymmddhhmmss_created_kessais.slice(10,12)}分${searchinfo.yyyymmddhhmmss_created_kessais.slice(-2)}秒` %>
+                  </p>
+                  <% } %>
                 </div>
+                <div class="searchinfo-right-mail">
+                  <% if (searchinfo.yyyymmddhhmmss_sended_mails) { %>
+                  <span class="btn-disabled">メール送信済</span>
+                  <p style="margin-top:5px">
+                    <%= `${searchinfo.yyyymmddhhmmss_sended_mails.slice(0,4)}年${searchinfo.yyyymmddhhmmss_sended_mails.slice(4,6)}月${searchinfo.yyyymmddhhmmss_sended_mails.slice(6,8)}日` %><br>
+                  </p>
+                  <p style="margin-top:5px">
+                    <%= `${searchinfo.yyyymmddhhmmss_sended_mails.slice(8,10)}時${searchinfo.yyyymmddhhmmss_sended_mails.slice(10,12)}分${searchinfo.yyyymmddhhmmss_sended_mails.slice(-2)}秒` %>
+                  </p>
+                  <% } else { %>
+                  <a class="btn-action" href="/kessais/sendmail/<%= searchinfo.id %>">メール一括送信</a>
+                  <% } %>
+                </div>
+                <div>
+                  <a class="btn-action-second" href="/yoyakudelete/<%= searchinfo.id %>">削除</a>
+                </div>
+              </div>
             </div>
           <% }) %>
         <% } %>
