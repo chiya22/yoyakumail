@@ -77,7 +77,8 @@
           <dt>メールアドレス</dt>
           <div class="oneline-dd"><%= kessai.email %></div>
           <dt>件名</dt>
-          <div class="oneline-dd"><%= kessai.mail_subject %></div>
+          <div class="oneline-dd"><input class="mail_subject" type="text" name="mail_subject" value="<%= kessai.mail_subject %>" /></div>
+          <!-- <div class="oneline-dd"><%= kessai.mail_subject %></div> -->
           <dt>メール送信年月日時分秒</dt>
           <div class="oneline-dd"><%= kessai.yyyymmddhhmmss_sended_mail %></div>
           <dt>メール再送信年月日時分秒</dt>

@@ -334,6 +334,13 @@ pre {
   text-align: right;
 }
 
+.mail_subject {
+  background-color: #c9daeb;
+  padding: 10px 20px;
+  border: 1px solid #243856;
+  width: 660px;
+}
+
 .mail_body_edit {
   background-color: #c9daeb;
   padding: 20px;

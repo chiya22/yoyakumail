@@ -334,6 +334,14 @@ pre {
   text-align: right;
 }
 
+// 決済情報メール件名
+.mail_subject {
+  background-color: $list-color;
+  padding: 10px 20px;
+  border: 1px solid $base-color;
+  width: 660px;
+}
+
 // 決済情報メール本文
 .mail_body_edit {
   background-color: $list-color;
