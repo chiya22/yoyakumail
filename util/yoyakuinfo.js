@@ -153,8 +153,8 @@ const filetodb = (yyyymmddhhmmss_proc) => {
           inObj.no_keiyakusha = linecontents[12];
           inObj.nm_keiyakusha = common.hankaku2Zenkaku(linecontents[13]);
           inObj.nm_tantousha = common.hankaku2Zenkaku(linecontents[14]);
-          inObj.telno = linecontents[15];
-          inObj.faxno = linecontents[16];
+          inObj.telno = linecontents[15].replace("‐","-");
+          inObj.faxno = linecontents[16].replace("‐","-");
           inObj.email = linecontents[17];
           inObj.kubun = linecontents[18];
           inObj.address = linecontents[19];
