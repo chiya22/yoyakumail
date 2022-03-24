@@ -172,27 +172,24 @@ const sendMailByIdSearch = async ( id_search)=> {
   // 対象となる決済情報を取得
   const kessais = await m_kessais.findByIdSearch(id_search);
 
-  kessais.forEach( (kessai) => {
+  for (let i=0; i < kessais.length; i++) {
     //　メール送信対象の場合
-    if ((kessai.isSendMail === '1') && (kessai.yyyymmddhhmmss_sended_mail == null)) {
+    if ((kessais[i].isSendMail === '1') && (kessais[i].yyyymmddhhmmss_sended_mail == null)) {
 
       // コンビニ決済有無によりbody部の設定をわける
-        if (kessai.isCvs === '1') {
-          send(kessai.email, kessai.mail_subject, kessai.mail_body_cvs);
+        if (kessais[i].isCvs === '1') {
+          send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body_cvs);
         } else {
-          send(kessai.email, kessai.mail_subject, kessai.mail_body);
+          send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body);
         }
       
-      (async () => {
-        try {
-          // メール送信時間を設定
-          await m_kessais.updatekessaiToSendMail(id_search,kessai.id_customer,common.getTodayTime());
-        } catch (err) {
-          await logger.info(`[err]Error:${err}`);
-        }
-      })();
+        // メール送信時間を設定
+        await m_kessais.updatekessaiToSendMail(id_search,kessais[i].id_customer,common.getTodayTime());
+
+        // 送信後sleep
+        await common.sleep(5000);
     }
-  })
+  }
 };
 
 //  決済情報をもとに、メールを再送信する
@@ -202,20 +199,20 @@ const sendMail = async ( id_search, id_cutomer)=> {
   const kessai = await m_kessais.findPKey(id_search, id_cutomer);
 
   //　メール送信対象の場合
-  // if (kessai.isSendMail === '1') {
+  if (kessai.isSendMail === '1') {
 
-  if (kessai.isCvs === '1') {
-    send(kessai.email, kessai.mail_subject, kessai.mail_body_cvs);
-  } else {
-    send(kessai.email, kessai.mail_subject, kessai.mail_body);
+    if (kessai.isCvs === '1') {
+      send(kessai.email, kessai.mail_subject, kessai.mail_body_cvs);
+    } else {
+      send(kessai.email, kessai.mail_subject, kessai.mail_body);
+    }
+
+    // メール送信時間を設定
+    const setTimeValue = kessai.yyyymmddhhmmss_resended_mail? `${kessai.yyyymmddhhmmss_resended_mail}|${common.getTodayTime()}`: common.getTodayTime();
+    await m_kessais.updatekessaiToReSendMail(id_search,id_cutomer,setTimeValue);
+    await logger.info(`送信先：${kessai.nm_keiyaku} <${kessai.email}>`);
+
   }
-
-  // メール送信時間を設定
-  const setTimeValue = kessai.yyyymmddhhmmss_resended_mail? `${kessai.yyyymmddhhmmss_resended_mail}|${common.getTodayTime()}`: common.getTodayTime();
-  await m_kessais.updatekessaiToReSendMail(id_search,id_cutomer,setTimeValue);
-  await logger.info(`送信先：${kessai.nm_keiyaku} <${kessai.email}>`);
-
-  // }
 };
 
 // private
