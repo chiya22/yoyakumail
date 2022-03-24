@@ -88,7 +88,7 @@
                     <%= `${searchinfo.yyyymmddhhmmss_sended_mails.slice(8,10)}時${searchinfo.yyyymmddhhmmss_sended_mails.slice(10,12)}分${searchinfo.yyyymmddhhmmss_sended_mails.slice(-2)}秒` %>
                   </p>
                   <% } else { %>
-                  <a class="btn-action" href="/kessais/sendmail/<%= searchinfo.id %>">メール一括送信</a>
+                  <a class="btn-action btnSendMails" href="/kessais/sendmail/<%= searchinfo.id %>">メール一括送信</a>
                   <% } %>
                 </div>
                 <div>
@@ -114,6 +114,15 @@
     let btnsGetKessai = document.getElementsByClassName("btnGetKessai");
     for (let i=0; i<btnsGetKessai.length; i++) {
       btnsGetKessai[i].addEventListener("click", (e) => {
+        scrollTo(0, 0);
+        let msg = document.getElementsByClassName("msg")[0];
+        msg.style.visibility = "visible";
+        // e.preventDefault();
+      })
+    }
+    let btnSendMails = document.getElementsByClassName("btnSendMails");
+    for (let i=0; i<btnSendMails.length; i++) {
+      btnSendMails[i].addEventListener("click", (e) => {
         scrollTo(0, 0);
         let msg = document.getElementsByClassName("msg")[0];
         msg.style.visibility = "visible";
