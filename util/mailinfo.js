@@ -259,4 +259,5 @@ module.exports = {
   setMailContent,
   sendMailByIdSearch,
   sendMail,
+  send,
 };
