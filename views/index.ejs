@@ -56,10 +56,10 @@
               <div class="searchinfo-right">
                 <div class="searchinfo-right-yoyaku">
                   <a class="btn-action" href="/yoyakus/<%= searchinfo.id %>">予約情報一覧</a>
-                  <p style="margin-top:5px">
+                  <p class="searchinfo_timeinfo">
                     <%= `${searchinfo.yyyymmddhhmmss_created_yoyakus.slice(0,4)}年${searchinfo.yyyymmddhhmmss_created_yoyakus.slice(4,6)}月${searchinfo.yyyymmddhhmmss_created_yoyakus.slice(6,8)}日` %><br>
                   </p>
-                  <p style="margin-top:5px">
+                  <p class="searchinfo_timeinfo">
                     <%= `${searchinfo.yyyymmddhhmmss_created_yoyakus.slice(8,10)}時${searchinfo.yyyymmddhhmmss_created_yoyakus.slice(10,12)}分${searchinfo.yyyymmddhhmmss_created_yoyakus.slice(-2)}秒` %>
                   </p>
                 </div>
@@ -70,10 +70,10 @@
                 <% } else { %>
                   <!-- 決済情報取得済み-->
                   <a class="btn-action" href="/kessais/<%= searchinfo.id %>">決済情報一覧</a>
-                  <p style="margin-top:5px">
+                  <p class="searchinfo_timeinfo">
                     <%= `${searchinfo.yyyymmddhhmmss_created_kessais.slice(0,4)}年${searchinfo.yyyymmddhhmmss_created_kessais.slice(4,6)}月${searchinfo.yyyymmddhhmmss_created_kessais.slice(6,8)}日` %><br>
                   </p>
-                  <p style="margin-top:5px">
+                  <p class="searchinfo_timeinfo">
                     <%= `${searchinfo.yyyymmddhhmmss_created_kessais.slice(8,10)}時${searchinfo.yyyymmddhhmmss_created_kessais.slice(10,12)}分${searchinfo.yyyymmddhhmmss_created_kessais.slice(-2)}秒` %>
                   </p>
                   <% } %>
@@ -81,10 +81,10 @@
                 <div class="searchinfo-right-mail">
                   <% if (searchinfo.yyyymmddhhmmss_sended_mails) { %>
                   <span class="btn-disabled">メール送信済</span>
-                  <p style="margin-top:5px">
+                  <p class="searchinfo_timeinfo">
                     <%= `${searchinfo.yyyymmddhhmmss_sended_mails.slice(0,4)}年${searchinfo.yyyymmddhhmmss_sended_mails.slice(4,6)}月${searchinfo.yyyymmddhhmmss_sended_mails.slice(6,8)}日` %><br>
                   </p>
-                  <p style="margin-top:5px">
+                  <p class="searchinfo_timeinfo">
                     <%= `${searchinfo.yyyymmddhhmmss_sended_mails.slice(8,10)}時${searchinfo.yyyymmddhhmmss_sended_mails.slice(10,12)}分${searchinfo.yyyymmddhhmmss_sended_mails.slice(-2)}秒` %>
                   </p>
                   <% } else { %>

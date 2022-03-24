@@ -208,6 +208,12 @@ pre {
   letter-spacing: 0.8px;
 }
 
+.searchinfo_timeinfo {
+  color: #243856;
+  margin-top: 5px;
+  font-size: 12px;
+}
+
 .yoyakus-yoyaku {
   color: #243856;
   display: inline-block;
