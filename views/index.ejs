@@ -7,6 +7,15 @@
 </head>
 
 <body>
+  <!-- 確認メッセージ -->
+  <div class="msg_confirm">
+      <div class="msgarea_confirm">
+          <p class="msgarea_text_confirm">処理を行います。よろしいですか？</p>
+          <button class="msgarea_okbtn">はい</button>
+          <button class="msgarea_ngbtn">いいえ</button>
+      </div>
+  </div>
+  <input type="hidden" id="targeturl" value="">
   <!-- 処理中メッセージ -->
   <div class="msg">
     <div class="msgarea">
@@ -102,33 +111,61 @@
     </div>
   </div>
   <script>
-    // 予約情報取得ボタン
+    // 「予約情報取得」のダイアログ
     let btnGetYoyaku = document.getElementById("btnGetYoyaku");
     btnGetYoyaku.addEventListener("click", (e) => {
+      document.getElementById("targeturl").value = "getYoyaku";
       scrollTo(0, 0);
-      let msg = document.getElementsByClassName("msg")[0];
+      let msg = document.getElementsByClassName("msg_confirm")[0];
       msg.style.visibility = "visible";
-      document.jyoukenform.submit();
-    },false);
-    // 決済情報取得ボタン
-    let btnsGetKessai = document.getElementsByClassName("btnGetKessai");
-    for (let i=0; i<btnsGetKessai.length; i++) {
-      btnsGetKessai[i].addEventListener("click", (e) => {
+    });
+    // 「決済情報取得」のダイアログ
+    const href_kessais = document.getElementsByClassName("btnGetKessai")
+    if (href_kessais){
+      for (let i=0; i<href_kessais.length; i++) {
+        href_kessais[i].addEventListener("click", (e) => {
+          e.preventDefault();
+          document.getElementById("targeturl").value = href_kessais[i].getAttribute('href');
+          scrollTo(0, 0);
+          let msg = document.getElementsByClassName("msg_confirm")[0];
+          msg.style.visibility = "visible";
+        })
+      }
+    }
+    // 「メール一括送信」のダイアログ
+    const href_sendMails = document.getElementsByClassName("btnSendMails");
+    for (let i=0; i<href_sendMails.length; i++) {
+      href_sendMails[i].addEventListener("click", (e) => {
+          e.preventDefault();
+          document.getElementById("targeturl").value = href_sendMails[i].getAttribute('href');
+          scrollTo(0, 0);
+          let msg = document.getElementsByClassName("msg_confirm")[0];
+          msg.style.visibility = "visible";
+        })
+    }
+    // 確認ダイアログで「OK」を押した場合
+    let okbtn = document.getElementsByClassName("msgarea_okbtn")[0];
+    okbtn.addEventListener('click', () => {
+        const action = document.getElementById("targeturl").value;
+        let msg_confirm = document.getElementsByClassName("msg_confirm")[0];
+        msg_confirm.style.visibility = "hidden";
+        // 処理中メッセージ領域を表示させる
         scrollTo(0, 0);
         let msg = document.getElementsByClassName("msg")[0];
         msg.style.visibility = "visible";
-        // e.preventDefault();
-      })
-    }
-    let btnSendMails = document.getElementsByClassName("btnSendMails");
-    for (let i=0; i<btnSendMails.length; i++) {
-      btnSendMails[i].addEventListener("click", (e) => {
-        scrollTo(0, 0);
-        let msg = document.getElementsByClassName("msg")[0];
-        msg.style.visibility = "visible";
-        // e.preventDefault();
-      })
-    }
+        if (action === "getYoyaku") {
+          document.jyoukenform.submit();
+        } else {
+          document.location.href = action;
+        }
+    });
+    // 確認ダイアログで「NG」を押した場合
+    let ngbtn = document.getElementsByClassName("msgarea_ngbtn")[0];
+    ngbtn.addEventListener('click', () => {
+        document.getElementById("targeturl").value = "";
+        let msg = document.getElementsByClassName("msg_confirm")[0];
+        msg.style.visibility = "hidden";
+    });
   </script>
 </body>
 <%- include("./common/javascripts.ejs") %>

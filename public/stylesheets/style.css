@@ -369,6 +369,17 @@ pre {
   font-weight: normal;
 }
 
+.tag-red {
+  display: inline-block;
+  color: #fff;
+  background-color: #ff0000;
+  border-radius: 28px;
+  font-size: 12px;
+  padding: 3px 7px 1px;
+  margin-right: 2px;
+  font-weight: normal;
+}
+
 .checkbox_label {
   display: inline-block;
   position: relative;
@@ -529,4 +540,50 @@ input:disabled + .checkbox_label {
 .msgarea__text {
   font-size: 18px;
   padding: 15px 20px 20px 20px;
+}
+
+.msg_confirm {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+  visibility: hidden;
+}
+
+.msgarea_confirm {
+  position: relative;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #d3eced;
+  border-radius: 15px;
+  font-size: 1.5rem;
+  width: 500px;
+  text-align: center;
+  padding: 2rem;
+}
+
+.msgarea_text_confirm {
+  padding: 0 20px 20px 20px;
+  line-height: 3rem;
+}
+
+.msgarea_okbtn,
+.msgarea_ngbtn {
+  font-size: 1.5rem;
+  color: #243856;
+  border: 1px solid #243856;
+  border-radius: 15px;
+  background-color: #fff;
+  padding: 30px;
+  margin: 0 15px;
+}
+
+.msgarea_okbtn:hover,
+.msgarea_ngbtn:hover {
+  background-color: #243856;
+  color: #fff;
+  transform: translateY(-5px);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
 }
