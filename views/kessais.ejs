@@ -66,7 +66,11 @@
                     <% kessai.yoyakus.forEach( yoyaku => { %>
                       <div class="kessais-kessai-yoyakus-yoyaku">
                         <!-- <p class="tag"><%= `${yoyaku.type_room === '9'?'備品×'+yoyaku.quantity:'部屋'} `%></p> -->
-                        <p class="tag"><%= yoyaku.status_shiharai %></p>
+                        <% if (yoyaku.status_shiharai === '受') { %>
+                          <p class="tag-red"><%= yoyaku.status_shiharai %></p>
+                        <% } else { %>
+                          <p class="tag"><%= yoyaku.status_shiharai %></p>
+                        <% } %>
                         <%= yoyaku.no_keiyaku %> <%= yoyaku.nm_riyousha %> | 
                         <%= yoyaku.nm_room_seishiki %> | 
                         <%= `${yoyaku.yyyymmdd_yoyaku.slice(0,4)}年${yoyaku.yyyymmdd_yoyaku.slice(4,6)}月${yoyaku.yyyymmdd_yoyaku.slice(6,8)}日` %> <%= `${yoyaku.time_start.slice(0,2)}:${yoyaku.time_start.slice(2,4)}` %>-<%= `${yoyaku.time_end.slice(0,2)}:${yoyaku.time_end.slice(2,4)}` %> | 
