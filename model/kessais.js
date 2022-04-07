@@ -142,14 +142,14 @@ const updatekessaisToisCvsAndisSendMail = async (id_search, id_customer, isCvs, 
   }
 }
 
-//PK（管理ID、検索情報ID）をキーに、コンビニ決済対象の場合はメール本文（コンビニ決済）、コンビニ決済対象外の場合はメール本文を更新する
-const updatekessaisToMailBody = async (id_search, id_customer, isCvs, mail_body ) => {
+//PK（管理ID、検索情報ID）をキーに、件名と、コンビニ決済対象の場合はメール本文（コンビニ決済）、コンビニ決済対象外の場合はメール本文を更新する
+const updatekessaisToMailBody = async (id_search, id_customer, isCvs, mail_subject, mail_body ) => {
   try {
     let query = '';
     if (isCvs) {
-      query = 'update kessais set mail_body_cvs = "' + mail_body + '" where id_customer = "' + id_customer + '" and id_search = "' + id_search + '";'
+      query = 'update kessais set mail_subject = "' + mail_subject + '", mail_body_cvs = "' + mail_body + '" where id_customer = "' + id_customer + '" and id_search = "' + id_search + '";'
     } else {
-      query = 'update kessais set mail_body = "' + mail_body + '" where id_customer = "' + id_customer + '" and id_search = "' + id_search + '";'
+      query = 'update kessais set mail_subject = "' + mail_subject + '", mail_body = "' + mail_body + '" where id_customer = "' + id_customer + '" and id_search = "' + id_search + '";'
     }
      logger.info(query);
      const retObj = await knex.raw(query);

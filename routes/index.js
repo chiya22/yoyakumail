@@ -292,11 +292,12 @@ router.post("/kessai/save", (req,res) => {
       // 更新値を取得
       const id_search = req.body.id_search;
       const id_customer = req.body.id_customer;
+      const mail_subject = req.body.mail_subject;
       const mail_body = req.body.mail_body;
       // const mail_body_cvs = req.body.mail_body_cvs;
       const isCvs = req.body.isCvs;
 
-      await m_kessais.updatekessaisToMailBody(id_search, id_customer, isCvs, mail_body);
+      await m_kessais.updatekessaisToMailBody(id_search, id_customer, isCvs, mail_subject, mail_body);
 
       req.flash("success","メール文を更新しました。");
       res.redirect(`/kessai/${id_search}_${id_customer}`);
