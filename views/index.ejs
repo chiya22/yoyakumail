@@ -96,7 +96,7 @@
                   <p class="searchinfo_timeinfo">
                     <%= `${searchinfo.yyyymmddhhmmss_sended_mails.slice(8,10)}時${searchinfo.yyyymmddhhmmss_sended_mails.slice(10,12)}分${searchinfo.yyyymmddhhmmss_sended_mails.slice(-2)}秒` %>
                   </p>
-                  <% } else { %>
+                  <% } else if (searchinfo.status === '2') { %>
                   <a class="btn-action btnSendMails" href="/kessais/sendmail/<%= searchinfo.id %>">メール一括送信</a>
                   <% } %>
                 </div>
