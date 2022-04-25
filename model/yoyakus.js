@@ -80,7 +80,7 @@ const insert = async (inObj) => {
       '", "' +
       inObj.nm_tantousha +
       '", "' +
-      inObj.telno +
+      inObj.telno.replace(/\s+/g,"") +
       '", "' +
       inObj.faxno +
       '", "' +
