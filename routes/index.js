@@ -166,37 +166,43 @@ router.get("/kessaiscreate/:id", (req,res) => {
       const outFilePath = await kessaiinfo.outputFile(req.params.id);
       
       // 電算システムへアップロードする
-      retvalue = await kessaiinfo.upkessaiinfo(req.params.id, outFilePath);
+      retValue = await kessaiinfo.upkessaiinfo(req.params.id, outFilePath);
       if (retValue.includes("エラー")) {
-        console.log(retValue);
+        console.log(retValue.replace(/\s+/g,""));
+        req.flash("error", retValue.replace(/\s+/g,""));
         res.redirect("/");
+
+      } else {
+
+        // 電算システムでURLが付与されるまで待機
+        // await common.sleep(process.env.WAITTIME);
+        await common.sleep(60000);
+    
+        // 電算システムよりダウンロードする
+        retValue = await kessaiinfo.dlkessaiinfo(req.params.id);
+        if (retValue.includes("エラー")) {
+          console.log(retValue.replace(/\s+/g,""));
+          req.flash("error", retValue.replace(/\s+/g,""));
+          res.redirect("/");
+        } else {
+
+          // ダウンロードしたファイルより、テーブルへ情報を反映する
+          await kessaiinfo.updkessaiinfo(req.params.id, retValue);
+      
+          await common.sleep(5000);
+      
+          // メール文章を作成する
+          await mailinfo.setMailContent(req.params.id);
+      
+          // 検索条件情報のステータスを更新する
+          await m_searchinfos.updateStatusAndTime(req.params.id, '2', common.getTodayTime());
+
+          req.flash("success",`決済情報を取得しました。(${req.params.id})`);
+          res.redirect("/");
+
+        }
       }
   
-      // 電算システムでURLが付与されるまで待機
-      // await common.sleep(process.env.WAITTIME);
-      await common.sleep(60000);
-  
-      // 電算システムよりダウンロードする
-      retValue = await kessaiinfo.dlkessaiinfo(req.params.id);
-      if (retValue.includes("エラー")) {
-        console.log(retValue);
-        res.redirect("/");
-      }
-
-      // ダウンロードしたファイルより、テーブルへ情報を反映する
-      await kessaiinfo.updkessaiinfo(req.params.id, retValue);
-  
-      await common.sleep(5000);
-  
-      // メール文章を作成する
-      await mailinfo.setMailContent(req.params.id);
-  
-      // 検索条件情報のステータスを更新する
-      await m_searchinfos.updateStatusAndTime(req.params.id, '2', common.getTodayTime());
-
-      req.flash("success",`決済情報を取得しました。(${req.params.id})`);
-      res.redirect("/");
-
     } catch (error) {
       req.flash("success",error.message);
       res.redirect("/");

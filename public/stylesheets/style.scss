@@ -506,10 +506,11 @@ input:disabled + .checkbox_label {
   font-size:12px;
 }
 .success {
-  color:#000
+  color:$base-color;
+  font-weight: bold;
 }
 .error {
-  color:$base-color;
+  color:red;
   font-weight: bold;
 }
 

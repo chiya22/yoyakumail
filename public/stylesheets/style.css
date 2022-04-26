@@ -509,11 +509,12 @@ input:disabled + .checkbox_label {
 }
 
 .success {
-  color: #000;
+  color: #243856;
+  font-weight: bold;
 }
 
 .error {
-  color: #243856;
+  color: red;
   font-weight: bold;
 }
 

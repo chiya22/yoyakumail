@@ -87,7 +87,6 @@ const upkessaiinfo = async (id_search, upFilepath) => {
 
   await page.waitForTimeout(process.env.WAITTIME);
 
-
   const errmsg = await page.evaluate( () => {
     const err = document.querySelector("#fra_main > center:nth-child(2) > div");
     if (err) {
@@ -96,10 +95,11 @@ const upkessaiinfo = async (id_search, upFilepath) => {
       return "";
     }
   });
+
   const errmsgdetail = await page.evaluate( () => {
     const err = document.querySelector("#fra_main > center:nth-child(2) > table > tbody");
     if (err) {
-      return err.textContent.replace("\n", "").replace(" ", "").replace(" ","");
+      return err.textContent.replace("\n", "").replace(/\s+/g,"");
     } else {
       return "";
     }
@@ -107,6 +107,7 @@ const upkessaiinfo = async (id_search, upFilepath) => {
 
   if (errmsg) {
 
+    await logger.info(errmsg);
     await browser.close();
     return `[err]アップロードエラー：${errmsg} | ${errmsgdetail}`
 
