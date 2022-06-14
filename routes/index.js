@@ -242,18 +242,25 @@ router.post("/kessais/update", (req,res) => {
       const isCvs_list = req.body.isCvs;
       const isSendMail_list = req.body.isSendMail;
 
-      for (let i = 0; i < id_customer_list.length; i++) {
-        await m_kessais.updatekessaisToisCvsAndisSendMail(id_search_list[i], id_customer_list[i], isCvs_list[i], isSendMail_list[i]);
+      let moveTo;
+      if (id_search_list.join().length == 15) {
+        await m_kessais.updatekessaisToisCvsAndisSendMail(id_search_list, id_customer_list, isCvs_list, isSendMail_list);
+        moveTo = id_search_list;
+      } else {
+        for (let i = 0; i < id_customer_list.length; i++) {
+          await m_kessais.updatekessaisToisCvsAndisSendMail(id_search_list[i], id_customer_list[i], isCvs_list[i], isSendMail_list[i]);
+        }
+        moveTo = id_search_list[0];
       }
-
+      
       req.flash("success","更新しました。");
-      res.redirect(`/kessais/${id_search_list[0]}`);
-
+      res.redirect(`/kessais/${moveTo}`);
+      
     } catch (error) {
       req.flash("error",error.message);
-      res.redirect(`/kessais/${id_search_list[0]}`);
+      res.redirect(`/kessais/${moveTo}`);
     }
-
+  
   })();
 });
 

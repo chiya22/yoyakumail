@@ -98,33 +98,46 @@
   <script>
     // 最初の状況を保存しておく
     let isCvs = [];
-    for (let i = 0; i < document.formKessaiUpdate.isCvs.length; i++) {
-      if (document.formKessaiUpdate._isCvs[i].checked) {
+    const isCvsElems = document.getElementsByName("isCvs");
+    const _isCvsElems = document.getElementsByName("_isCvs");
+    for (let i = 0; i < isCvsElems.length; i++) {
+      if ( _isCvsElems[i].checked ) {
         isCvs[i] = "1";
+      } else {
+        isCvs[i] = "";
       }
     }
     let isSendMail = [];
-    for (let i = 0; i < document.formKessaiUpdate.isSendMail.length; i++) {
-      if (document.formKessaiUpdate._isSendMail[i].checked) {
+    const isSendMailElems = document.getElementsByName("isSendMail");
+    const _isSendMailElems = document.getElementsByName("_isSendMail");
+    for (let i = 0; i < isSendMailElems.length; i++) {
+      if (_isSendMailElems[i].checked) {
         isSendMail[i] = "1";
+      } else {
+        isSendMail[i] = "";
       }
     }
     // チェック用関数
     window.onbeforeunload = (event) => {
       let isUpd = false;
-      for (let i = 0; i < document.formKessaiUpdate.isCvs.length; i++) {
-        if ((document.formKessaiUpdate._isCvs[i].checked) && (isCvs[i] !== "1")){
+      const isCvsElems = document.getElementsByName("isCvs");
+      const _isCvsElems = document.getElementsByName("_isCvs");
+      const isSendMailElems = document.getElementsByName("isSendMail");
+      const _isSendMailElems = document.getElementsByName("_isSendMail");
+      
+      for (let i = 0; i < isCvsElems; i++) {
+        if ((_isCvsElems[i].checked) && (isCvs[i] !== "1")){
           isUpd = true;
         }
-        if ((!document.formKessaiUpdate._isCvs[i].checked) && (isCvs[i] === "1")){
+        if ((!_isCvsElems[i].checked) && (isCvs[i] === "1")){
           isUpd = true;
         }
       }
-      for (let i = 0; i < document.formKessaiUpdate.isSendMail.length; i++) {
-        if ((document.formKessaiUpdate._isSendMail[i].checked) && (isSendMail[i] !== "1")){
+      for (let i = 0; i < isSendMailElems.length; i++) {
+        if ((_isSendMailElems[i].checked) && (isSendMail[i] !== "1")){
           isUpd = true;
         }
-        if ((!document.formKessaiUpdate._isSendMail[i].checked) && (isSendMail[i] === "1")){
+        if ((!_isSendMailElems[i].checked) && (isSendMail[i] === "1")){
           isUpd = true;
         }
       }
@@ -137,14 +150,19 @@
     // コンビニ決済対象、メール送信対象を設定
     let updatebtn = document.getElementsByClassName("updatekessai")[0];
     updatebtn.addEventListener('click', () => {
-      for (let i = 0; i < document.formKessaiUpdate.isCvs.length; i++) {
-        if (document.formKessaiUpdate._isCvs[i].checked) {
-          document.formKessaiUpdate.isCvs[i].value = "1";
+      const isCvsElems = document.getElementsByName("isCvs");
+      const _isCvsElems = document.getElementsByName("_isCvs");
+      const isSendMailElems = document.getElementsByName("isSendMail");
+      const _isSendMailElems = document.getElementsByName("_isSendMail");
+
+      for (let i = 0; i < isCvsElems.length; i++) {
+        if (_isCvsElems[i].checked) {
+          isCvsElems[i].value = "1";
         }
       }
-      for (let i = 0; i < document.formKessaiUpdate.isSendMail.length; i++) {
-        if (document.formKessaiUpdate._isSendMail[i].checked) {
-          document.formKessaiUpdate.isSendMail[i].value = "1";
+      for (let i = 0; i < isSendMailElems.length; i++) {
+        if (_isSendMailElems[i].checked) {
+          isSendMailElems[i].value = "1";
         }
       }
       window.onbeforeunload = null;
