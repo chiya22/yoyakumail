@@ -331,13 +331,26 @@ router.get("/kessais/sendmail/:id", (req,res) => {
     try {
 
       const id_search = req.params.id;
-      await mailinfo.sendMailByIdSearch(id_search);
-  
-      // 検索条件情報のステータスを更新する
-      await m_searchinfos.updateStatusAndTime(req.params.id, '3', common.getTodayTime());
-  
-      req.flash("success", `すべてのメールを送信しました。(${id_search})`);
-      res.redirect("/");
+
+      // 決済情報の一覧を取得する
+      const kessais = await m_kessais.findByIdSearch(id_search);
+
+      // 1件でもコンビニ決済用のURLが取得できていればOK
+      if (kessais[0].url_cvs) {
+
+        // メール送信
+        await mailinfo.sendMailByIdSearch(id_search);
+
+        // 検索条件情報のステータスを更新する
+        await m_searchinfos.updateStatusAndTime(req.params.id, '3', common.getTodayTime());
+    
+        req.flash("success", `すべてのメールを送信しました。(${id_search})`);
+        res.redirect("/");
+          
+      } else {
+        req.flash("error", "コンビニ決済用URLの取得に失敗しています。最初からやり直してください。");
+        res.redirect("/");
+      }
 
     } catch (error) {
       req.flash("error", error.message);
