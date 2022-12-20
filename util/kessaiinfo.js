@@ -12,6 +12,8 @@ const m_kessais = require("../model/kessais");
 const m_logininfo = require("../model/logininfo");
 const { env } = require("process");
 
+const seikyuinfo = require("./seikyuinfo");
+
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
@@ -253,7 +255,11 @@ const updkessaiinfo = async (id_search, dlfilename) => {
         inObj.url_cvs = linecontents[9];
         inObj.message = linecontents[10];
 
+        // 請求書のPDFファイルを作成し、そのパス情報を取得する
+        seikyuinfo.createSeikyuPDF(inObj.id_customer, inObj.id_search);
+        
         (async () => {
+          // 決済情報へ反映する
           await m_kessais.updatekessaisBydlinfo(inObj);
         })();
         // logger.info(`決済情報ID：${inObj.id_customer}_${inObj.id_search}`);
