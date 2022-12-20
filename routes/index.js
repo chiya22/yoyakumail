@@ -11,6 +11,8 @@ const yoyakuinfo = require("../util/yoyakuinfo");
 const kessaiinfo = require("../util/kessaiinfo");
 const mailinfo = require("../util/mailinfo");
 
+const fs = require('fs');
+
 const log4js = require("log4js");
 const logger = log4js.configure("./config/log4js-config.json").getLogger();
 
@@ -129,10 +131,16 @@ router.get("/yoyakudelete/:id", (req, res) => {
   (async () => {
 
     try {
-      // idより予約一覧を取得し、返却する
+      // idより各情報を削除する
       await m_yoyakus.removeByIdSearch(req.params.id); // 予約情報
       await m_kessais.removeByIdSearch(req.params.id);  // 決済情報
       await m_searchinfos.remove(req.params.id);       // 検索条件
+
+      // 請求書PDFが存在する場合は削除する
+      const dirpath = `public/pdf/${req.params.id}`;
+      if (fs.existsSync( dirpath )) {
+        fs.rmdirSync(dirpath, { recursive: true });
+      }
 
       // 検索条件情報の一覧を取得する
       await m_searchinfos.find();
@@ -141,7 +149,7 @@ router.get("/yoyakudelete/:id", (req, res) => {
       res.redirect("/");
 
     } catch (error) {
-      req.flash("error", err.message);
+      req.flash("error", error.message);
       res.redirect("/");
     }
 
