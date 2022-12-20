@@ -195,24 +195,35 @@ router.get("/kessaiscreate/:id", (req,res) => {
         } else {
 
           // ダウンロードしたファイルより、テーブルへ情報を反映する
-          await kessaiinfo.updkessaiinfo(req.params.id, retValue);
-      
-          await common.sleep(5000);
-      
-          // メール文章を作成する
-          await mailinfo.setMailContent(req.params.id);
-      
-          // 検索条件情報のステータスを更新する
-          await m_searchinfos.updateStatusAndTime(req.params.id, '2', common.getTodayTime());
+          if (await kessaiinfo.updkessaiinfo(req.params.id, retValue)) {
 
-          req.flash("success",`決済情報を取得しました。(${req.params.id})`);
-          res.redirect("/");
+            await common.sleep(5000);
+      
+            // メール文章を作成する
+            await mailinfo.setMailContent(req.params.id);
+        
+            // 検索条件情報のステータスを更新する
+            await m_searchinfos.updateStatusAndTime(req.params.id, '2', common.getTodayTime());
+  
+            req.flash("success",`決済情報を取得しました。(${req.params.id})`);
+            res.redirect("/");
+
+          } else {
+
+            // 決済情報がある場合は削除する
+            await m_kessais.removeByIdSearch(req.params.id);
+
+            req.flash("error",`決済情報の取得に取得しました。時間をおいて再度処理を行ってください。(${req.params.id})`);
+            res.redirect("/");
+
+          }
+      
 
         }
       }
   
     } catch (error) {
-      req.flash("success",error.message);
+      req.flash("error",error.message);
       res.redirect("/");
     }
 

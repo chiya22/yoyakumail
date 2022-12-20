@@ -247,22 +247,28 @@ const updkessaiinfo = async (id_search, dlfilename) => {
 
         const linecontents = chunk.split(",");
 
-        inObj = {};
-        inObj.id_customer = linecontents[0];
-        inObj.id_search = id_search;
-        inObj.result = linecontents[7];
-        inObj.id_data = linecontents[8];
-        inObj.url_cvs = linecontents[9];
-        inObj.message = linecontents[10];
+        if (linecontents[9] === '') {
+          return false
+        } else {
+          
+          inObj = {};
+          inObj.id_customer = linecontents[0];
+          inObj.id_search = id_search;
+          inObj.result = linecontents[7];
+          inObj.id_data = linecontents[8];
+          inObj.url_cvs = linecontents[9];
+          inObj.message = linecontents[10];
+  
+          // 請求書のPDFファイルを作成し、そのパス情報を取得する
+          seikyuinfo.createSeikyuPDF(inObj.id_customer, inObj.id_search);
+          
+          (async () => {
+            // 決済情報へ反映する
+            await m_kessais.updatekessaisBydlinfo(inObj);
+          })();
+          // logger.info(`決済情報ID：${inObj.id_customer}_${inObj.id_search}`);
+        }
 
-        // 請求書のPDFファイルを作成し、そのパス情報を取得する
-        seikyuinfo.createSeikyuPDF(inObj.id_customer, inObj.id_search);
-        
-        (async () => {
-          // 決済情報へ反映する
-          await m_kessais.updatekessaisBydlinfo(inObj);
-        })();
-        // logger.info(`決済情報ID：${inObj.id_customer}_${inObj.id_search}`);
       });
 
       // 終了時には処理した対象ファイルをリネームする
