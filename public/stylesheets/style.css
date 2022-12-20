@@ -21,7 +21,6 @@ pre {
   position: fixed;
   z-index: 998;
 }
-
 .header .header-wrapper {
   max-width: 900px;
   min-width: 900px;
@@ -34,13 +33,11 @@ pre {
   justify-content: space-between;
   margin: 0 auto;
 }
-
 .header .header-wrapper .header-left {
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
 }
-
 .header .header-wrapper .header-left .header-logo {
   display: inline-block;
   background-color: #d3eced;
@@ -48,11 +45,9 @@ pre {
   width: 300px;
   height: auto;
 }
-
 .header .header-wrapper .header-right {
   display: inline-block;
 }
-
 .header .header-wrapper .header-right .header-form__item-style {
   color: #8a8a8a;
   display: inline-block;
@@ -66,7 +61,6 @@ pre {
   font-size: 12px;
   letter-spacing: 0.8px;
 }
-
 .header .header-wrapper .header-right .header-form__item-style:focus {
   outline: none;
   border: 1px solid #243856;
@@ -86,6 +80,7 @@ pre {
 }
 
 .area_header {
+  position: -webkit-sticky;
   position: sticky;
   top: 60px;
   display: block;
@@ -113,7 +108,6 @@ pre {
   font-size: 12px;
   letter-spacing: 0.5px;
 }
-
 .searchform__item-style:focus {
   outline: none;
   border: 1px solid #243856;
@@ -225,7 +219,6 @@ pre {
   width: 100%;
   border-radius: 10px;
 }
-
 .yoyakus-yoyaku:hover {
   background-color: #85b4d0;
 }
@@ -241,7 +234,6 @@ pre {
   width: 100%;
   border-radius: 10px;
 }
-
 .yoyakus-bihin:hover {
   background-color: #85b4d0;
 }
@@ -260,7 +252,6 @@ pre {
   flex-wrap: wrap;
   align-items: center;
 }
-
 .yoyaku-dl dt, .kessai-dl dt, .mail-dl dt {
   width: 20%;
   text-align: right;
@@ -270,13 +261,11 @@ pre {
   color: #243856;
   font-weight: bold;
 }
-
 .yoyaku-dl dd, .kessai-dl dd, .mail-dl dd {
   width: 30%;
   padding: 5px 5px;
   font-size: 12px;
 }
-
 .yoyaku-dl .oneline-dd, .kessai-dl .oneline-dd, .mail-dl .oneline-dd {
   width: 80%;
   padding: 5px 5px;
@@ -295,7 +284,6 @@ pre {
   border-radius: 10px;
   border-top: solid 10px #243856;
 }
-
 .kessais-kessai:hover {
   background-color: #85b4d0;
 }
@@ -390,13 +378,15 @@ pre {
   background-color: #8a8a8a;
   white-space: nowrap;
   cursor: pointer;
-  user-select: none;
-  transition: background-color .1s, box-shadow .1s;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  transition: background-color 0.1s, box-shadow 0.1s;
   font-size: 12px;
 }
-
 .checkbox_label::before {
-  content: '';
+  content: "";
   display: block;
   position: absolute;
   top: 6px;
@@ -408,7 +398,7 @@ pre {
   border-radius: 20px;
 }
 
-input[type="checkbox"] {
+input[type=checkbox] {
   position: absolute;
   left: -9999px;
 }
@@ -436,7 +426,6 @@ input:disabled + .checkbox_label {
   text-align: center;
   font-size: 0.75rem;
 }
-
 .btn-action:hover {
   background-color: #fff;
   color: #243856;
@@ -454,7 +443,6 @@ input:disabled + .checkbox_label {
   text-align: center;
   font-size: 0.75rem;
 }
-
 .btn-action-second:hover {
   background-color: #fff;
   color: #8a8a8a;
@@ -472,7 +460,6 @@ input:disabled + .checkbox_label {
   text-align: center;
   font-size: 0.75rem;
 }
-
 .btn-back:hover {
   background-color: #243856;
   color: #fff;
@@ -587,4 +574,4 @@ input:disabled + .checkbox_label {
   color: #fff;
   transform: translateY(-5px);
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
-}
+}/*# sourceMappingURL=style.css.map */
