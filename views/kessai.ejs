@@ -72,7 +72,9 @@
         <dt>コンビニ決済対象</dt>
         <dd><%= kessai.isCvs %></dd>
         <dt>メール送信対象</dt>
-        <dd class="oneline-dd"><%= kessai.isSendMail %></dd>
+        <dd><%= kessai.isSendMail %></dd>
+        <dt>請求書PDF</dt>
+        <dd><a href="/static/pdf/<%= kessai.id_search %>/<%= kessai.id_search %>-<%= kessai.id_customer %>.pdf">請求書</a></dd>
       </dl>
       <div class="yoyaku-title">【メール情報】</div>
       <dl class="mail-dl">
