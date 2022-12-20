@@ -167,7 +167,7 @@ const setMailContent = async (id_search) => {
 }
 
 //  検索情報ID配下のすべての決済情報をもとに、メールを送信する
-const sendMailByIdSearch = async ( id_search)=> {
+const sendMailByIdSearch = async ( id_search )=> {
 
   // 対象となる決済情報を取得
   const kessais = await m_kessais.findByIdSearch(id_search);
@@ -178,9 +178,9 @@ const sendMailByIdSearch = async ( id_search)=> {
 
       // コンビニ決済有無によりbody部の設定をわける
         if (kessais[i].isCvs === '1') {
-          send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body_cvs);
+          send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body_cvs, kessais[i].id_search, kessais[i].id_customer);
         } else {
-          send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body);
+          send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body, kessais[i].id_search, kessais[i].id_customer);
         }
       
         // メール送信時間を設定
@@ -202,9 +202,9 @@ const sendMail = async ( id_search, id_cutomer)=> {
   if (kessai.isSendMail === '1') {
 
     if (kessai.isCvs === '1') {
-      send(kessai.email, kessai.mail_subject, kessai.mail_body_cvs);
+      send(kessai.email, kessai.mail_subject, kessai.mail_body_cvs, kessai.id_search, kessai.id_customer);
     } else {
-      send(kessai.email, kessai.mail_subject, kessai.mail_body);
+      send(kessai.email, kessai.mail_subject, kessai.mail_body, kessai.id_search, kessai.id_customer);
     }
 
     // メール送信時間を設定
@@ -217,7 +217,7 @@ const sendMail = async ( id_search, id_cutomer)=> {
 
 // private
 // メール送信
-const send = (mail_to,title, content) => {
+const send = (mail_to,title, content, id_search, id_customer) => {
 
   // 認証情報
   const auth = {
@@ -240,12 +240,18 @@ const send = (mail_to,title, content) => {
   let message = {
       from: process.env.MAIL_FROM,
       // テスト用として宛先を強制的に変更
+      // to: 'ps_members@yamori.jp',
       to: 'yoshida@yamori.jp',
       // to: mail_to,
       // テスト用として件名に【テスト】を追加
-      subject: `【吉田テスト】${title}`,
+      subject: `【吉田 | 請求書電子化テスト】${title}`,
       // subject: title,
       text: content,
+      attachments: [{
+        filename: `${id_search}-${id_customer}.pdf`,
+        path: `public/pdf/${id_search}/${id_search}-${id_customer}.pdf`,
+        contentType: 'application/pdf'
+      }],
   };
 
   // メール送信
