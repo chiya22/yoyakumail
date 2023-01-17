@@ -173,14 +173,22 @@ const sendMailByIdSearch = async ( id_search )=> {
   const kessais = await m_kessais.findByIdSearch(id_search);
 
   for (let i=0; i < kessais.length; i++) {
+
+    // 予約情報
+    let yoyakus = await m_yoyakus.findByIdSearchAndCustomer(id_search, kessais[i].id_customer);
+    let no_keiyaku = yoyakus[0].no_keiyaku;
+
     //　メール送信対象の場合
     if ((kessais[i].isSendMail === '1') && (kessais[i].yyyymmddhhmmss_sended_mail == null)) {
 
+      // 請求書PDFファイルパスを組み立て
+      let filename = `${kessais[i].id_search}-${no_keiyaku}-${kessais[i].yyyymmdd_yoyaku}-${kessais[i].yyyymmdd_uketuke}.pdf`
+
       // コンビニ決済有無によりbody部の設定をわける
         if (kessais[i].isCvs === '1') {
-          send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body_cvs, kessais[i].id_search, kessais[i].id_customer);
+          send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body_cvs, kessais[i].id_search, filename);
         } else {
-          send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body, kessais[i].id_search, kessais[i].id_customer);
+          send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body, kessais[i].id_search, filename);
         }
       
         // メール送信時間を設定
@@ -198,13 +206,20 @@ const sendMail = async ( id_search, id_cutomer)=> {
   // 対象となる決済情報を取得
   const kessai = await m_kessais.findPKey(id_search, id_cutomer);
 
+  // 対象となる予約情報よりIDを抽出する
+  const yoyakus = await m_yoyakus.findByIdSearchAndCustomer(id_search, id_cutomer);
+  const no_keiyaku = yoyakus[0].no_keiyaku;
+
   //　メール送信対象の場合
   if (kessai.isSendMail === '1') {
 
+    // 請求書PDFのファイル名を組み立てる
+    const filename = `${kessais.id_search}-${no_keiyaku}-${yyyymmdd_yoyaku}-${yyyymmdd_uketuke}.pdf`;
+
     if (kessai.isCvs === '1') {
-      send(kessai.email, kessai.mail_subject, kessai.mail_body_cvs, kessai.id_search, kessai.id_customer);
+      send(kessai.email, kessai.mail_subject, kessai.mail_body_cvs, kessai.id_search, filename);
     } else {
-      send(kessai.email, kessai.mail_subject, kessai.mail_body, kessai.id_search, kessai.id_customer);
+      send(kessai.email, kessai.mail_subject, kessai.mail_body, kessai.id_search, filename);
     }
 
     // メール送信時間を設定
@@ -217,7 +232,7 @@ const sendMail = async ( id_search, id_cutomer)=> {
 
 // private
 // メール送信
-const send = (mail_to,title, content, id_search, id_customer) => {
+const send = (mail_to,title, content, id_search, filename) => {
 
   // 認証情報
   const auth = {
@@ -248,8 +263,8 @@ const send = (mail_to,title, content, id_search, id_customer) => {
       // subject: title,
       text: content,
       attachments: [{
-        filename: `${id_search}-${id_customer}.pdf`,
-        path: `public/pdf/${id_search}/${id_search}-${id_customer}.pdf`,
+        filename: filename,
+        path: `public/pdf/${id_search}/${filename}`,
         contentType: 'application/pdf'
       }],
   };

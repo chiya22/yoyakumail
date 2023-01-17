@@ -10,10 +10,10 @@ const common = require("./common");
 
 const m_kessais = require("../model/kessais");
 const m_logininfo = require("../model/logininfo");
-const { env } = require("process");
 
 const seikyuinfo = require("./seikyuinfo");
 
+const { env } = require("process");
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }

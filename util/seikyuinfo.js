@@ -94,7 +94,8 @@ const createSeikyuPDF = async (id_customer,id_search) => {
 
     // 請求番号
     let no_seikyu = document.querySelector("#__no_seikyu > tspan");
-    no_seikyu.textContent = kessai.id_search + "-" + kessai.id_customer;
+    // no_seikyu.textContent = kessai.id_search + "-" + kessai.id_customer;
+    no_seikyu.textContent = kessai.id_search + "-" + no_keiyaku + "-" + kessai.yyyymmdd_yoyaku + "-" + kessai.yyyymmdd_uketuke;
 
     // 利用者番号
     let no_riyou = document.querySelector("#__no_riyou > tspan");
@@ -111,7 +112,8 @@ const createSeikyuPDF = async (id_customer,id_search) => {
 
     // 発行日　★ToDo
     let ymdyoubi_hakkou = document.querySelector("#__ymdyoubi_hakkou > tspan");
-    ymdyoubi_hakkou.textContent = `${kessai.yyyymmdd_yoyaku.slice(0,4)}年${kessai.yyyymmdd_yoyaku.slice(4,6)}月${kessai.yyyymmdd_yoyaku.slice(6,8)}日\r\n`;
+    let yyyymmdd_now = common.getYYYYMMDD(new Date());
+    ymdyoubi_hakkou.textContent = `${yyyymmdd_now.slice(0,4)}年${yyyymmdd_now.slice(4,6)}月${yyyymmdd_now.slice(6,8)}日\r\n`;
 
     // 利用日
     const ymdyoubi_riyou = document.querySelector("#__ymdyoubi_riyou > tspan");
@@ -201,7 +203,7 @@ const createSeikyuPDF = async (id_customer,id_search) => {
   
     let pdfDoc = printer.createPdfKitDocument(docDefinition,options);
     let filepath = `public/pdf/${id_search}`;
-    let filename = kessai.id_search + "-" + kessai.id_customer;
+    let filename = kessai.id_search + "-" + no_keiyaku + "-" + kessai.yyyymmdd_yoyaku + "-" + kessai.yyyymmdd_uketuke;
     if (!fs.existsSync( filepath )) {
       fs.mkdirSync(filepath);
     }

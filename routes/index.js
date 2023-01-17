@@ -298,9 +298,12 @@ router.get("/kessai/:id", (req,res) => {
 
     const kessai = await m_kessais.findPKey(id_search, id_customer);
 
+    const yoyakus = await m_yoyakus.findByIdSearchAndCustomer(id_search, id_customer);
+
     const searchinfo = await m_searchinfos.findPKey(id_search);
 
     res.render("kessai", {
+      no_keiyaku: yoyakus[0].no_keiyaku,
       kessai: kessai,
       searchinfo: searchinfo,
     });
@@ -316,7 +319,10 @@ router.get("/kessai/edit/:id", (req,res) => {
 
     const kessai = await m_kessais.findPKey(id_search, id_customer);
 
+    const yoyakus = await m_yoyakus.findByIdSearchAndCustomer(id_search, id_customer);
+
     res.render("kessaiform", {
+      no_keiyaku: yoyakus[0].no_keiyaku,
       kessai: kessai,
     });
   })();

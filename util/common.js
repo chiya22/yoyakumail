@@ -83,6 +83,7 @@ const sleep = (time) => {
 
 
 module.exports = {
+  getYYYYMMDD,
   getTodayTime,
   getBeforeday,
   getNextYearday,
