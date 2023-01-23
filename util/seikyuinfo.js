@@ -186,7 +186,7 @@ const createSeikyuPDF = async (id_customer,id_search) => {
       defaultStyle: {
         font: 'NotoSansJP',
       },
-      ownerPassword: '123456',
+      ownerPassword: process.env.PDF_PASSWORD,
       permissions: {
         // printing: false, //'lowResolution'
         printing: 'highResolution', //'lowResolution'
