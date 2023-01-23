@@ -27,7 +27,7 @@ const startcron = () => {
 
       //メール送信
       if (mailbody !== '') {
-        mail.send("yoshida@yamori.jp","【予約確認メール送信】エラー発生", mailbody);
+        mail.sendByXserer("【予約確認メール送信】エラー発生", mailbody);
         logger.info(`cronより通知メールを送信しました（エラーチェック）：${new Date()}`);
       } else {
         logger.info(`エラーはありませんでした：${new Date()}`);
