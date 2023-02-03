@@ -73,6 +73,8 @@
         <dd><%= kessai.isCvs %></dd>
         <dt>メール送信対象</dt>
         <dd><%= kessai.isSendMail %></dd>
+        <dt>請求書PDF添付対象</dt>
+        <dd><%= kessai.isPDF %></dd>
         <dt>請求書PDF</dt>
         <dd><a href="/static/pdf/<%= kessai.id_search %>/<%= kessai.id_search %>-<%= no_keiyaku %>-<%= kessai.yyyymmdd_yoyaku %>-<%= kessai.yyyymmdd_uketuke %>.pdf">請求書</a></dd>
       </dl>

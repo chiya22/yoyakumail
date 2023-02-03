@@ -46,6 +46,10 @@
               if (kessai.isSendMail === "1") {
                 isSendMailChecked = "checked";
               }
+              let isPDFChecked = "";
+              if (kessai.isPDF === "1") {
+                isPDFChecked = "checked";
+              }
               let isDisabled = "";
               if (searchinfo.yyyymmddhhmmss_sended_mails) {
                 isDisabled = "disabled";
@@ -55,6 +59,7 @@
                 <div class="kessais-kessai-checkbox">
                   <input type="checkbox" name="_isCvs" id="_isCvs<%= kessai.id_customer + kessai.id_search %>" value="1" <%= isCvsChecked %> <%= isDisabled %> /><label class="checkbox_label" for="_isCvs<%= kessai.id_customer + kessai.id_search %>">コンビニ決済</label>
                   <input type="checkbox" name="_isSendMail" id="_isSendMail<%= kessai.id_customer + kessai.id_search %>" value="1" <%= isSendMailChecked %> <%= isDisabled %> /><label class="checkbox_label" for="_isSendMail<%= kessai.id_customer + kessai.id_search %>">メール送信</label>
+                  <input type="checkbox" name="_isPDF" id="_isPDF<%= kessai.id_customer + kessai.id_search %>" value="1" <%= isPDFChecked %> <%= isDisabled %> /><label class="checkbox_label" for="_isPDF<%= kessai.id_customer + kessai.id_search %>">PDF添付</label>
                 </div>
                 <a href="/kessai/<%= kessai.id_search %>_<%= kessai.id_customer %>">
                   <div class="kessais-kessai-title"><%= kessai.nm_keiyaku %></div>
@@ -86,6 +91,7 @@
               </a>
                 <input type="hidden" name="isCvs" value="">
                 <input type="hidden" name="isSendMail" value="">
+                <input type="hidden" name="isPDF" value="">
                 <input type="hidden" name="id_customer" value="<%= kessai.id_customer %>">
                 <input type="hidden" name="id_search" value="<%= kessai.id_search %>">
               </div>
@@ -117,6 +123,16 @@
         isSendMail[i] = "";
       }
     }
+    let isPDF = [];
+    const isPDFElems = document.getElementsByName("isPDF");
+    const _isPDFElems = document.getElementsByName("_isPDF");
+    for (let i = 0; i < isPDFElems.length; i++) {
+      if (_isPDFElems[i].checked) {
+        isPDF[i] = "1";
+      } else {
+        isPDF[i] = "";
+      }
+    }
     // チェック用関数
     window.onbeforeunload = (event) => {
       let isUpd = false;
@@ -124,6 +140,8 @@
       const _isCvsElems = document.getElementsByName("_isCvs");
       const isSendMailElems = document.getElementsByName("isSendMail");
       const _isSendMailElems = document.getElementsByName("_isSendMail");
+      const isPDFElems = document.getElementsByName("isPDF");
+      const _isPDFElems = document.getElementsByName("_isPDF");
       
       for (let i = 0; i < isCvsElems; i++) {
         if ((_isCvsElems[i].checked) && (isCvs[i] !== "1")){
@@ -141,6 +159,14 @@
           isUpd = true;
         }
       }
+      for (let i = 0; i < isPDFElems.length; i++) {
+        if ((_isPDFElems[i].checked) && (isPDF[i] !== "1")){
+          isUpd = true;
+        }
+        if ((!_isPDFElems[i].checked) && (isPDF[i] === "1")){
+          isUpd = true;
+        }
+      }
       if (isUpd) {
         // chromeの場合はメッセージはシステム制御されている
         event.returnValue = "いずれかのコンビニ決済、メール送信の設定値が変更されています。保存せずに移動しますか？"
@@ -154,6 +180,8 @@
       const _isCvsElems = document.getElementsByName("_isCvs");
       const isSendMailElems = document.getElementsByName("isSendMail");
       const _isSendMailElems = document.getElementsByName("_isSendMail");
+      const isPDFElems = document.getElementsByName("isPDF");
+      const _isPDFElems = document.getElementsByName("_isPDF");
 
       for (let i = 0; i < isCvsElems.length; i++) {
         if (_isCvsElems[i].checked) {
@@ -163,6 +191,11 @@
       for (let i = 0; i < isSendMailElems.length; i++) {
         if (_isSendMailElems[i].checked) {
           isSendMailElems[i].value = "1";
+        }
+      }
+      for (let i = 0; i < isPDFElems.length; i++) {
+        if (_isPDFElems[i].checked) {
+          isPDFElems[i].value = "1";
         }
       }
       window.onbeforeunload = null;
