@@ -201,33 +201,29 @@ const sendMailByIdSearch = async ( id_search )=> {
 };
 
 //  決済情報をもとに、メールを再送信する
-const sendMail = async ( id_search, id_cutomer)=> {
+const sendMail = async ( id_search, id_customer)=> {
 
   // 対象となる決済情報を取得
-  const kessai = await m_kessais.findPKey(id_search, id_cutomer);
+  const kessai = await m_kessais.findPKey(id_search, id_customer);
 
   // 対象となる予約情報よりIDを抽出する
-  const yoyakus = await m_yoyakus.findByIdSearchAndCustomer(id_search, id_cutomer);
+  const yoyakus = await m_yoyakus.findByIdSearchAndCustomer(id_search, id_customer);
   const no_keiyaku = yoyakus[0].no_keiyaku;
 
-  //　メール送信対象の場合
-  if (kessai.isSendMail === '1') {
+  // 請求書PDFのファイル名を組み立てる
+  const filename = `${kessai.id_search}-${no_keiyaku}-${kessai.yyyymmdd_yoyaku}-${kessai.yyyymmdd_uketuke}.pdf`;
 
-    // 請求書PDFのファイル名を組み立てる
-    const filename = `${kessais.id_search}-${no_keiyaku}-${yyyymmdd_yoyaku}-${yyyymmdd_uketuke}.pdf`;
-
-    if (kessai.isCvs === '1') {
-      send(kessai.email, kessai.mail_subject, kessai.mail_body_cvs, kessai.id_search, filename);
-    } else {
-      send(kessai.email, kessai.mail_subject, kessai.mail_body, kessai.id_search, filename);
-    }
-
-    // メール送信時間を設定
-    const setTimeValue = kessai.yyyymmddhhmmss_resended_mail? `${kessai.yyyymmddhhmmss_resended_mail}|${common.getTodayTime()}`: common.getTodayTime();
-    await m_kessais.updatekessaiToReSendMail(id_search,id_cutomer,setTimeValue);
-    await logger.info(`送信先：${kessai.nm_keiyaku} <${kessai.email}>`);
-
+  if (kessai.isCvs === '1') {
+    send(kessai.email, kessai.mail_subject, kessai.mail_body_cvs, kessai.id_search, filename);
+  } else {
+    send(kessai.email, kessai.mail_subject, kessai.mail_body, kessai.id_search, filename);
   }
+
+  // メール送信時間を設定
+  const setTimeValue = kessai.yyyymmddhhmmss_resended_mail? `${kessai.yyyymmddhhmmss_resended_mail}|${common.getTodayTime()}`: common.getTodayTime();
+  await m_kessais.updatekessaiToReSendMail(id_search,id_customer,setTimeValue);
+  await logger.info(`送信先：${kessai.nm_keiyaku} <${kessai.email}>`);
+  
 };
 
 // private
@@ -255,12 +251,11 @@ const send = (mail_to,title, content, id_search, filename) => {
   let message = {
       from: process.env.MAIL_FROM,
       // テスト用として宛先を強制的に変更
-      // to: 'ps_members@yamori.jp',
-      to: 'yoshida@yamori.jp',
-      // to: mail_to,
+      // to: 'yoshida@yamori.jp',
+      to: mail_to,
       // テスト用として件名に【テスト】を追加
-      subject: `【吉田 | 請求書電子化テスト】${title}`,
-      // subject: title,
+      // subject: `【吉田 | 請求書電子化テスト】${title}`,
+      subject: title,
       text: content,
       attachments: [{
         filename: filename,
@@ -279,10 +274,42 @@ const send = (mail_to,title, content, id_search, filename) => {
   });
 };
 
+// XServerを使用してメール送信
+const sendByXserer = (title, content) => {
+
+    // トランスポート
+    const smtp_config = {
+        host: process.env.MAIL_ADMIN_HOST,
+        port: process.env.MAIL_ADMIN_PORT,
+        secure: true,
+        auth: {
+            user: process.env.MAIL_ADMIN_USER,
+            pass: process.env.MAIL_ADMIN_PASSWORD,
+        },
+    };    
+
+    let transporter = nodemailer.createTransport(smtp_config);
+
+    // メール情報
+    let message = {
+        from: process.env.MAIL_ADMIN_FROM,
+        to: process.env.MAIL_ADMIN_TO,
+        subject: title,
+        text: content,
+    };
+
+    // メール送信
+    transporter.sendMail(message, function (err, response) {
+        if (err) {
+            logger.info(`[err]${err}`);
+        }
+    });
+}
 
 module.exports = {
   setMailContent,
   sendMailByIdSearch,
   sendMail,
   send,
+  sendByXserer,
 };
