@@ -186,9 +186,9 @@ const sendMailByIdSearch = async ( id_search )=> {
 
       // コンビニ決済有無によりbody部の設定をわける
         if (kessais[i].isCvs === '1') {
-          send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body_cvs, kessais[i].id_search, filename);
+          send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body_cvs, kessais[i].id_search, filename, kessais[i].isPDF);
         } else {
-          send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body, kessais[i].id_search, filename);
+          send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body, kessais[i].id_search, filename, kessais[i].isPDF);
         }
       
         // メール送信時間を設定
@@ -214,9 +214,9 @@ const sendMail = async ( id_search, id_customer)=> {
   const filename = `${kessai.id_search}-${no_keiyaku}-${kessai.yyyymmdd_yoyaku}-${kessai.yyyymmdd_uketuke}.pdf`;
 
   if (kessai.isCvs === '1') {
-    send(kessai.email, kessai.mail_subject, kessai.mail_body_cvs, kessai.id_search, filename);
+    send(kessai.email, kessai.mail_subject, kessai.mail_body_cvs, kessai.id_search, filename, kessai.isPDF);
   } else {
-    send(kessai.email, kessai.mail_subject, kessai.mail_body, kessai.id_search, filename);
+    send(kessai.email, kessai.mail_subject, kessai.mail_body, kessai.id_search, filename, kessai.isPDF);
   }
 
   // メール送信時間を設定
@@ -228,7 +228,7 @@ const sendMail = async ( id_search, id_customer)=> {
 
 // private
 // メール送信
-const send = (mail_to,title, content, id_search, filename) => {
+const send = (mail_to,title, content, id_search, filename, isPDF) => {
 
   // 認証情報
   const auth = {
@@ -249,20 +249,23 @@ const send = (mail_to,title, content, id_search, filename) => {
 
   // メール情報
   let message = {
-      from: process.env.MAIL_FROM,
-      // テスト用として宛先を強制的に変更
-      // to: 'yoshida@yamori.jp',
-      to: mail_to,
-      // テスト用として件名に【テスト】を追加
-      // subject: `【吉田 | 請求書電子化テスト】${title}`,
-      subject: title,
-      text: content,
-      attachments: [{
+    from: process.env.MAIL_FROM,
+    // テスト用として宛先を強制的に変更
+    // to: 'yoshida@yamori.jp',
+    to: mail_to,
+    // テスト用として件名に【テスト】を追加
+    // subject: `【吉田 | 請求書電子化テスト】${title}`,
+    subject: title,
+    text: content,
+  };
+
+  if (isPDF) {
+    message.attachments = [{
         filename: filename,
         path: `public/pdf/${id_search}/${filename}`,
         contentType: 'application/pdf'
-      }],
-  };
+      }]
+  }
 
   // メール送信
   transporter.sendMail(message, (err, response) => {

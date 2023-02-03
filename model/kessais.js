@@ -130,10 +130,10 @@ const updatekessaiToReSendMail = async ( id_search, id_customer, time) => {
   }
  }
  
-//PK（管理ID、検索情報ID）をキーにコンビニ決済対象、メール送信対象を更新する
-const updatekessaisToisCvsAndisSendMail = async (id_search, id_customer, isCvs, isSendMail ) => {
+//PK（管理ID、検索情報ID）をキーにコンビニ決済対象、メール送信対象、PDF添付対象を更新する
+const updatekessaisToisCvsAndisSendMail = async (id_search, id_customer, isCvs, isSendMail, isPDF ) => {
   try {
-    const query = 'update kessais set isCvs = "' + isCvs + '", isSendMail = "' + isSendMail + '" where id_customer = "' + id_customer + '" and id_search = "' + id_search + '";'
+    const query = 'update kessais set isCvs = "' + isCvs + '", isSendMail = "' + isSendMail + '", isPDF = "' + isPDF + '" where id_customer = "' + id_customer + '" and id_search = "' + id_search + '";'
      logger.info(query);
      const retObj = await knex.raw(query);
   } catch (err) {

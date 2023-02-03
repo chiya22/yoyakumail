@@ -256,7 +256,7 @@ router.get("/kessais/:id", (req, res) => {
   })();
 });
 
-// 決済情報一覧において「コンビニ決済対象」「メール送信対象」を更新する
+// 決済情報一覧において「コンビニ決済対象」「メール送信対象」「PDF添付対象」を更新する
 router.post("/kessais/update", (req,res) => {
   (async () => {
 
@@ -266,14 +266,16 @@ router.post("/kessais/update", (req,res) => {
       const id_customer_list = req.body.id_customer;
       const isCvs_list = req.body.isCvs;
       const isSendMail_list = req.body.isSendMail;
+      const isPDF_list = req.body.isPDF;
 
       let moveTo;
+      // 更新対象が1件だけの場合は、「xxxx_list」変数が配列とならない場合の対処
       if (id_search_list.join().length == 15) {
-        await m_kessais.updatekessaisToisCvsAndisSendMail(id_search_list, id_customer_list, isCvs_list, isSendMail_list);
+        await m_kessais.updatekessaisToisCvsAndisSendMail(id_search_list, id_customer_list, isCvs_list, isSendMail_list, isPDF_list);
         moveTo = id_search_list;
       } else {
         for (let i = 0; i < id_customer_list.length; i++) {
-          await m_kessais.updatekessaisToisCvsAndisSendMail(id_search_list[i], id_customer_list[i], isCvs_list[i], isSendMail_list[i]);
+          await m_kessais.updatekessaisToisCvsAndisSendMail(id_search_list[i], id_customer_list[i], isCvs_list[i], isSendMail_list[i], isPDF_list[i]);
         }
         moveTo = id_search_list[0];
       }
@@ -283,7 +285,7 @@ router.post("/kessais/update", (req,res) => {
       
     } catch (error) {
       req.flash("error",error.message);
-      res.redirect(`/kessais/${moveTo}`);
+      res.redirect(`/`);
     }
   
   })();
