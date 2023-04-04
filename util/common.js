@@ -81,6 +81,34 @@ const sleep = (time) => {
   })
 };
 
+/**
+ * hhmm形式の文字列が時間に変換できるかチェックする
+ * @param {*} str hhmm形式
+ * @returns true：時間に変換可能、false：時間に変換不可
+ */
+const isTime = (str) => {
+  return str.match(/^([01]?[0-9]|2[0-3])([0-5][0-9])$/) !== null;
+};
+
+/**
+ * yyyymmdd形式の文字列が日付に変換できるかチェックする
+ * @param {*} str yyyymmdd形式
+ * @returns true：日付に変換可能、false：日付に変換不可
+ */
+const isDate = (str) => {
+  if (str.length !== 8) {
+    return false
+  }
+  const arr = (str.substr(0, 4) + '/' + str.substr(4, 2) + '/' + str.substr(6, 2)).split('/');
+  if (arr.length !== 3) return false;
+  const date = new Date(arr[0], arr[1] - 1, arr[2]);
+  if (arr[0] !== String(date.getFullYear()) || arr[1] !== ('0' + (date.getMonth() + 1)).slice(-2) || arr[2] !== ('0' + date.getDate()).slice(-2)) {
+    return false;
+  } else {
+    return true;
+  }
+};
+
 
 module.exports = {
   getYYYYMMDD,
@@ -90,4 +118,6 @@ module.exports = {
   hankaku2Zenkaku,
   zenkakuNum2hankakuNum,
   sleep,
+  isTime,
+  isDate
 };
