@@ -78,6 +78,25 @@
         <dt>請求書PDF</dt>
         <dd><a href="/static/pdf/<%= kessai.id_search %>/<%= kessai.id_search %>-<%= no_keiyaku %>-<%= kessai.yyyymmdd_yoyaku %>-<%= kessai.yyyymmdd_uketuke %>.pdf">請求書</a></dd>
       </dl>
+      <div class="yoyaku-title">【予約情報】
+        <a class="btn-action" href="<%= `/yoyakus/edit/${kessai.id_search}_${kessai.id_customer}` %>">予約編集</a>
+      </div>
+      <dl class="yoyaku-dl">
+        <% yoyakus.forEach( yoyaku => { %>
+          <dd class="oneline-dd">
+            <!-- <p class="tag"><%= `${yoyaku.type_room === '9'?'備品×'+yoyaku.quantity:'部屋'} `%></p> -->
+            <% if (yoyaku.status_shiharai === '受') { %>
+              <p class="tag-red"><%= yoyaku.status_shiharai %></p>
+            <% } else { %>
+              <p class="tag"><%= yoyaku.status_shiharai %></p>
+            <% } %>
+            <!-- <%= yoyaku.no_keiyaku %> <%= yoyaku.nm_riyousha %> |  -->
+            <%= yoyaku.nm_room_seishiki %> | 
+            <%= `${yoyaku.yyyymmdd_yoyaku.slice(0,4)}年${yoyaku.yyyymmdd_yoyaku.slice(4,6)}月${yoyaku.yyyymmdd_yoyaku.slice(6,8)}日` %> <%= `${yoyaku.time_start.slice(0,2)}:${yoyaku.time_start.slice(2,4)}` %>-<%= `${yoyaku.time_end.slice(0,2)}:${yoyaku.time_end.slice(2,4)}` %> | 
+            <%= `${yoyaku.price.toLocaleString()}円` %>
+          </dd>
+        <% }) %>
+      </dl>
       <div class="yoyaku-title">【メール情報】</div>
       <dl class="mail-dl">
         <dt>メールアドレス</dt>
