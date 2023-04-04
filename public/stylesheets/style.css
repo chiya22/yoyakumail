@@ -80,7 +80,6 @@ pre {
 }
 
 .area_header {
-  position: -webkit-sticky;
   position: sticky;
   top: 60px;
   display: block;
@@ -346,6 +345,43 @@ pre {
   letter-spacing: 0.8px;
 }
 
+.yoyaku-input {
+  display: inline-block;
+  background-color: #c9daeb;
+  padding: 10px 20px;
+  border: 1px solid #243856;
+  width: 80%;
+}
+.yoyaku-input:focus {
+  background-color: #ece5da;
+}
+
+.fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+}
+
+.radio-inline__input {
+  clip: rect(1px, 1px, 1px, 1px);
+  position: absolute !important;
+}
+
+.radio-inline__label {
+  display: inline-block;
+  padding: 0.5rem;
+  margin-right: 5px;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+
+.radio-inline__input:checked + .radio-inline__label {
+  background: #243856;
+  color: #fff;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.7);
+}
+
 .tag {
   display: inline-block;
   color: #fff;
@@ -380,7 +416,6 @@ pre {
   cursor: pointer;
   -webkit-user-select: none;
      -moz-user-select: none;
-      -ms-user-select: none;
           user-select: none;
   transition: background-color 0.1s, box-shadow 0.1s;
   font-size: 12px;

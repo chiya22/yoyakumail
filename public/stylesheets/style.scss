@@ -358,6 +358,43 @@ pre {
   letter-spacing: 0.8px;
 }
 
+.yoyaku-input {
+  display: inline-block;
+  background-color: $list-color;
+  padding: 10px 20px;
+  border: 1px solid $base-color;
+  width: 80%;
+  // width: 300px;
+  &:focus {
+    background-color: #ece5da;
+  }
+}
+
+.fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+}
+
+.radio-inline__input {
+  clip: rect(1px, 1px, 1px, 1px);
+  position: absolute !important;
+}
+
+.radio-inline__label {
+  display: inline-block;
+  padding: 0.5rem;
+  margin-right: 5px;
+  border-radius: 3px;
+  transition: all .2s;
+}
+
+.radio-inline__input:checked + .radio-inline__label {
+  background: #243856;
+  color: #fff;
+  text-shadow: 0 0 1px rgba(0,0,0,.7);
+}
 
 // タグ
 .tag {
