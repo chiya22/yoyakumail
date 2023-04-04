@@ -1,17 +1,18 @@
 {
-    "appenders": {
-        "SystemLogAppender": {
-            "type": "dateFile",
-            "filename": "./logs/crud.log",
-            "pattern": "yyyy-MM-dd"
-        }
-    },
-    "categories": {
-        "default": {
-            "appenders": [
-                "SystemLogAppender"
-            ],
-            "level": "all"
-        }
-    }
+  "appenders": {
+      "SystemLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/crud.log",
+          "pattern": "-yyyy-MM-dd",
+          "numBackups" : 40
+      }
+  },
+  "categories": {
+      "default": {
+          "appenders": [
+              "SystemLogAppender"
+          ],
+          "level": "all"
+      }
+  }
 }
