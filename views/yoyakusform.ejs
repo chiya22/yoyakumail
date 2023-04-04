@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>予約情報編集</title>
+    <%- include("./common/stylesheets.ejs") %>
+  </head>
+
+  <body>
+    <!-- 確認メッセージ -->
+    <div class="msg_confirm">
+      <div class="msgarea_confirm">
+        <p class="msgarea_text_confirm">更新します。よろしいですか？</p>
+        <button class="msgarea_okbtn">はい</button>
+        <button class="msgarea_ngbtn">いいえ</button>
+      </div>
+    </div>
+    <!-- 処理中メッセージ -->
+    <div class="msg">
+      <div class="msgarea">
+        <i class="bx bx-burst"><p class="msgarea__text">処理中です</p></i>
+      </div>
+    </div>
+    <%- include("./common/header.ejs", {isTop: false}); %>
+    <div class="main">
+      <div class="main__wrapper">
+        <!-- メッセージ -->
+        <% if (flashMessages) { %> <% if (flashMessages.success) { %>
+        <div class="flashes">
+          <div class="flash success"><%= flashMessages.success %></div>
+        </div>
+        <% } else if (flashMessages.error) { %>
+        <div class="flashes">
+          <div class="flash error"><%= flashMessages.error %></div>
+        </div>
+        <% } %> <% } %>
+        <div class="area_header">
+          <a class="btn-back" href="/kessai/<%= yoyakus[0].id_search %>_<%= yoyakus[0].id_customer %>">戻る</a>
+          <button class="btn-action" id="upd-yoyaku">更新</button>
+        </div>
+        <!-- クライアントエラーメッセージ領域　-->
+        <div class="flashes" style="visibility:hidden">
+          <div id="client_error" class="flash error"></div>
+        </div>
+        <div class="area_yoyakus">
+          <% if (yoyakus) { %>
+          <div style="margin-bottom: 30px">
+            <div class="yoyaku-title">【予約情報】<button id="addline" class="btn-action">行追加</button></div>
+            <dl class="yoyaku-dl">
+              <dt>管理ID</dt>
+              <dd><%= yoyakus[0].id_kanri %></dd>
+              <dt>契約番号</dt>
+              <dd><%= yoyakus[0].no_keiyaku %></dd>
+              <dt>利用者名</dt>
+              <dd><%= yoyakus[0].nm_riyousha %></dd>
+              <dt>契約者名</dt>
+              <dd><%= yoyakus[0].nm_keiyaku %></dd>
+              <dt>担当者名</dt>
+              <dd><%= yoyakus[0].nm_tantousha %></dd>
+              <dt>電話番号</dt>
+              <dd><%= yoyakus[0].nm_telno %></dd>
+              <dt>FAX番号</dt>
+              <dd><%= yoyakus[0].faxno %></dd>
+              <dt>メールアドレス</dt>
+              <dd><%= yoyakus[0].email %></dd>
+              <dt>住所</dt>
+              <dd class="oneline-dd"><%= yoyakus[0].address %></dd>
+            </dl>
+          </div>
+          <form method="POST" name="yoyakusform" action="/updyoyakus/<%= yoyakus[0].id_search %>_<%= yoyakus[0].id_customer %>">
+            <!-- 共通項目 -->
+            <div class="yoyaku-dl">
+              <dt>予約年月日</dt>
+              <dd><input class="yoyaku-input" type="text" name="yyyymmdd_yoyaku" value="<%= yoyakus[0].yyyymmdd_yoyaku %>" /></dd>
+            </div>
+            <input type="hidden" name="status_shiharai" value="<%= yoyakus[0].status_shiharai %>" />
+            <input type="hidden" name="id_kanri" value="<%= yoyakus[0].id_kanri %>" />
+            <input type="hidden" name="nm_riyousha" value="<%= yoyakus[0].nm_riyousha %>" />
+            <input type="hidden" name="no_keiyaku" value="<%= yoyakus[0].no_keiyaku %>" />
+            <input type="hidden" name="nm_keiyaku" value="<%= yoyakus[0].nm_keiyaku %>" />
+            <input type="hidden" name="nm_tantousha" value="<%= yoyakus[0].nm_tantousha %>" />
+            <input type="hidden" name="telno" value="<%= yoyakus[0].telno %>" />
+            <input type="hidden" name="faxno" value="<%= yoyakus[0].faxno %>" />
+            <input type="hidden" name="email" value="<%= yoyakus[0].email %>" />
+            <input type="hidden" name="address" value="<%= yoyakus[0].address %>" />
+            <input type="hidden" name="type_list" value="">
+            <% yoyakus.forEach( yoyaku => { %>
+            <div class="yoyaku-dl yoyakus-yoyaku" id="<%= yoyaku.id %>">
+              <dt>会議室名/備品名</dt>
+              <dd class="oneline-dd">
+                <input class="yoyaku-input" type="text" name="nm_room" value="<%= yoyaku.nm_room %>" /><span class="btn-action" style="margin-left: 10px" onClick="delyoyaku(this)">削除</span>
+              </dd>
+              <dt>開始時間</dt>
+              <dd>
+                <input class="yoyaku-input" type="text" name="time_start" value="<%= yoyaku.time_start %>" />
+              </dd>
+              <dt>終了時間</dt>
+              <dd>
+                <input class="yoyaku-input" type="text" name="time_end" value="<%= yoyaku.time_end %>" />
+              </dd>
+              <dt>価格</dt>
+              <dd>
+                <input class="yoyaku-input" type="text" name="price" value="<%= yoyaku.price %>" />
+              </dd>
+              <dt>数量</dt>
+              <dd>
+                <input class="yoyaku-input" type="text" name="quantity" value="<%= yoyaku.quantity %>" />
+              </dd>
+              <%
+              let type0checked = (yoyaku.type_room === "0"?"checked":"")
+              let type1checked = (yoyaku.type_room === "1"?"checked":"")
+              let type2checked = (yoyaku.type_room === "2"?"checked":"")
+              let type9checked = (yoyaku.type_room === "9"?"checked":"")
+               %>
+              <dt>タイプ</dt>
+              <dd class="oneline-dd">
+                <fieldset>
+                  <input id="item-1<%= yoyaku.id %>" class="radio-inline__input" type="radio" name="type_room" value="0" <%= type0checked %> />
+                  <label class="radio-inline__label" for="item-1<%= yoyaku.id %>">
+                      会議室
+                  </label>
+                  <input id="item-2<%= yoyaku.id %>" class="radio-inline__input" type="radio" name="type_room" value="1" <%= type1checked %>/>
+                  <label class="radio-inline__label" for="item-2<%= yoyaku.id %>">
+                      ミーティングルーム
+                  </label>
+                  <input id="item-3<%= yoyaku.id %>" class="radio-inline__input" type="radio" name="type_room" value="2" <%= type2checked %>/>
+                  <label class="radio-inline__label" for="item-3<%= yoyaku.id %>">
+                      プロジェクトルーム
+                  </label>
+                  <input id="item-4<%= yoyaku.id %>" class="radio-inline__input" type="radio" name="type_room" value="9" <%= type9checked %>/>
+                  <label class="radio-inline__label" for="item-4<%= yoyaku.id %>">
+                      備品
+                  </label>
+                </fieldset>
+              </dd>
+            </div>
+            <% }) %>
+          </form>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </body>
+  <%- include("./common/javascripts.ejs") %>
+  <script>
+    // 「メール一括送信」のダイアログ
+    const btn_upd = document.getElementById("upd-yoyaku");
+    btn_upd.addEventListener("click", () => {
+      scrollTo(0, 0);
+      let msg = document.getElementsByClassName("msg_confirm")[0];
+      msg.style.visibility = "visible";
+    });
+
+    // 確認ダイアログで「OK」を押した場合
+    let okbtn = document.getElementsByClassName("msgarea_okbtn")[0];
+    okbtn.addEventListener("click", () => {
+
+      let errMsg = '';
+
+      // 日付チェック
+      const yyyymmdd_yoyaku = document.getElementsByName("yyyymmdd_yoyaku")[0];
+      if (!isDate(yyyymmdd_yoyaku.value)) {
+        console.log("bbb");
+        errMsg += '予約年月日はyyyymmdd形式で入力してください。</br>'
+      }
+
+      // 部屋名/備品名チェック
+      const nm_room_list = document.querySelectorAll("form > div > dd > input[name='nm_room']");
+      for (let i=0; i < nm_room_list.length; i++) {
+        if (!nm_room_list[i].value){
+          errMsg += '部屋名/備品名は必ず入力してください。('+ (i+1) + '行目)</br>'
+        }
+      }
+      // 時間チェック
+      // const time_start_list = document.querySelectorAll()
+      const time_start_list = document.querySelectorAll("form > div > dd > input[name='time_start']");
+      for (let i=0; i < time_start_list.length; i++) {
+        if (!isTime(time_start_list[i].value)){
+          errMsg += '開始時間はhhmm形式で入力してください。('+ (i+1) + '行目)</br>'
+        }
+      }
+      const time_end_list = document.querySelectorAll("form > div > dd > input[name='time_end']");
+      for (let i=0; i < time_end_list.length; i++) {
+        if (!isTime(time_end_list[i].value)){
+          errMsg += '終了時間はhhmm形式で入力してください。('+ (i+1) + '行目)</br>'
+        }
+      }
+      // 数値チェック
+      const price_list = document.querySelectorAll("form > div > dd > input[name='price']");
+      for (let i=0; i < price_list.length; i++) {
+        if ((!Number.isInteger(Number(price_list[i].value))) || (Number(price_list[i].value) < 0) || (price_list[i].value.length > 11)){
+          errMsg += '価格は11桁以下の正の数値で入力してください。('+ (i+1) + '行目)</br>'
+        }
+      }
+      const quantity_list = document.querySelectorAll("form > div > dd > input[name='quantity']");
+      for (let i=0; i < quantity_list.length; i++) {
+        if ((!Number.isInteger(Number(quantity_list[i].value))) || (Number(quantity_list[i].value) < 0) || (quantity_list[i].value.length > 11)){
+          errMsg += '数量は11桁以下の正の数値で入力してください。('+ (i+1) + '行目)</br>'
+        }
+      }
+
+      //　タイプ取得
+      const type_room_list = document.querySelectorAll("form > div > dd > fieldset > input[type='radio']");
+      const type_list = document.getElementsByName("type_list")[0];
+      let type = [];
+      for (let i=0; i<type_room_list.length; i++) {
+        if (type_room_list[i].checked) {
+          console.log(type_room_list[i].value);
+          type.push(type_room_list[i].value);
+        }
+      }
+      console.dir(type);
+      type_list.value = type;
+
+      // 確認ダイアログを非表示にする
+      let msg_confirm = document.getElementsByClassName("msg_confirm")[0];
+      msg_confirm.style.visibility = "hidden";
+
+      if (errMsg) {
+        // エラーありの場合
+        // エラーメッセージ追加領域
+        const errMsgField = document.getElementById("client_error");
+        errMsgField.innerHTML = errMsg
+        errMsgField.style.visibility = "visible";
+        return
+
+      } else {
+        // エラーなしの場合
+        // 処理中メッセージ領域を表示させる
+        scrollTo(0, 0);
+        let msg = document.getElementsByClassName("msg")[0];
+        msg.style.visibility = "visible";
+        document.yoyakusform.submit();
+      }
+    });
+    // 確認ダイアログで「NG」を押した場合
+    let ngbtn = document.getElementsByClassName("msgarea_ngbtn")[0];
+    ngbtn.addEventListener("click", () => {
+      let msg = document.getElementsByClassName("msg_confirm")[0];
+      msg.style.visibility = "hidden";
+    });
+
+    // 行追加時にid属性に設定する値として使用する
+    let addCount = 0;
+
+    // 予約情報の追加（最後の行をコピーして追加）
+    const btnAddLine = document.getElementById("addline");
+    btnAddLine.addEventListener("click", () => {
+
+      const all_yoyakus = document.getElementsByClassName("yoyakus-yoyaku");
+      const last_yoyaku = all_yoyakus[all_yoyakus.length - 1];
+      const newRow = getNewRow(`AddNewLine${addCount}`);
+      addCount += 1;
+      last_yoyaku.after(newRow);
+    });
+
+    // 予約情報の削除（指定した行の削除）
+    const delyoyaku = (e) => {
+      const parent = e.parentNode.parentNode;
+      const target = document.getElementById(parent.id);
+      target.remove();
+    };
+
+    /**
+     * hhmm形式の文字列が時間に変換できるかチェックする
+     * @param {*} str hhmm形式
+     * @returns true：時間に変換可能、false：時間に変換不可
+     */
+    const isTime = (str) => {
+      return str.match(/^([01]?[0-9]|2[0-3])([0-5][0-9])$/) !== null;
+    };
+
+    /**
+     * yyyymmdd形式の文字列が日付に変換できるかチェックする
+     * @param {*} str yyyymmdd形式
+     * @returns true：日付に変換可能、false：日付に変換不可
+     */
+    const isDate = (str) => {
+      if (str.length !== 8) {
+        return false
+      }
+      const arr = (str.substr(0, 4) + '/' + str.substr(4, 2) + '/' + str.substr(6, 2)).split('/');
+      if (arr.length !== 3) return false;
+      const date = new Date(arr[0], arr[1] - 1, arr[2]);
+      if (arr[0] !== String(date.getFullYear()) || arr[1] !== ('0' + (date.getMonth() + 1)).slice(-2) || arr[2] !== ('0' + date.getDate()).slice(-2)) {
+        return false;
+      } else {
+        return true;
+      }
+    };
+
+    /**
+     * 追加する行のオブジェクトを作成し返却する
+     * @param {*} id 追加行のID
+     * @returns obj：追加行のオブジェクト 
+     */
+    const getNewRow = (id) => {
+      
+      const div = document.createElement("div");
+      div.classList.add("yoyaku-dl", "yoyakus-yoyaku");
+      div.setAttribute("id", id);
+
+      // 会議室名/備品
+      const dt1 = document.createElement("dt");
+      dt1.textContent = "会議室名/備品名";
+      div.appendChild(dt1);
+
+      const dd1 = document.createElement("dd");
+      dd1.classList.add("oneline-dd");
+
+      const input1 = document.createElement("input");
+      input1.classList.add("yoyaku-input");
+      input1.setAttribute("type", "text");
+      input1.setAttribute("name", "nm_room");
+      input1.setAttribute("value", "");
+      dd1.appendChild(input1);
+
+      const span1 = document.createElement("span");
+      span1.classList.add("btn-action");
+      span1.style.marginLeft = "10px";
+      span1.textContent = "削除";
+      span1.onclick = function() {
+        delyoyaku(this);
+      };
+      dd1.appendChild(span1);
+
+      div.appendChild(dd1);
+
+      // 開始時間
+      const dt2 = document.createElement("dt");
+      dt2.textContent = "開始時間";
+      div.appendChild(dt2);
+
+      const dd2 = document.createElement("dd");
+
+      const input2 = document.createElement("input");
+      input2.classList.add("yoyaku-input");
+      input2.setAttribute("type", "text");
+      input2.setAttribute("name", "time_start");
+      input2.setAttribute("value", "");
+      dd2.appendChild(input2);
+
+      div.appendChild(dd2);
+
+      const dt3 = document.createElement("dt");
+      dt3.textContent = "終了時間";
+      div.appendChild(dt3);
+
+      const dd3 = document.createElement("dd");
+
+      const input3 = document.createElement("input");
+      input3.classList.add("yoyaku-input");
+      input3.setAttribute("type", "text");
+      input3.setAttribute("name", "time_end");
+      input3.setAttribute("value", "");
+      dd3.appendChild(input3);
+
+      div.appendChild(dd3);
+
+      // 価格
+      const dt4 = document.createElement("dt");
+      dt4.textContent = "価格";
+      div.appendChild(dt4);
+
+      const dd4 = document.createElement("dd");
+
+      const input4 = document.createElement("input");
+      input4.classList.add("yoyaku-input");
+      input4.setAttribute("type", "text");
+      input4.setAttribute("name", "price");
+      input4.setAttribute("value", "");
+      dd4.appendChild(input4);
+
+      div.appendChild(dd4);
+
+      // 数量
+      const dt5 = document.createElement("dt");
+      dt5.textContent = "数量";
+      div.appendChild(dt5);
+
+      const dd5 = document.createElement("dd");
+
+      const input5 = document.createElement("input");
+      input5.classList.add("yoyaku-input");
+      input5.setAttribute("type", "text");
+      input5.setAttribute("name", "quantity");
+      input5.setAttribute("value", "");
+      dd5.appendChild(input5);
+
+      div.appendChild(dd5);
+
+      // タイプ
+      const dt = document.createElement("dt");
+      dt.textContent = "タイプ";
+      div.appendChild(dt);
+
+      const dd = document.createElement("dd");
+      dd.classList.add("oneline-dd");
+
+      const fieldset = document.createElement("fieldset");
+
+      const radio1 = document.createElement("input");
+      radio1.classList.add("radio-inline__input");
+      radio1.setAttribute("id", "item-1" + id);
+      radio1.setAttribute("type", "radio");
+      radio1.setAttribute("name", "type_room" + id);
+      radio1.setAttribute("value", "0");
+      radio1.setAttribute("checked", "checked");
+
+      const label1 = document.createElement("label");
+      label1.classList.add("radio-inline__label");
+      label1.setAttribute("for", "item-1" + id);
+      label1.textContent = "会議室";
+      fieldset.appendChild(radio1);
+      fieldset.appendChild(label1);
+
+      const radio2 = document.createElement("input");
+      radio2.classList.add("radio-inline__input");
+      radio2.setAttribute("id", "item-2" + id);
+      radio2.setAttribute("type", "radio");
+      radio2.setAttribute("name", "type_room" + id);
+      radio2.setAttribute("value", "1");
+
+      const label2 = document.createElement("label");
+      label2.classList.add("radio-inline__label");
+      label2.setAttribute("for", "item-2" + id);
+      label2.textContent = "ミーティングルーム";
+      fieldset.appendChild(radio2);
+      fieldset.appendChild(label2);
+
+      const radio3 = document.createElement("input");
+      radio3.classList.add("radio-inline__input");
+      radio3.setAttribute("id", "item-3" + id);
+      radio3.setAttribute("type", "radio");
+      radio3.setAttribute("name", "type_room" + id);
+      radio3.setAttribute("value", "2");
+
+      const label3 = document.createElement("label");
+      label3.classList.add("radio-inline__label");
+      label3.setAttribute("for", "item-3" + id);
+      label3.textContent = "プロジェクトルーム";
+      fieldset.appendChild(radio3);
+      fieldset.appendChild(label3);
+
+      const radio4 = document.createElement("input");
+      radio4.classList.add("radio-inline__input");
+      radio4.setAttribute("id", "item-4" + id);
+      radio4.setAttribute("type", "radio");
+      radio4.setAttribute("name", "type_room" + id);
+      radio4.setAttribute("value", "9");
+
+      const label4 = document.createElement("label");
+      label4.classList.add("radio-inline__label");
+      label4.setAttribute("for", "item-4" + id);
+      label4.textContent = "備品";
+      fieldset.appendChild(radio4);
+      fieldset.appendChild(label4);
+
+      dd.appendChild(fieldset);
+      div.appendChild(dd);
+
+      return div;
+    }
+
+  </script>
+</html>
