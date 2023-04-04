@@ -40,6 +40,23 @@ const findByIdSearchAndCustomer = async ( id_search, id_customer ) => {
   }
 };
 
+// 
+/**
+ * 検索情報ID内のMAXのIDを取得する
+ * @param {*} id_search 
+ * @returns 検索情報ID内のIDの最大値（Y+id_search+5桁の連番）
+ */
+const findMaxId = async ( id_search ) => {
+  try {
+    const query = `select MAX(id) as maxnum from yoyakus where id_search = "${id_search}" group by id_search`
+    // logger.info(query);
+    const retObj = await knex.raw(query);
+    return retObj[0];
+  } catch (err) {
+    throw err;
+  }
+};
+
 const insert = async (inObj) => {
   try {
     const query =
@@ -133,12 +150,31 @@ const removeByIdSearch = async (id) => {
   }
 };
 
+/**
+ * 検索情報ID＋顧客情報IDをキーに対象となる予約情報を削除する
+ * @param {*} id_search 検索情報ID
+ * @param {*} id_customer 顧客情報ID
+ */
+const removeByIdSearchAndIdCustomer = async (id_search, id_customer) => {
+  try {
+    const query = `delete from yoyakus where id_search = "${id_search}" and id_customer = "${id_customer}"`;
+    // logger.info(query);
+    const retObj = await knex.raw(query);
+    return retObj[0];
+  } catch (err) {
+    logger.error(err.message);
+    throw err;
+  }
+};
+
 module.exports = {
   find,
   findPKey,
   findByIdSearch,
   findByIdSearchAndCustomer,
+  findMaxId,
   insert,
   remove,
   removeByIdSearch,
+  removeByIdSearchAndIdCustomer,
 };
