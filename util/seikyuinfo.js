@@ -17,7 +17,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // 決済情報に対応する請求書PDFを作成する
-const createSeikyuPDF = async (id_customer,id_search) => {
+const createSeikyuPDF = async (id_search,id_customer) => {
 
   // 決済情報を取得する
   const kessai = await m_kessais.findPKey(id_search,id_customer);
@@ -25,7 +25,7 @@ const createSeikyuPDF = async (id_customer,id_search) => {
   //　対応する予約情報を取得する
   (async () => {
 
-    let yoyakus = await m_yoyakus.findByIdSearchAndCustomer(id_search, kessai.id_customer);
+    let yoyakus = await m_yoyakus.findByIdSearchAndCustomer(id_search, id_customer);
 
     //　予約情報から請求書（PDF）出力情報を作成する
     let meisais = [];
@@ -110,7 +110,7 @@ const createSeikyuPDF = async (id_customer,id_search) => {
       name_riyou.setAttribute("font-size", "10");
     }
 
-    // 発行日　★ToDo
+    // 発行日
     let ymdyoubi_hakkou = document.querySelector("#__ymdyoubi_hakkou > tspan");
     let yyyymmdd_now = common.getYYYYMMDD(new Date());
     ymdyoubi_hakkou.textContent = `${yyyymmdd_now.slice(0,4)}年${yyyymmdd_now.slice(4,6)}月${yyyymmdd_now.slice(6,8)}日\r\n`;
