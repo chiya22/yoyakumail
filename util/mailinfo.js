@@ -12,158 +12,193 @@ if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 
-// メール情報を作成し、決済情報へ格納する
-const setMailContent = async (id_search) => {
+/**
+ * 決済情報からメール情報を作成し、決済情報へ範囲する
+ * 顧客情報IDが設定されている場合は、1件の決済情報を対象とする
+ * 顧客情報IDが設定されていない場合は、検索情報IDに紐づくすべての決済情報を対象とする
+ * 
+ * @param {*} id_search 
+ * @param {*} id_customer 
+ */
+const setMailContent = async (id_search, id_customer = null) => {
 
-  // 決済情報を取得する
-  const kessais = await m_kessais.findByIdSearch(id_search);
+  if (id_customer) {
 
-  // 各決済情報に対する処理
-  kessais.forEach( (kessai) => {
+    // 決済情報を取得する（1件）
+    const kessai = await m_kessais.findPKey(id_search, id_customer);
+    // メール文を作成
+    const inObj = await makeMailBody(id_search, id_customer, kessai);
+    // 決済情報を更新する
+    await m_kessais.updatekessaisByMailinfo(inObj);
 
-    //　対応する予約情報を取得する
-    (async () => {
+  } else {
 
-      let yoyakus = await m_yoyakus.findByIdSearchAndCustomer(id_search, kessai.id_customer);
+    // 検索情報IDで決済情報を取得する
+    const kessais = await m_kessais.findByIdSearch(id_search);
 
-      //　予約情報から明細情報を作成する
-      let meisai = '';
-      yoyakus.forEach( (yoyaku) => {
-        if (yoyaku.type_room === '9') {
-          meisai += yoyaku.nm_room + "(" + yoyaku.time_start.slice(0,2) + ":" + yoyaku.time_start.slice(-2) + "-" + yoyaku.time_end.slice(0,2) + ":" + yoyaku.time_end.slice(-2) + ") × " + yoyaku.quantity + "  " + yoyaku.price.toLocaleString() + "円(税込)\r\n"
-        } else {
-          meisai += yoyaku.nm_room + "(" + yoyaku.time_start.slice(0,2) + ":" + yoyaku.time_start.slice(-2) + "-" + yoyaku.time_end.slice(0,2) + ":" + yoyaku.time_end.slice(-2) + ")   " + yoyaku.price.toLocaleString() + "円(税込)\r\n"
-        }
-      });
+    // 各決済情報に対する処理
+    let inObj = {};
+    kessais.forEach((kessai) => {
+      (async () => {
+        // メール文を作成
+        inObj = await makeMailBody(id_search, kessai.id_customer, kessai);
+        // 決済情報を更新
+        await m_kessais.updatekessaisByMailinfo(inObj);
+      })();
+    });
 
-      let mailbody_before = '';
-      let mailbody = '';
-      let mailbody_cvs = '';
-      let mailbody_after = '';
+ }
+}
 
-      mailbody_before += "＜会議室・ミーティングルーム予約確認書及びご請求書＞\r\n";
-      mailbody_before += "この度はちよだプラットフォームスクウェア会議室を\r\n";
-      mailbody_before += "ご予約いただきありがとうございます。\r\n"
-      mailbody_before += "下記の内容にて承りましたのでご確認ください。\r\n"
-      mailbody_before += "\r\n"
-
-      // （表示名：XXX）があれば削除する　例）■　１２３４　株式会社ＡＡＡ（表示名：ＢＢＢ）　⇒　■　１２３４　株式会社ＡＡＡ
-      let nm_keiyaku = kessai.nm_keiyaku;
-      if (nm_keiyaku.indexOf("（表示") !== -1) {
-        nm_keiyaku = kessai.nm_keiyaku.slice(0,kessai.nm_keiyaku.indexOf("（表示"));
-      }
-      // 「登録区分　登録名」の場合に「登録名」を抜き出す　例）■　１２３４　株式会社ＡＡＡ　⇒　１２３４　株式会社ＡＡＡ
-      if (nm_keiyaku.indexOf("　") !== -1) {
-        nm_keiyaku = nm_keiyaku.slice(nm_keiyaku.indexOf("　")+1);
-      }
-      // 「入居番号　登録名」の場合に「登録名」を抜き出す　例）１２３４　株式会社ＡＡＡ　⇒　株式会社ＡＡＡ
-      if (!isNaN(common.zenkakuNum2hankakuNum(nm_keiyaku.slice(0,4)))) {
-        nm_keiyaku = nm_keiyaku.slice(5);
-      }
-
-      // 会社名と担当者名が同一の場合は、会社名のみを宛先名として出力する
-      if (nm_keiyaku.trim().replace(" ","").replace("　","") !== kessai.nm_tantousha.trim().replace(" ","").replace("　","")) {
-        mailbody_before += "ご利用者名： " + nm_keiyaku.trim() + " " + kessai.nm_tantousha.trim() + "　様\r\n"
-      } else {
-        mailbody_before += "ご利用者名： " + nm_keiyaku.trim() + "　様\r\n"
-      }
-      mailbody_before += "ご連絡先： " + kessai.email + "\r\n"
-      mailbody_before += `ご予約受付日：${common.getTodayTime().slice(0,4)}年${common.getTodayTime().slice(4,6)}月${common.getTodayTime().slice(6,8)}日\r\n`
-      mailbody_before += `ご利用日： ${kessai.yyyymmdd_yoyaku.slice(0,4)}年${kessai.yyyymmdd_yoyaku.slice(4,6)}月${kessai.yyyymmdd_yoyaku.slice(6,8)}日\r\n`
-      mailbody_before += "利用施設：\r\n"
-      mailbody_before += meisai + "\r\n\r\n"
-      mailbody_before += "ご利用料金合計： " + kessai.price.toLocaleString() + "円(税込)\r\n"
-      mailbody_before += "\r\n"
+/**
+ * 引数で取得した検索情報IDに紐づく予約情報と、
+ * 引数で取得した検索情報ID、顧客情報IDに紐づく決済情報をもとに、
+ * メール文章を作成し、メール情報が格納されたオブジェクトを返却する
+ * 
+ * @param {*} id_search 検索情報ID
+ * @param {*} id_customer 顧客情報ID
+ * @param {*} kessai 決済情報
+ * @returns inObj メールタイトル、メール本文が格納されたオブジェクト
+ */
+const makeMailBody = async (id_search, id_customer, kessai) => {
   
-      // メール本文（コンビニ決済対象）
-      mailbody_cvs += "使用料は、【7日以内】に下記の手順に従い、\r\n"
-      mailbody_cvs += "コンビニ決済、銀行振込または現金にてお願いいたします。\r\n"
-      mailbody_cvs += "尚、必ずご利用時までにお支払いください。\r\n"
-      mailbody_cvs += "ご利用日が７日以内の場合、当日受付でもお支払いいただけます。\r\n"
-      mailbody_cvs += "\r\n"
-      mailbody_cvs += "【コンビニ決済】\r\n"
-      mailbody_cvs += "　下記URLより決済コードを取得の上、店頭にてお支払いください。\r\n"
-      mailbody_cvs += "　※手数料は発生しません。\r\n"
-      mailbody_cvs += "\r\n"
-      mailbody_cvs += "　" + kessai.url_cvs + "\r\n"
-      mailbody_cvs += "\r\n"
-      mailbody_cvs += "　※携帯電話等からもご利用いただけます。\r\n"
-      mailbody_cvs += "\r\n"
+  // 予約情報取得
+  let yoyakus = await m_yoyakus.findByIdSearchAndCustomer(id_search, id_customer);
 
-      // メール本文（コンビニ決済対象外）
-      mailbody += "使用料は、【7日以内】に下記の手順に従い、\r\n"
-      mailbody += "銀行振込または現金にてお願いいたします。\r\n"
-      mailbody += "尚、必ずご利用時までにお支払いください。\r\n"
-      mailbody += "ご利用日が７日以内の場合、当日受付でもお支払いいただけます。\r\n"
-      mailbody += "\r\n"
-      mailbody += "(コンビニ決済はオンライン予約の場合のみ承っております。)\r\n"
-      mailbody += "\r\n"
-  
-      // 共通部分
-      mailbody_after += "【銀行振込】\r\n"
-      mailbody_after += "　三菱UFJ銀行　東京営業部\r\n"
-      mailbody_after += "　普通　6974978　プラットフォームサービス(カ\r\n"
-      mailbody_after += "　※必ず、「利用登録NO.」もしくは「(冠称を除いた)利用登録名」にてお振込みください。\r\n"
-      mailbody_after += "　※振込手数料はご負担ください。\r\n"
-      mailbody_after += "\r\n"
-      mailbody_after += "【現金】\r\n"
-      mailbody_after += "　ちよだプラットフォームスクウェア・コンシェルジュまでお持ちください。\r\n"
-      mailbody_after += "　受付時間は平日10:00～17:00となっております。\r\n"
-      mailbody_after += "\r\n"
-      mailbody_after += "尚、本書面を以て料金が発生いたします。キャンセルは承っておりません。\r\n"
-      mailbody_after += "\r\n"
-      mailbody_after += "●ご予約の誤り\r\n"
-      mailbody_after += "お手数ですが、本日中に【TEL：03-5259-8400（平日10:00～17:00）】まで\r\n"
-      mailbody_after += "ご連絡ください。明日以降のご連絡の場合、対応いたしかねます。\r\n"
-      mailbody_after += "\r\n"
-      mailbody_after += "●ご予約の変更\r\n"
-      mailbody_after += "1回のみ、ご利用日の2週間前の同じ曜日（土日祝の場合その前の平日）まで\r\n"
-      mailbody_after += "お電話にて受付いたします。それ以降はお受けできませんのでご了承ください。\r\n"
-      mailbody_after += "\r\n"
-      mailbody_after += "●ご利用当日について\r\n"
-      mailbody_after += "・「会議室利用登録証」を受付へ必ずご提示ください。\r\n"
-      mailbody_after += "　（初回は本メールの文面をお持ちください。）\r\n"
-      mailbody_after += "・会議室への飲食物の持ち込みはお断りしております。\r\n"
-      mailbody_after += "　飲食を希望される方は、1階カフェしまゆしにご相談ください。\r\n"
-      mailbody_after += "・駐輪・駐車場はございません。近くのコインパーキングを\r\n"
-      mailbody_after += "　ご利用いただくか、公共の交通機関をご利用ください。\r\n"
-      mailbody_after += "\r\n"
-      mailbody_after += "ご利用お待ち申し上げております。\r\n"
-      mailbody_after += "\r\n"
-      mailbody_after += "--------------------------------------------\r\n"
-      mailbody_after += "プラットフォームサービス株式会社\r\n"
-      mailbody_after += "Tel  : 03-3233-1511\r\n"
-      mailbody_after += "Fax : 03-3233-1501\r\n"
-      mailbody_after += "Mail: concierge@yamori.jp\r\n"
-      mailbody_after += "--------------------------------------------\r\n"
-      mailbody_after += "\r\n"
-      mailbody_after += "～ちよだプラットフォームスクウェアのご案内～\r\n"
-      mailbody_after += "〒101-0054 千代田区神田錦町3-21\r\n"
-      mailbody_after += "\r\n"
-      mailbody_after += "○コンシェルジュ○　TEL：03-3233-1511\r\n"
-      mailbody_after += "　会議室対応：月-土9時～22時／日祝9時～19時\r\n"
-      mailbody_after += "　（予約受付は平日10時～17時のみ）\r\n"
-      mailbody_after += "\r\n"
-      mailbody_after += "○しまゆし○　TEL：03-5259-8051\r\n"
-      mailbody_after += "　営業：平日10時～22時／土曜10時～14時\r\n"
-      mailbody_after += "　（日祝休み）\r\n"
-      mailbody_after += "\r\n"
-      mailbody_after += "○ビジネスセンター○　TEL：03-5259-8020\r\n"
-      mailbody_after += "　営業：平日9時～19時\r\n"
-      mailbody_after += "　（土日祝休み）\r\n"
-  
-      let inObj = {};
-      inObj.id_customer = kessai.id_customer;
-      inObj.id_search = id_search;
-      inObj.mail_subject = "会議室・ミーティングルーム予約確認書及びご請求書";
-      inObj.mail_body = mailbody_before + mailbody + mailbody_after;
-      inObj.mail_body_cvs = mailbody_before + mailbody_cvs + mailbody_after;
-  
-      await m_kessais.updatekessaisByMailinfo(inObj);
-
-    })();
-
+  //　予約情報から明細情報を作成する
+  let meisai = '';
+  yoyakus.forEach( (yoyaku) => {
+    if (yoyaku.type_room === '9') {
+      meisai += yoyaku.nm_room + "(" + yoyaku.time_start.slice(0,2) + ":" + yoyaku.time_start.slice(-2) + "-" + yoyaku.time_end.slice(0,2) + ":" + yoyaku.time_end.slice(-2) + ") × " + yoyaku.quantity + "  " + yoyaku.price.toLocaleString() + "円(税込)\r\n"
+    } else {
+      meisai += yoyaku.nm_room + "(" + yoyaku.time_start.slice(0,2) + ":" + yoyaku.time_start.slice(-2) + "-" + yoyaku.time_end.slice(0,2) + ":" + yoyaku.time_end.slice(-2) + ")   " + yoyaku.price.toLocaleString() + "円(税込)\r\n"
+    }
   });
+
+  let mailbody_before = '';
+  let mailbody = '';
+  let mailbody_cvs = '';
+  let mailbody_after = '';
+
+  mailbody_before += "＜会議室・ミーティングルーム予約確認書及びご請求書＞\r\n";
+  mailbody_before += "この度はちよだプラットフォームスクウェア会議室を\r\n";
+  mailbody_before += "ご予約いただきありがとうございます。\r\n"
+  mailbody_before += "下記の内容にて承りましたのでご確認ください。\r\n"
+  mailbody_before += "\r\n"
+
+  // （表示名：XXX）があれば削除する　例）■　１２３４　株式会社ＡＡＡ（表示名：ＢＢＢ）　⇒　■　１２３４　株式会社ＡＡＡ
+  let nm_keiyaku = kessai.nm_keiyaku;
+  if (nm_keiyaku.indexOf("（表示") !== -1) {
+    nm_keiyaku = kessai.nm_keiyaku.slice(0,kessai.nm_keiyaku.indexOf("（表示"));
+  }
+  // 「登録区分　登録名」の場合に「登録名」を抜き出す　例）■　１２３４　株式会社ＡＡＡ　⇒　１２３４　株式会社ＡＡＡ
+  if (nm_keiyaku.indexOf("　") !== -1) {
+    nm_keiyaku = nm_keiyaku.slice(nm_keiyaku.indexOf("　")+1);
+  }
+  // 「入居番号　登録名」の場合に「登録名」を抜き出す　例）１２３４　株式会社ＡＡＡ　⇒　株式会社ＡＡＡ
+  if (!isNaN(common.zenkakuNum2hankakuNum(nm_keiyaku.slice(0,4)))) {
+    nm_keiyaku = nm_keiyaku.slice(5);
+  }
+
+  // 会社名と担当者名が同一の場合は、会社名のみを宛先名として出力する
+  if (nm_keiyaku.trim().replace(" ","").replace("　","") !== kessai.nm_tantousha.trim().replace(" ","").replace("　","")) {
+    mailbody_before += "ご利用者名： " + nm_keiyaku.trim() + " " + kessai.nm_tantousha.trim() + "　様\r\n"
+  } else {
+    mailbody_before += "ご利用者名： " + nm_keiyaku.trim() + "　様\r\n"
+  }
+  mailbody_before += "ご連絡先： " + kessai.email + "\r\n"
+  mailbody_before += `ご予約受付日：${common.getTodayTime().slice(0,4)}年${common.getTodayTime().slice(4,6)}月${common.getTodayTime().slice(6,8)}日\r\n`
+  mailbody_before += `ご利用日： ${kessai.yyyymmdd_yoyaku.slice(0,4)}年${kessai.yyyymmdd_yoyaku.slice(4,6)}月${kessai.yyyymmdd_yoyaku.slice(6,8)}日\r\n`
+  mailbody_before += "利用施設：\r\n"
+  mailbody_before += meisai + "\r\n\r\n"
+  mailbody_before += "ご利用料金合計： " + kessai.price.toLocaleString() + "円(税込)\r\n"
+  mailbody_before += "\r\n"
+
+  // メール本文（コンビニ決済対象）
+  mailbody_cvs += "使用料は、【7日以内】に下記の手順に従い、\r\n"
+  mailbody_cvs += "コンビニ決済、銀行振込または現金にてお願いいたします。\r\n"
+  mailbody_cvs += "尚、必ずご利用時までにお支払いください。\r\n"
+  mailbody_cvs += "ご利用日が７日以内の場合、当日受付でもお支払いいただけます。\r\n"
+  mailbody_cvs += "\r\n"
+  mailbody_cvs += "【コンビニ決済】\r\n"
+  mailbody_cvs += "　下記URLより決済コードを取得の上、店頭にてお支払いください。\r\n"
+  mailbody_cvs += "　※手数料は発生しません。\r\n"
+  mailbody_cvs += "\r\n"
+  mailbody_cvs += "　" + kessai.url_cvs + "\r\n"
+  mailbody_cvs += "\r\n"
+  mailbody_cvs += "　※携帯電話等からもご利用いただけます。\r\n"
+  mailbody_cvs += "\r\n"
+
+  // メール本文（コンビニ決済対象外）
+  mailbody += "使用料は、【7日以内】に下記の手順に従い、\r\n"
+  mailbody += "銀行振込または現金にてお願いいたします。\r\n"
+  mailbody += "尚、必ずご利用時までにお支払いください。\r\n"
+  mailbody += "ご利用日が７日以内の場合、当日受付でもお支払いいただけます。\r\n"
+  mailbody += "\r\n"
+  mailbody += "(コンビニ決済はオンライン予約の場合のみ承っております。)\r\n"
+  mailbody += "\r\n"
+
+  // 共通部分
+  mailbody_after += "【銀行振込】\r\n"
+  mailbody_after += "　三菱UFJ銀行　東京営業部\r\n"
+  mailbody_after += "　普通　6974978　プラットフォームサービス(カ\r\n"
+  mailbody_after += "　※必ず、「利用登録NO.」もしくは「(冠称を除いた)利用登録名」にてお振込みください。\r\n"
+  mailbody_after += "　※振込手数料はご負担ください。\r\n"
+  mailbody_after += "\r\n"
+  mailbody_after += "【現金】\r\n"
+  mailbody_after += "　ちよだプラットフォームスクウェア・コンシェルジュまでお持ちください。\r\n"
+  mailbody_after += "　受付時間は平日10:00～17:00となっております。\r\n"
+  mailbody_after += "\r\n"
+  mailbody_after += "尚、本書面を以て料金が発生いたします。キャンセルは承っておりません。\r\n"
+  mailbody_after += "\r\n"
+  mailbody_after += "●ご予約の誤り\r\n"
+  mailbody_after += "お手数ですが、本日中に【TEL：03-5259-8400（平日10:00～17:00）】まで\r\n"
+  mailbody_after += "ご連絡ください。明日以降のご連絡の場合、対応いたしかねます。\r\n"
+  mailbody_after += "\r\n"
+  mailbody_after += "●ご予約の変更\r\n"
+  mailbody_after += "1回のみ、ご利用日の2週間前の同じ曜日（土日祝の場合その前の平日）まで\r\n"
+  mailbody_after += "お電話にて受付いたします。それ以降はお受けできませんのでご了承ください。\r\n"
+  mailbody_after += "\r\n"
+  mailbody_after += "●ご利用当日について\r\n"
+  mailbody_after += "・「会議室利用登録証」を受付へ必ずご提示ください。\r\n"
+  mailbody_after += "　（初回は本メールの文面をお持ちください。）\r\n"
+  mailbody_after += "・会議室への飲食物の持ち込みはお断りしております。\r\n"
+  mailbody_after += "　飲食を希望される方は、1階カフェしまゆしにご相談ください。\r\n"
+  mailbody_after += "・駐輪・駐車場はございません。近くのコインパーキングを\r\n"
+  mailbody_after += "　ご利用いただくか、公共の交通機関をご利用ください。\r\n"
+  mailbody_after += "\r\n"
+  mailbody_after += "ご利用お待ち申し上げております。\r\n"
+  mailbody_after += "\r\n"
+  mailbody_after += "--------------------------------------------\r\n"
+  mailbody_after += "プラットフォームサービス株式会社\r\n"
+  mailbody_after += "Tel  : 03-3233-1511\r\n"
+  mailbody_after += "Fax : 03-3233-1501\r\n"
+  mailbody_after += "Mail: concierge@yamori.jp\r\n"
+  mailbody_after += "--------------------------------------------\r\n"
+  mailbody_after += "\r\n"
+  mailbody_after += "～ちよだプラットフォームスクウェアのご案内～\r\n"
+  mailbody_after += "〒101-0054 千代田区神田錦町3-21\r\n"
+  mailbody_after += "\r\n"
+  mailbody_after += "○コンシェルジュ○　TEL：03-3233-1511\r\n"
+  mailbody_after += "　会議室対応：月-土9時～22時／日祝9時～19時\r\n"
+  mailbody_after += "　（予約受付は平日10時～17時のみ）\r\n"
+  mailbody_after += "\r\n"
+  mailbody_after += "○しまゆし○　TEL：03-5259-8051\r\n"
+  mailbody_after += "　営業：平日10時～22時／土曜10時～14時\r\n"
+  mailbody_after += "　（日祝休み）\r\n"
+  mailbody_after += "\r\n"
+  mailbody_after += "○ビジネスセンター○　TEL：03-5259-8020\r\n"
+  mailbody_after += "　営業：平日9時～19時\r\n"
+  mailbody_after += "　（土日祝休み）\r\n"
+
+  let inObj = {};
+  inObj.id_customer = id_customer;
+  inObj.id_search = id_search;
+  inObj.mail_subject = "会議室・ミーティングルーム予約確認書及びご請求書";
+  inObj.mail_body = mailbody_before + mailbody + mailbody_after;
+  inObj.mail_body_cvs = mailbody_before + mailbody_cvs + mailbody_after;
+
+  return inObj;
 }
 
 //  検索情報ID配下のすべての決済情報をもとに、メールを送信する
@@ -251,11 +286,11 @@ const send = (mail_to,title, content, id_search, filename, isPDF) => {
   let message = {
     from: process.env.MAIL_FROM,
     // テスト用として宛先を強制的に変更
-    // to: 'yoshida@yamori.jp',
-    to: mail_to,
+    to: 'yoshida@yamori.jp',
+    // to: mail_to,
     // テスト用として件名に【テスト】を追加
-    // subject: `【吉田 | 請求書電子化テスト】${title}`,
-    subject: title,
+    subject: `【吉田 | 請求書電子化テスト】${title}`,
+    // subject: title,
     text: content,
   };
 
