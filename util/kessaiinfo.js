@@ -18,18 +18,27 @@ if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 
-// 検索情報IDに紐づく決済情報をファイルに出力する（電算システムアップロード用）
-const outputFile = async (id_search) => {
+/**
+ * 検索情報ID＋顧客情報IDをキーに、決済情報をファイルへ出力する（電算システムアップロード用）
+ * 顧客情報IDが設定されていない場合は、検索情報IDに紐づくすべての決済情報が対象となる
+ * @param {*} id_search 検索情報ID
+ * @param {*} id_customer 顧客情報ID
+ * @returns 
+ */
+const outputFile = async (id_search, id_customer = null) => {
 
-  const kessais = await m_kessais.findByIdSearch(id_search);
+  let content = "";
+  if (id_customer) {
+    const kessai = await m_kessais.findPKey(id_search, id_customer);
+    content += kessai.id_customer + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + kessai.nm_customer_2 + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
+  } else {
+    const kessais = await m_kessais.findByIdSearch(id_search);
+    kessais.forEach( kessai => {
+      content += kessai.id_customer + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + kessai.nm_customer_2 + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
+    });
+  }
 
   const outFileName = process.env.KESSAI_UP_PATH + "\\kessaiinfo" + common.getTodayTime() + ".csv";
-  let content = "";
-
-  kessais.forEach( kessai => {
-    content += kessai.id_customer + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + kessai.nm_customer_2 + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
-  });
-
   const content_SJIS = iconv.encode(content, "Shift_JIS");
   await fs.writeFileSync(outFileName, content_SJIS);
 
@@ -37,8 +46,13 @@ const outputFile = async (id_search) => {
 
 }
 
-// 電算システムへ決済依頼データをアップロードする
-const upkessaiinfo = async (id_search, upFilepath) => {
+/**
+ * 電算システムへ決済依頼データをアップロードする
+ * @param {*} key 電算システムへアップロードする際にコメント欄へ記載するキー情報
+ * @param {*} upFilepath アップロード対象ファイルパス
+ * @returns 
+ */
+const upkessaiinfo = async (key, upFilepath) => {
 
   // ★ヘッドレス設定
   const browser = await puppeteer.launch({ headless: true });
@@ -71,7 +85,7 @@ const upkessaiinfo = async (id_search, upFilepath) => {
   await page.waitForTimeout(process.env.WAITTIME);
 
   // コメントへ検索情報IDを設定する
-  await page.type('input[name="comment"]', id_search);
+  await page.type('input[name="comment"]', key);
 
   // アップロードファイルを設定
   const inputUploadfile = await page.$('input[type="file"]');
@@ -134,8 +148,12 @@ const upkessaiinfo = async (id_search, upFilepath) => {
   }
 }
 
-// 電算システムから決済結果データをダウンロードする
-const dlkessaiinfo = async (id_search) => {
+/**
+ * 電算システムより決済結果データをダウンロードする
+ * @param {*} key 電算システムの決済結果データを検索する際にコメント欄に設定する文字列
+ * @returns 
+ */
+const dlkessaiinfo = async (key) => {
 
   // ★ヘッドレス設定
   const browser = await puppeteer.launch({ headless: true });
@@ -166,8 +184,8 @@ const dlkessaiinfo = async (id_search) => {
   
   await page.waitForTimeout(process.env.WAITTIME);
 
-  // コメントに検索IDを設定
-  await page.type('input[name="comm"]', id_search);
+  // コメントにKEYを設定
+  await page.type('input[name="comm"]', key);
 
   // アップロード処理日のToに現在の日付を設定
   await page.type("#fra_main > center:nth-child(3) > form:nth-child(2) > table.ViewTBL > tbody > tr:nth-child(1) > td > input[type=text]:nth-child(2)", common.getTodayTime().slice(0,8));
@@ -220,14 +238,25 @@ const dlkessaiinfo = async (id_search) => {
   }
 }
 
-// 電算システムよりダウンロードした決済結果データをもとに決済テーブルへ反映させる
+/**
+ * 電算システムよりダウンロードした決済結果データをもとに決済テーブルへ反映させる
+ * 
+ * ＜注意＞
+ * 検索情報IDは反映対象の決済情報を特定する際に使用される
+ * 電算システムよりダウンロードした決済結果データには存在しないため
+ * 
+ * @param {*} id 検索情報ID
+ * @param {*} dlfilename ダウンロードファイル名 
+ * @returns 
+ */
 const updkessaiinfo = async (id_search, dlfilename) => {
 
   let targetfilename = "";
 
+  // ダウンロードディレクトリの中のファイルを総当たり
   fs.readdirSync(process.env.YOYAKU_DL_PATH).forEach((filename) => {
 
-    // 決済結果ダウンロードファイルの場合
+    // ファイル名が合致した場合
     if (filename === dlfilename) {
 
       targetfilename = filename;
@@ -256,7 +285,7 @@ const updkessaiinfo = async (id_search, dlfilename) => {
         inObj.message = linecontents[10];
 
         // 請求書のPDFファイルを作成し、そのパス情報を取得する
-        seikyuinfo.createSeikyuPDF(inObj.id_customer, inObj.id_search);
+        seikyuinfo.createSeikyuPDF(inObj.id_search, inObj.id_customer);
         
         (async () => {
           // 決済情報へ反映する
@@ -278,7 +307,6 @@ const updkessaiinfo = async (id_search, dlfilename) => {
     }
   })
 };
-
 
 module.exports = {
   outputFile,
