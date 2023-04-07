@@ -24,6 +24,12 @@ const getBeforeday = () => {
   return getYYYYMMDD(date);
 }
 
+const getAfterday = () => {
+  let date = new Date();
+  date.setDate(date.getDate() + 1);
+  return getYYYYMMDD(date);
+}
+
 const getNextYearday = () => {
   let date = new Date();
   date.setFullYear(date.getFullYear() + 1);
@@ -114,6 +120,7 @@ module.exports = {
   getYYYYMMDD,
   getTodayTime,
   getBeforeday,
+  getAfterday,
   getNextYearday,
   hankaku2Zenkaku,
   zenkakuNum2hankakuNum,
