@@ -28,12 +28,14 @@ router.get("/", (req, res) => {
 
     const curYyyymmdd = common.getTodayTime().slice(0, 8);
     const curYyyymmdd_minus1Day = common.getBeforeday();
+    const curYyyymmdd_plus1Day = common.getAfterday();
     const curYyyymmdd_plus1Year = common.getNextYearday();
 
     res.render("index", {
       curYyyymmdd: curYyyymmdd,
       curYyyymmdd_minus1Day: curYyyymmdd_minus1Day,
       curYyyymmdd_plus1Year: curYyyymmdd_plus1Year,
+      curYyyymmdd_plus1Day: curYyyymmdd_plus1Day,
       searchinfos: searchinfos,
       logininfo: logininfo,
     });
