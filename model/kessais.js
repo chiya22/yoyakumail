@@ -267,7 +267,7 @@ const remove = async (id_search, id_customer = null) => {
     if (id_customer) {
       query = `delete from kessais where id_customer = "${id_customer}" and id_search = "${id_search}"`;
     } else {
-      query = `delete from kessais where id_customer = id_search = "${id_search}"`;
+      query = `delete from kessais where id_search = "${id_search}"`;
     }
     const retObj = await knex.raw(query);
     return retObj[0];
