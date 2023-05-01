@@ -81,7 +81,7 @@
             <input type="hidden" name="telno" value="<%= yoyakus[0].telno %>" />
             <input type="hidden" name="faxno" value="<%= yoyakus[0].faxno %>" />
             <input type="hidden" name="email" value="<%= yoyakus[0].email %>" />
-            <input type="hidden" name="address" value="<%= yoyakus[0].address %>" />
+            <input type="hidden" name="address" value="<%= yoyakus[0].address %>" />  
             <input type="hidden" name="type_list" value="">
             <% yoyakus.forEach( yoyaku => { %>
             <div class="yoyaku-dl yoyakus-yoyaku" id="<%= yoyaku.id %>">
@@ -114,20 +114,20 @@
               <dt>タイプ</dt>
               <dd class="oneline-dd">
                 <fieldset>
-                  <input id="item-1<%= yoyaku.id %>" class="radio-inline__input" type="radio" name="type_room" value="0" <%= type0checked %> />
-                  <label class="radio-inline__label" for="item-1<%= yoyaku.id %>">
+                  <input id="item-1-<%= yoyaku.id %>" class="radio-inline__input" type="radio" name="type_room_<%= yoyaku.id %>" value="0" <%= type0checked %>/>
+                  <label for="item-1-<%= yoyaku.id %>" class="radio-inline__label">
                       会議室
                   </label>
-                  <input id="item-2<%= yoyaku.id %>" class="radio-inline__input" type="radio" name="type_room" value="1" <%= type1checked %>/>
-                  <label class="radio-inline__label" for="item-2<%= yoyaku.id %>">
+                  <input id="item-2-<%= yoyaku.id %>" class="radio-inline__input" type="radio" name="type_room_<%= yoyaku.id %>"" value="1" <%= type1checked %>/>
+                  <label for="item-2-<%= yoyaku.id %>" class="radio-inline__label">
                       ミーティングルーム
                   </label>
-                  <input id="item-3<%= yoyaku.id %>" class="radio-inline__input" type="radio" name="type_room" value="2" <%= type2checked %>/>
-                  <label class="radio-inline__label" for="item-3<%= yoyaku.id %>">
+                  <input id="item-3-<%= yoyaku.id %>" class="radio-inline__input" type="radio" name="type_room_<%= yoyaku.id %>"" value="2" <%= type2checked %>/>
+                  <label for="item-3-<%= yoyaku.id %>" class="radio-inline__label">
                       プロジェクトルーム
                   </label>
-                  <input id="item-4<%= yoyaku.id %>" class="radio-inline__input" type="radio" name="type_room" value="9" <%= type9checked %>/>
-                  <label class="radio-inline__label" for="item-4<%= yoyaku.id %>">
+                  <input id="item-4-<%= yoyaku.id %>" class="radio-inline__input" type="radio" name="type_room_<%= yoyaku.id %>"" value="9" <%= type9checked %>/>
+                  <label for="item-4-<%= yoyaku.id %>" class="radio-inline__label">
                       備品
                   </label>
                 </fieldset>
@@ -204,11 +204,9 @@
       let type = [];
       for (let i=0; i<type_room_list.length; i++) {
         if (type_room_list[i].checked) {
-          console.log(type_room_list[i].value);
           type.push(type_room_list[i].value);
         }
       }
-      console.dir(type);
       type_list.value = type;
 
       // 確認ダイアログを非表示にする
