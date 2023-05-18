@@ -471,6 +471,7 @@ input:disabled + .checkbox_label {
   color: #fff;
   text-align: center;
   font-size: 0.75rem;
+  cursor: pointer;
   &:hover {
     background-color: #fff;
     color: $base-color;

@@ -460,6 +460,7 @@ input:disabled + .checkbox_label {
   color: #fff;
   text-align: center;
   font-size: 0.75rem;
+  cursor: pointer;
 }
 .btn-action:hover {
   background-color: #fff;
