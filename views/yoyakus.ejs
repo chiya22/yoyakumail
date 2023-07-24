@@ -23,9 +23,12 @@
             <a href="/yoyaku/<%= yoyaku.id %>">
             <div class="<%= yoyaku.type_room==='9'?'yoyakus-bihin':'yoyakus-yoyaku' %>">
               <div class="yoyakus-yoyaku-content">
+                <% if (yoyaku.nm_nyuryoku.slice(0,3) === "コピー") { %>
+                  <div class="yoyakus-yoyaku-copy" >COPY</div>
+                <% } %>
                 <p class="tag"><%= `${yoyaku.type_room === '9'?'備品×'+yoyaku.quantity:'部屋'} `%></p>
                 <p class="tag"><%= yoyaku.status_shiharai %></p>
-                <%= yoyaku.no_keiyaku %> <%= yoyaku.nm_riyousha %> | 
+                <%= yoyaku.no_keiyaku %> <%= yoyaku.nm_riyou %> | 
                 <%= yoyaku.nm_room_seishiki %> | 
                 <%= `${yoyaku.yyyymmdd_yoyaku.slice(0,4)}年${yoyaku.yyyymmdd_yoyaku.slice(4,6)}月${yoyaku.yyyymmdd_yoyaku.slice(6,8)}日` %> <%= `${yoyaku.time_start.slice(0,2)}:${yoyaku.time_start.slice(2,4)}` %>-<%= `${yoyaku.time_end.slice(0,2)}:${yoyaku.time_end.slice(2,4)}` %> | 
                 <%= `${yoyaku.price.toLocaleString()}円` %>

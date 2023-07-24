@@ -5,6 +5,8 @@ const m_searchinfos = require("../model/searchinfos");
 const m_yoyakus = require("../model/yoyakus");
 const m_kessais = require("../model/kessais");
 const m_logininfo = require("../model/logininfo");
+const m_sq = require("../model/sq");
+
 
 const common = require("../util/common");
 const yoyakuinfo = require("../util/yoyakuinfo");
@@ -80,7 +82,7 @@ router.post("/yoyakus", (req, res) => {
 
       // 検索条件情報を登録する
       let inObjSearch = {};
-      inObjSearch.id = "Y" + yyyymmddhhmmss_proc;
+      inObjSearch.id = "S" + yyyymmddhhmmss_proc;
       inObjSearch.yyyymmdd_addupd_start = yyyymmdd_addupd_start;
       inObjSearch.yyyymmdd_addupd_end = yyyymmdd_addupd_end;
       inObjSearch.yyyymmdd_riyou_start = yyyymmdd_riyou_start;
@@ -122,10 +124,143 @@ router.get("/yoyakus/:id", (req, res) => {
 });
 
 /**
+ * 予約情報を取得する
+ * id：予約情報ID
+*/
+router.get("/yoyaku/:id", (req, res) => {
+  (async () => {
+    const yoyaku = await m_yoyakus.findPKey(req.params.id); // 予約情報
+    res.render("yoyaku", {
+      yoyaku: yoyaku,
+    });
+  })();
+});
+
+/**
+ * 検索情報IDに紐づく情報（予約情報、決済情報、検索情報）を削除する
+ * id：検索情報ID
+ */
+router.get("/searchdelete/:id", (req, res) => {
+  (async () => {
+    try {
+      // idより各情報を削除する
+      await m_yoyakus.removeByIdSearch(req.params.id); // 予約情報
+      await m_kessais.remove(req.params.id); // 決済情報
+      await m_searchinfos.remove(req.params.id); // 検索条件
+      
+      // 請求書PDFが存在する場合は削除する
+      const dirpath = `public/pdf/${req.params.id}`;
+      if (fs.existsSync(dirpath)) {
+        fs.rmdirSync(dirpath, { recursive: true });
+      }
+      
+      // 検索条件情報の一覧を取得する
+      await m_searchinfos.find();
+
+      req.flash("success", `検索条件情報を削除しました。(${req.params.id})`);
+      res.redirect("/");
+    } catch (error) {
+      req.flash("error", error.message);
+      res.redirect("/");
+    }
+  })();
+});
+
+/**
+ * 検索情報IDに紐づくすべての決済情報を対象に、予約情報を取得し、決済情報の作成を行う
+ * id：検索情報ID
+*/
+router.get("/kessaiscreate/:id", (req, res) => {
+  (async () => {
+    try {
+      let retValue = "";
+      const id_search = req.params.id
+
+      // 前回処理時の決済情報がある場合は削除する
+      await m_kessais.remove(id_search);
+      
+      // 検索情報IDをキーに予約情報を集約（GroupBy）した決済情報を取得する
+      const retObjkessais = await m_kessais.selectFromYoyakus(id_search);
+      let id_max_kessai = 1
+
+      // 取得した決済情報に決済IDを付与し登録する
+      for (let i=0; i<retObjkessais.length; i++) {
+
+        // 決済情報IDを採番し、決済情報を登録する
+        const retObjKessaiSq = await m_sq.selectSqKessai();
+        retObjkessais[i].id = retObjKessaiSq.id;
+        await m_kessais.insert(retObjkessais[i]);
+
+        // 予約情報に決済情報IDを設定する
+        await m_yoyakus.updateByIdSearchAndIdCustomer(retObjkessais[i].id,retObjkessais[i].id_search,retObjkessais[i].id_customer)
+        id_max_kessai += 1;
+
+      }
+
+      // ファイルへ書き出す
+      const outFilePath = await kessaiinfo.outputFile(id_search);
+
+      // 電算システムへアップロードする
+      retValue = await kessaiinfo.upkessaiinfo(id_search, outFilePath);
+      if (retValue.includes("エラー")) {
+        console.log(retValue.replace(/\s+/g, ""));
+        req.flash("error", retValue.replace(/\s+/g, ""));
+        res.redirect("/");
+      } else {
+        // 電算システムでURLが付与されるまで待機
+        // await common.sleep(process.env.WAITTIME);
+        await common.sleep(60000);
+        
+        // 電算システムよりダウンロードする
+        retValue = await kessaiinfo.dlkessaiinfo(id_search);
+        if (retValue.includes("エラー")) {
+          console.log(retValue.replace(/\s+/g, ""));
+          req.flash("error", retValue.replace(/\s+/g, ""));
+          res.redirect("/");
+        } else {
+
+          // ダウンロードしたファイルより、テーブルへ情報を反映する
+          //　※請求書PDFも作成する
+          await kessaiinfo.updkessaiinfo(id_search, retValue);
+
+          await common.sleep(5000);
+
+          // 検索IDをキーに決済情報を取得する
+          const retObj = await m_kessais.findByIdSearch(id_search);
+          
+          // コンビニ決済用URLが取得できている場合
+          if (retObj[0].url_cvs) {
+
+            // メール文章を作成する
+            await mailinfo.setMailContent(id_search);
+            
+            // 検索条件情報のステータスを更新する
+            await m_searchinfos.updateStatusAndTime(id_search, "2", common.getTodayTime());
+
+            req.flash("success", `決済情報を取得しました。(${id_search})`);
+            res.redirect("/");
+
+          // コンビニ決済用URLが取得できていない場合
+          } else {
+            // 決済情報がある場合は削除する
+            await m_kessais.remove(id_search);
+            
+            req.flash("error", `決済情報の取得に取得しました。時間をおいて再度処理を行ってください。(${id_search})`);
+            res.redirect("/");
+          }
+        }
+      }
+    } catch (error) {
+      req.flash("error", error.message);
+      res.redirect("/");
+    }
+  })();
+});
+
+/**
  * 予約情報を登録しなおし、登録した予約情報をもとに決済情報を作成しなおす
  *
- * ▼パラメータ
- * id：検索情報ID＋"_"＋顧客情報ID
+ * id：決済情報ID
  *
  * ▼
  * 予約情報編集画面（yoyakusform）から呼び出される
@@ -134,16 +269,17 @@ router.get("/yoyakus/:id", (req, res) => {
 router.post("/updyoyakus/:id", (req, res) => {
   (async () => {
     try {
-      const id_search = req.params.id.split("_")[0];
-      const id_customer = req.params.id.split("_")[1];
+      const id_kessai = req.params.id;
 
       if (!req.body.nm_room) {
         req.flash("error", "予約情報を入力してください。");
-        res.redirect(`/yoyakus/edit/${id_search}_${id_customer}`);
+        res.redirect(`/yoyakus/edit/${id}`);
         return;
       }
 
       // フォームからの入力値を受け取る
+      const id_search = req.body.id_search;
+      const id_customer = req.body.id_customer;
       const nm_room_list = Array.isArray(req.body.nm_room) ? req.body.nm_room : [req.body.nm_room];
       // const yyyymmdd_yoyaku_list = Array.isArray(req.body.yyyymmdd_yoyaku) ? req.body.yyyymmdd_yoyaku : [req.body.yyyymmdd_yoyaku];
       const time_start_list = Array.isArray(req.body.time_start) ? req.body.time_start : [req.body.time_start];
@@ -151,11 +287,12 @@ router.post("/updyoyakus/:id", (req, res) => {
       const price_list = Array.isArray(req.body.price) ? req.body.price : [req.body.price];
       const quantity_list = Array.isArray(req.body.quantity) ? req.body.quantity : [req.body.quantity];
       const type_room_list = req.body.type_list.split(","); // 通常会議室：0、ミーティングルーム：1、プロジェクトルーム：2、備品：9
+      const nm_nyuryoku_list = req.body.nm_nyuryoku
 
       // 予約年月日が日付変換できるかチェック
       if (!common.isDate(req.body.yyyymmdd_yoyaku)) {
         req.flash("error", "予約情報の予約年月日はyyyymmdd形式で入力してください。" + req.body.yyyymmdd_yoyaku);
-        res.redirect(`/yoyakus/edit/${id_search}_${id_customer}`);
+        res.redirect(`/yoyakus/edit/${id_kessai}`);
         return;
       }
 
@@ -163,7 +300,7 @@ router.post("/updyoyakus/:id", (req, res) => {
       for (let j = 0; j < nm_room_list; j++) {
         if (!nm_room_list[j]) {
           req.flash("error", "部屋名/備品名は必ず入力してください。 " + (j + 1) + "行目：" + nm_room_list[j]);
-          res.redirect(`/yoyakus/edit/${id_search}_${id_customer}`);
+          res.redirect(`/yoyakus/edit/${id_kessai}`);
           return;
         }
       }
@@ -172,7 +309,7 @@ router.post("/updyoyakus/:id", (req, res) => {
       for (let j = 0; j < time_start_list.length; j++) {
         if (!common.isTime(time_start_list[j])) {
           req.flash("error", "予約情報の開始時間はhhmm形式で入力してください。 " + (j + 1) + "行目：" + time_start_list[j]);
-          res.redirect(`/yoyakus/edit/${id_search}_${id_customer}`);
+          res.redirect(`/yoyakus/edit/${id_kessai}`);
           return;
         }
       }
@@ -181,7 +318,7 @@ router.post("/updyoyakus/:id", (req, res) => {
       for (let j = 0; j < time_end_list.length; j++) {
         if (!common.isTime(time_end_list[j])) {
           req.flash("error", "予約情報の終了時間はhhmm形式で入力してください。 " + (j + 1) + "行目：" + time_end_list[j]);
-          res.redirect(`/yoyakus/edit/${id_search}_${id_customer}`);
+          res.redirect(`/yoyakus/edit/${id_kessai}`);
           return;
         }
       }
@@ -190,7 +327,7 @@ router.post("/updyoyakus/:id", (req, res) => {
       for (let j = 0; j < price_list.length; j++) {
         if ((!Number.isInteger(Number(price_list[j]))) || (Number(price_list[j]) < 0) || (Number(price_list[j]) > 9999999999)) {
           req.flash("error", "価格は11桁以内の正の数値で入力してください。 " + (j + 1) + "行目：" + price_list[j]);
-          res.redirect(`/yoyakus/edit/${id_search}_${id_customer}`);
+          res.redirect(`/yoyakus/edit/${id_kessai}`);
           return;
         }
       }
@@ -199,33 +336,35 @@ router.post("/updyoyakus/:id", (req, res) => {
       for (let j = 0; j < quantity_list.length; j++) {
         if ((!Number.isInteger(Number(quantity_list[j]))) || (Number(quantity_list[j]) < 0) || (Number(quantity_list[j]) > 9999999999)) {
           req.flash("error", "数量は11桁以内の正の数値で入力してください。 " + (j + 1) + "行目：" + quantity_list[j]);
-          res.redirect(`/yoyakus/edit/${id_search}_${id_customer}`);
+          res.redirect(`/yoyakus/edit/${id_kessai}`);
           return;
         }
       }
 
-      // 既存決済情報の削除
-      await m_kessais.remove(id_search, id_customer);
-
-      // 既存予約情報の削除
-      await m_yoyakus.removeByIdSearchAndIdCustomer(id_search, id_customer);
-
       // 検索情報ID単位での採番MAXを取得
-      const maxinfo = await m_yoyakus.findMaxId(id_search);
-      let maxnum = Number(maxinfo[0].maxnum.slice(-5)) + 1;
+      // const maxinfo = await m_yoyakus.findMaxId(id_search);
+      // let id_max_yoyaku = 1;
+      // if (maxinfo[0].maxnum) {
+      //   id_max_yoyaku = Number(maxinfo[0].maxnum.slice(-5)) + 1;
+      // }
 
-      const id_customer_new = `R${req.body.id_kanri}-${common.getYYYYMMDD(new Date())}-${req.body.yyyymmdd_yoyaku}`;
+      // 新しい決済情報IDを取得する
+      const retObjKessaiSq = await m_sq.selectSqKessai();
+      const id_kessai_new = retObjKessaiSq.id;
+
+      // 予約情報を取得する
 
       // 入力情報をもとに予約情報を登録
       for (let i = 0; i < nm_room_list.length; i++) {
+
         // 追加用予約情報オブジェクト
         let inObjYoyaku = {};
 
+        // 新しい予約情報IDを採番する
+        const retObjYoyakuSq = await m_sq.selectSqYoyaku();
+        inObjYoyaku.id = retObjYoyakuSq.id;
+
         // フォームからの入力値を設定する
-        inObjYoyaku.id = id_search + ("00000" + maxnum).slice(-5);
-        maxnum += 1;
-        // inObjYoyaku.id_customer = `R${req.body.id_kanri[0]}-${common.getYYYYMMDD(new Date())}-${req.body.yyyymmdd_yoyaku[i]}`
-        inObjYoyaku.id_customer = id_customer_new;
         inObjYoyaku.nm_room = nm_room_list[i];
         inObjYoyaku.time_start = time_start_list[i];
         inObjYoyaku.time_end = time_end_list[i];
@@ -237,15 +376,17 @@ router.post("/updyoyakus/:id", (req, res) => {
 
         // 共通項目のためリストの最初の項目値を設定
         inObjYoyaku.id_search = id_search;
+        inObjYoyaku.id_customer = id_customer;
         inObjYoyaku.id_kanri = req.body.id_kanri;
         inObjYoyaku.yyyymmdd_yoyaku = req.body.yyyymmdd_yoyaku;
         inObjYoyaku.yyyymmdd_uketuke = common.getYYYYMMDD(new Date());
         inObjYoyaku.status_shiharai = "未";
-        inObjYoyaku.nm_nyuryoku = "システム補正";
-        inObjYoyaku.nm_riyousha = req.body.nm_riyousha;
-        inObjYoyaku.no_keiyakusha = req.body.no_keiyaku;
-        inObjYoyaku.nm_keiyakusha = req.body.nm_keiyaku;
-        inObjYoyaku.nm_tantousha = req.body.nm_tantousha;
+        inObjYoyaku.nm_nyuryoku = req.body.nm_nyuryoku.slice(0,3) === "コピー"?"コピーシステム補正":"システム補正";
+        inObjYoyaku.nm_riyou = req.body.nm_riyou
+        ;
+        inObjYoyaku.no_keiyaku = req.body.no_keiyaku;
+        inObjYoyaku.nm_keiyaku = req.body.nm_keiyaku;
+        inObjYoyaku.nm_tantou = req.body.nm_tantou;
         inObjYoyaku.telno = req.body.telno;
         inObjYoyaku.faxno = req.body.faxno;
         inObjYoyaku.email = req.body.email;
@@ -256,17 +397,30 @@ router.post("/updyoyakus/:id", (req, res) => {
         inObjYoyaku.memo = "";
         inObjYoyaku.yyyymmddhhmmss_created = common.getTodayTime();
 
+        // 新しい決済情報IDを設定する
+        inObjYoyaku.id_kessai = id_kessai_new;
+
         await m_yoyakus.insert(inObjYoyaku);
       }
 
-      // 予約情報をもとに、決済情報を登録する
-      await m_kessais.insertfromyoyakus(id_search, id_customer_new);
+      // 決済情報の雛型を予約情報から取得
+      const retObjkessai = await m_kessais.selectFromYoyakus(id_search, id_kessai_new);
+
+      // 新しい決済情報を登録する
+      retObjkessai[0].id = id_kessai_new;
+      await m_kessais.insert(retObjkessai[0]);
+
+      // 既存予約情報の削除
+      await m_yoyakus.removeByIdKessai(id_kessai);
+
+      // 既存決済情報の削除
+      await m_kessais.remove(id_search, id_kessai);
 
       // ファイルへ書き出す
-      const outFilePath = await kessaiinfo.outputFile(id_search, id_customer_new);
+      const outFilePath = await kessaiinfo.outputFile(id_search, id_kessai_new);
 
       // 電算システムへアップロードする
-      retValue = await kessaiinfo.upkessaiinfo(`${id_search}_${id_customer_new}`, outFilePath);
+      retValue = await kessaiinfo.upkessaiinfo(`${id_kessai_new}`, outFilePath);
       if (retValue.includes("エラー")) {
         console.log(retValue.replace(/\s+/g, ""));
         req.flash("error", retValue.replace(/\s+/g, ""));
@@ -277,7 +431,7 @@ router.post("/updyoyakus/:id", (req, res) => {
         await common.sleep(60000);
 
         // 電算システムよりダウンロードする
-        retValue = await kessaiinfo.dlkessaiinfo(`${id_search}_${id_customer_new}`);
+        retValue = await kessaiinfo.dlkessaiinfo(`${id_kessai_new}`);
         if (retValue.includes("エラー")) {
           console.log(retValue.replace(/\s+/g, ""));
           req.flash("error", retValue.replace(/\s+/g, ""));
@@ -293,22 +447,23 @@ router.post("/updyoyakus/:id", (req, res) => {
           // ▼コンビニ決済URLが取得できているかチェック！
 
           // 検索IDをキーに決済情報を取得する
-          const retObj = await m_kessais.findPKey(id_search, id_customer_new);
+          const retObj = await m_kessais.findPKey(id_kessai_new);
 
           // コンビニ決済用URLが取得できている場合
           if (retObj.url_cvs) {
-            // メール文章を作成する
-            await mailinfo.setMailContent(id_search, id_customer_new);
 
-            req.flash("success", `予約情報を更新しました。(${id_search}_${id_customer_new})`);
-            res.redirect(`/kessai/${id_search}_${id_customer_new}`);
+            // メール文章を作成する
+            await mailinfo.setMailContent(id_search, id_kessai_new);
+
+            req.flash("success", `予約情報を更新しました。(${id_kessai_new})`);
+            res.redirect(`/kessai/${id_kessai_new}`);
 
           // コンビニ決済用URLが取得できていない場合
           } else {
             // 決済情報がある場合は削除する
-            await m_kessais.remove(req.params.id);
+            await m_kessais.remove(id_kessai_new);
 
-            req.flash("error", `決済情報の取得に取得しました。時間をおいて再度処理を行ってください。(${id_search}_${id_customer_new})`);
+            req.flash("error", `決済情報の取得に取得しました。時間をおいて再度処理を行ってください。(${id_kessai_new})`);
             res.redirect("/");
           }
         }
@@ -321,132 +476,7 @@ router.post("/updyoyakus/:id", (req, res) => {
   })();
 });
 
-/**
- * 予約情報を取得する
- *
- * ▼パラメータ
- * id：予約情報ID
- *
- */
-router.get("/yoyaku/:id", (req, res) => {
-  (async () => {
-    // idより予約情報を取得し、返却する
-    const yoyaku = await m_yoyakus.findPKey(req.params.id); // 予約情報
 
-    res.render("yoyaku", {
-      yoyaku: yoyaku,
-    });
-  })();
-});
-
-/**
- * 検索情報IDに紐づく情報（予約情報、決済情報、検索情報）を削除する
- *
- * ▼パラメータ
- * id：検索情報ID
- *
- */
-router.get("/yoyakudelete/:id", (req, res) => {
-  (async () => {
-    try {
-      // idより各情報を削除する
-      await m_yoyakus.removeByIdSearch(req.params.id); // 予約情報
-      await m_kessais.remove(req.params.id); // 決済情報
-      await m_searchinfos.remove(req.params.id); // 検索条件
-
-      // 請求書PDFが存在する場合は削除する
-      const dirpath = `public/pdf/${req.params.id}`;
-      if (fs.existsSync(dirpath)) {
-        fs.rmdirSync(dirpath, { recursive: true });
-      }
-
-      // 検索条件情報の一覧を取得する
-      await m_searchinfos.find();
-
-      req.flash("success", `検索条件情報を削除しました。(${req.params.id})`);
-      res.redirect("/");
-    } catch (error) {
-      req.flash("error", error.message);
-      res.redirect("/");
-    }
-  })();
-});
-
-/**
- * 検索情報IDに紐づくすべての決済情報を対象に、
- * 予約情報を取得し、決済情報の作成を行う
- *
- * ▼パラメータ
- * id：検索情報ID
- *
- */
-router.get("/kessaiscreate/:id", (req, res) => {
-  (async () => {
-    try {
-      let retValue = "";
-
-      // 前回処理時の決済情報がある場合は削除する
-      await m_kessais.remove(req.params.id);
-
-      // 予約情報をもとに、決済情報を登録する
-      await m_kessais.insertfromyoyakus(req.params.id);
-
-      // ファイルへ書き出す
-      const outFilePath = await kessaiinfo.outputFile(req.params.id);
-
-      // 電算システムへアップロードする
-      retValue = await kessaiinfo.upkessaiinfo(req.params.id, outFilePath);
-      if (retValue.includes("エラー")) {
-        console.log(retValue.replace(/\s+/g, ""));
-        req.flash("error", retValue.replace(/\s+/g, ""));
-        res.redirect("/");
-      } else {
-        // 電算システムでURLが付与されるまで待機
-        // await common.sleep(process.env.WAITTIME);
-        await common.sleep(60000);
-
-        // 電算システムよりダウンロードする
-        retValue = await kessaiinfo.dlkessaiinfo(req.params.id);
-        if (retValue.includes("エラー")) {
-          console.log(retValue.replace(/\s+/g, ""));
-          req.flash("error", retValue.replace(/\s+/g, ""));
-          res.redirect("/");
-        } else {
-          // ダウンロードしたファイルより、テーブルへ情報を反映する
-          await kessaiinfo.updkessaiinfo(req.params.id, retValue);
-
-          await common.sleep(5000);
-
-          // 検索IDをキーに決済情報を取得する
-          const retObj = await m_kessais.findByIdSearch(req.params.id);
-
-          // コンビニ決済用URLが取得できている場合
-          if (retObj[0].url_cvs) {
-            // メール文章を作成する
-            await mailinfo.setMailContent(req.params.id);
-
-            // 検索条件情報のステータスを更新する
-            await m_searchinfos.updateStatusAndTime(req.params.id, "2", common.getTodayTime());
-
-            req.flash("success", `決済情報を取得しました。(${req.params.id})`);
-            res.redirect("/");
-
-            // コンビニ決済用URLが取得できていない場合
-          } else {
-            // 決済情報がある場合は削除する
-            await m_kessais.remove(req.params.id);
-
-            req.flash("error", `決済情報の取得に取得しました。時間をおいて再度処理を行ってください。(${req.params.id})`);
-            res.redirect("/");
-          }
-        }
-      }
-    } catch (error) {
-      req.flash("error", error.message);
-      res.redirect("/");
-    }
-  })();
-});
 
 /**
  * 検索情報IDをもとに、紐づくすべての決済情報を取得する
@@ -454,15 +484,15 @@ router.get("/kessaiscreate/:id", (req, res) => {
  * ▼パラメータ
  * id：検索情報ID
  *
- */
+*/
 router.get("/kessais/:id", (req, res) => {
   (async () => {
     // idより決済一覧を取得し、返却する
     const searchinfo = await m_searchinfos.findPKey(req.params.id); // 検索条件
     const kessais = await m_kessais.findByIdSearch(req.params.id); // 決済情報
-
+    
     for (kessai of kessais) {
-      kessai.yoyakus = await m_yoyakus.findByIdSearchAndCustomer(kessai.id_search, kessai.id_customer);
+      kessai.yoyakus = await m_yoyakus.findByIdKessai(kessai.id);
     }
 
     res.render("kessais", {
@@ -481,22 +511,24 @@ router.post("/kessais/update", (req, res) => {
   (async () => {
     try {
       // 更新値を取得
+      const id_list = req.body.id;
       const id_search_list = req.body.id_search;
-      const id_customer_list = req.body.id_customer;
+      // const id_customer_list = req.body.id_customer;
       const isCvs_list = req.body.isCvs;
       const isSendMail_list = req.body.isSendMail;
       const isPDF_list = req.body.isPDF;
-
+      
       let moveTo;
-      // 更新対象が1件だけの場合は、「xxxx_list」変数が配列とならない場合の対処
-      if (id_search_list.join().length == 15) {
-        await m_kessais.updatekessaisToisCvsAndisSendMail(id_search_list, id_customer_list, isCvs_list, isSendMail_list, isPDF_list);
-        moveTo = id_search_list;
-      } else {
-        for (let i = 0; i < id_customer_list.length; i++) {
-          await m_kessais.updatekessaisToisCvsAndisSendMail(id_search_list[i], id_customer_list[i], isCvs_list[i], isSendMail_list[i], isPDF_list[i]);
+      if (Array.isArray(id_list)) {
+        // 更新対象が配列の場合
+        for (let i = 0; i < id_list.length; i++) {
+          await m_kessais.updatekessaisToisCvsAndisSendMail(id_list[i], isCvs_list[i], isSendMail_list[i], isPDF_list[i]);
         }
         moveTo = id_search_list[0];
+      } else {
+        // 更新対象が1件だけの場合は、「xxxx_list」変数が配列とならない場合の対処
+        await m_kessais.updatekessaisToisCvsAndisSendMail(id_list, isCvs_list, isSendMail_list, isPDF_list);
+        moveTo = id_search_list;
       }
 
       req.flash("success", "更新しました。");
@@ -509,20 +541,15 @@ router.post("/kessais/update", (req, res) => {
 });
 
 /**
- * 検索情報ID、顧客情報IDをもとに、決済情報（1件）を表示する
- *
- * ▼パラメータ
- * id：検索情報ID＋"_"＋顧客情報ID
- *
+ * 決済情報IDをもとに、決済情報（1件）を表示する
+ * id：決済情報ID
  */
 router.get("/kessai/:id", (req, res) => {
   (async () => {
-    const id_search = req.params.id.split("_")[0];
-    const id_customer = req.params.id.split("_")[1];
-
-    const kessai = await m_kessais.findPKey(id_search, id_customer);
-    const yoyakus = await m_yoyakus.findByIdSearchAndCustomer(id_search, id_customer);
-    const searchinfo = await m_searchinfos.findPKey(id_search);
+    const id_kessai = req.params.id;
+    const kessai = await m_kessais.findPKey(id_kessai);
+    const yoyakus = await m_yoyakus.findByIdKessai(id_kessai);
+    const searchinfo = await m_searchinfos.findPKey(kessai.id_search);
 
     res.render("kessai", {
       no_keiyaku: yoyakus[0].no_keiyaku,
@@ -537,14 +564,14 @@ router.get("/kessai/:id", (req, res) => {
  * 決済情報画面（kessai）から予約情報編集画面（yoyakusform）へ遷移する
  *
  * ▼パラメータ
- * id：検索情報ID＋"_"＋顧客情報ID
- */
+ * id：決済情報ID
+*/
 router.get("/yoyakus/edit/:id", (req, res) => {
   (async () => {
-    const id_search = req.params.id.split("_")[0];
-    const id_customer = req.params.id.split("_")[1];
 
-    const yoyakus = await m_yoyakus.findByIdSearchAndCustomer(id_search, id_customer);
+    const id_kessai = req.params.id;
+
+    const yoyakus = await m_yoyakus.findByIdKessai(id_kessai);
 
     res.render("yoyakusform", {
       yoyakus: yoyakus,
@@ -553,20 +580,90 @@ router.get("/yoyakus/edit/:id", (req, res) => {
 });
 
 /**
+ * 決済情報画面（kessai）に表示されている決済情報と、その決済情報に紐づく予約情報を複製する
+ *
+ * ▼パラメータ
+ * id：決済情報のid
+ *
+*/
+router.get("/kessai/copy/:id", (req, res) => {
+  (async () => {
+
+    // COPY元を取得
+    const kessai = await m_kessais.findPKey(req.params.id); //決済情報
+    // const searchinfo = await m_searchinfos.findPKey(kessai.id_search); //検索情報
+    const yoyakus = await m_yoyakus.findByIdKessai(req.params.id); //予約情報
+
+    // COPY先の情報作成
+
+    // 検索情報
+    // const yyyymmddhhmmss_proc = common.getTodayTime();
+    // const id_searchinfo = "S" + yyyymmddhhmmss_proc;
+    // searchinfo.id = id_searchinfo;
+    // await m_searchinfos.insert(searchinfo);
+
+    // 決済情報
+    const retObjKessaiSq = await m_sq.selectSqKessai();
+    const id_kessai = retObjKessaiSq.id;
+    kessai.id = id_kessai;
+    // kessai.id_search = id_searchinfo;
+    await m_kessais.insert(kessai);
+
+    // 予約情報
+    for (let i=0; i<yoyakus.length; i++) {
+      const retObjYoyakuSq = await m_sq.selectSqYoyaku();
+      const id_yoyaku = retObjYoyakuSq.id;;
+      yoyakus[i].id = id_yoyaku;
+      // yoyakus[i].id_search = id_searchinfo;
+      yoyakus[i].id_kessai = id_kessai;
+      yoyakus[i].nm_nyuryoku = "コピー";
+      await m_yoyakus.insert(yoyakus[i]);
+    }
+
+    req.flash("success", "複製を行いました。");
+    res.redirect(`/kessais/${kessai.id_search}`);
+  
+  })();
+});
+
+/**
+ * 決済情報画面（kessai）に表示されている決済情報と、その決済情報に紐づく予約情報を削除する
+ *
+ * ▼パラメータ
+ * id：決済情報のid
+ *
+*/
+router.get("/kessai/remove/:id", (req, res) => {
+  (async () => {
+
+    //決済情報から検索情報IDを取得する
+    const retObjKessai = await m_kessais.findPKey(req.params.id);
+    const id_search = retObjKessai.id_search;
+
+    //決済情報削除
+    await m_kessais.remove(null, req.params.id);
+
+    //予約情報削除
+    await m_yoyakus.removeByIdKessai(req.params.id);
+
+    req.flash("success", `削除しました。(${req.params.id})`);
+    res.redirect(`/kessais/${id_search}`);
+  
+  })();
+});
+
+/**
  * 決済情報画面（kessai）から決済情報編集画面（kessaiform）へ遷移する
  *
  * ▼パラメータ
- * id：検索情報ID＋"_"＋顧客情報ID
+ * id：決済情報ID
  *
- */
+*/
 router.get("/kessai/edit/:id", (req, res) => {
   (async () => {
-    const id_search = req.params.id.split("_")[0];
-    const id_customer = req.params.id.split("_")[1];
 
-    const kessai = await m_kessais.findPKey(id_search, id_customer);
-
-    const yoyakus = await m_yoyakus.findByIdSearchAndCustomer(id_search, id_customer);
+    const kessai = await m_kessais.findPKey(req.params.id);
+    const yoyakus = await m_yoyakus.findByIdKessai(req.params.id);
 
     res.render("kessaiform", {
       no_keiyaku: yoyakus[0].no_keiyaku,
@@ -584,20 +681,20 @@ router.post("/kessai/save", (req, res) => {
   (async () => {
     try {
       // 更新値を取得
-      const id_search = req.body.id_search;
-      const id_customer = req.body.id_customer;
+      const id = req.body.id;
+      // const id_customer = req.body.id_customer;
       const mail_subject = req.body.mail_subject;
       const mail_body = req.body.mail_body;
       // const mail_body_cvs = req.body.mail_body_cvs;
-      const isCvs = req.body.isCvs;
+      const isCvs = req.body.isCvs==='1'?req.body.isCvs:"";
 
-      await m_kessais.updatekessaisToMailBody(id_search, id_customer, isCvs, mail_subject, mail_body);
+      await m_kessais.updatekessaisToMailBody(id, isCvs, mail_subject, mail_body);
 
       req.flash("success", "メール文を更新しました。");
-      res.redirect(`/kessai/${id_search}_${id_customer}`);
+      res.redirect(`/kessai/${id}`);
     } catch (error) {
       req.flash("error", error.message);
-      res.redirect(`/kessai/${id_search}_${id_customer}`);
+      res.redirect(`/kessai/${id}`);
     }
   })();
 });
@@ -639,28 +736,26 @@ router.get("/kessais/sendmail/:id", (req, res) => {
 });
 
 /**
- * 検索情報ID＋顧客情報IDで指定した決済情報（1件）をメール送信する
+ * 決済情報IDで指定した決済情報（1件）をメール送信する
  *
  * 【注意】
  * メール送信対象外でもメールは送信されます！
- *
+*
  * ▼パラメータ
- * id：検索情報ID＋"_"＋顧客情報ID
+ * id：決済情報ID
  *
- */
+*/
 router.get("/kessai/sendmail/:id", (req, res) => {
   (async () => {
     try {
-      const id_search = req.params.id.split("_")[0];
-      const id_customer = req.params.id.split("_")[1];
 
-      await mailinfo.sendMail(id_search, id_customer);
+      await mailinfo.sendMail(req.params.id);
 
-      req.flash("success", `メールを送信しました。(${id_customer})`);
-      res.redirect(`/kessai/${id_search}_${id_customer}`);
+      req.flash("success", `メールを送信しました。(${req.params.id})`);
+      res.redirect(`/kessai/${req.params.id}`);
     } catch (error) {
       req.flash("error", error.message);
-      res.redirect(`/kessai/${id_search}_${id_customer}`);
+      res.redirect(`/kessai/${req.params.id}`);
     }
   })();
 });

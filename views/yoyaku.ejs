@@ -14,7 +14,10 @@
         <a class="btn-back" href="<%= `/yoyakus/${yoyaku.id_search}` %>">戻る</a>
       </div>
       <div class="yoyaku-title">
-        【予約情報】<%= yoyaku.no_keiyaku %> <%= yoyaku.nm_riyousha %>　<%= yoyaku.nm_room_seishiki %> <%= `${yoyaku.time_start.slice(0,2)}:${yoyaku.time_start.slice(2,4)}` %>-<%= `${yoyaku.time_end.slice(0,2)}:${yoyaku.time_end.slice(2,4)}` %> <%= `${yoyaku.price.toLocaleString()}円` %>        
+        <% if (yoyaku.nm_nyuryoku.slice(0,3) === "コピー") { %>
+          <div class="yoyakus-yoyaku-copy" >COPY</div>
+        <% } %>
+        【予約情報】<%= yoyaku.no_keiyaku %> <%= yoyaku.nm_riyou %>　<%= yoyaku.nm_room_seishiki %> <%= `${yoyaku.time_start.slice(0,2)}:${yoyaku.time_start.slice(2,4)}` %>-<%= `${yoyaku.time_end.slice(0,2)}:${yoyaku.time_end.slice(2,4)}` %> <%= `${yoyaku.price.toLocaleString()}円` %>        
       </div>
       <dl class="yoyaku-dl">
         <dt class=>ID</dt>
@@ -40,7 +43,7 @@
         <dt>入力名</dt>
         <dd><%= yoyaku.nm_nyuryoku %></dd>
         <dt>利用者名</dt>
-        <dd><%= yoyaku.nm_riyousha %></dd>
+        <dd><%= yoyaku.nm_riyou %></dd>
         <dt>会議室名（正式）</dt>
         <dd><%= yoyaku.nm_room_seishiki %></dd>
         <dt>部屋タイプ</dt>

@@ -19,22 +19,25 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 /**
- * 検索情報ID＋顧客情報IDをキーに、決済情報をファイルへ出力する（電算システムアップロード用）
- * 顧客情報IDが設定されていない場合は、検索情報IDに紐づくすべての決済情報が対象となる
+ * 決済情報IDまたは検索情報IDをキーに、決済情報をファイルへ出力する（電算システムアップロード用）
+ * 決済情報IDが設定されている場合は、決済情報IDに紐づく決済情報が対象となる（１件）
+ * 検索情報IDが設定されている場合は、検索情報IDに紐づくすべての決済情報が対象となる（１件から複数県）
  * @param {*} id_search 検索情報ID
- * @param {*} id_customer 顧客情報ID
+ * @param {*} id_kessai 決済情報ID
  * @returns 
  */
-const outputFile = async (id_search, id_customer = null) => {
+const outputFile = async (id_search, id_kessai = null) => {
 
   let content = "";
-  if (id_customer) {
-    const kessai = await m_kessais.findPKey(id_search, id_customer);
-    content += kessai.id_customer + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + kessai.nm_customer_2 + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
+  if (id_kessai) {
+    const kessai = await m_kessais.findPKey(id_kessai);
+    content += kessai.id + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + kessai.nm_customer_2 + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
+    // content += kessai.id_customer + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + kessai.nm_customer_2 + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
   } else {
     const kessais = await m_kessais.findByIdSearch(id_search);
     kessais.forEach( kessai => {
-      content += kessai.id_customer + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + kessai.nm_customer_2 + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
+      content += kessai.id + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + kessai.nm_customer_2 + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
+      // content += kessai.id_customer + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + kessai.nm_customer_2 + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
     });
   }
 
@@ -240,6 +243,7 @@ const dlkessaiinfo = async (key) => {
 
 /**
  * 電算システムよりダウンロードした決済結果データをもとに決済テーブルへ反映させる
+ * ※請求書PDFファイルを作成し格納する
  * 
  * ＜注意＞
  * 検索情報IDは反映対象の決済情報を特定する際に使用される
@@ -277,7 +281,8 @@ const updkessaiinfo = async (id_search, dlfilename) => {
         const linecontents = chunk.split(",");
 
         inObj = {};
-        inObj.id_customer = linecontents[0];
+        // inObj.id_customer = linecontents[0];
+        inObj.id = linecontents[0];
         inObj.id_search = id_search;
         inObj.result = linecontents[7];
         inObj.id_data = linecontents[8];
@@ -285,7 +290,7 @@ const updkessaiinfo = async (id_search, dlfilename) => {
         inObj.message = linecontents[10];
 
         // 請求書のPDFファイルを作成し、そのパス情報を取得する
-        seikyuinfo.createSeikyuPDF(inObj.id_search, inObj.id_customer);
+        seikyuinfo.createSeikyuPDF(inObj.id);
         
         (async () => {
           // 決済情報へ反映する

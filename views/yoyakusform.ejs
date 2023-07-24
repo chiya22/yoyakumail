@@ -34,8 +34,9 @@
         </div>
         <% } %> <% } %>
         <div class="area_header">
-          <a class="btn-back" href="/kessai/<%= yoyakus[0].id_search %>_<%= yoyakus[0].id_customer %>">戻る</a>
+          <a class="btn-back" href="/kessai/<%= yoyakus[0].id_kessai %>">戻る</a>
           <button class="btn-action" id="upd-yoyaku">更新</button>
+          <button id="addline" class="btn-action">行追加</button>
         </div>
         <!-- クライアントエラーメッセージ領域　-->
         <div class="flashes" style="visibility:hidden">
@@ -44,18 +45,23 @@
         <div class="area_yoyakus">
           <% if (yoyakus) { %>
           <div style="margin-bottom: 30px">
-            <div class="yoyaku-title">【予約情報】<button id="addline" class="btn-action">行追加</button></div>
+            <div class="yoyaku-title">
+              <% if (yoyakus[0].nm_nyuryoku.slice(0,3) === "コピー") { %>
+                <div class="yoyakus-yoyaku-copy" >COPY</div>
+              <% } %>
+              【予約情報】
+            </div>
             <dl class="yoyaku-dl">
               <dt>管理ID</dt>
               <dd><%= yoyakus[0].id_kanri %></dd>
               <dt>契約番号</dt>
               <dd><%= yoyakus[0].no_keiyaku %></dd>
               <dt>利用者名</dt>
-              <dd><%= yoyakus[0].nm_riyousha %></dd>
+              <dd><%= yoyakus[0].nm_riyou %></dd>
               <dt>契約者名</dt>
               <dd><%= yoyakus[0].nm_keiyaku %></dd>
               <dt>担当者名</dt>
-              <dd><%= yoyakus[0].nm_tantousha %></dd>
+              <dd><%= yoyakus[0].nm_tantou %></dd>
               <dt>電話番号</dt>
               <dd><%= yoyakus[0].nm_telno %></dd>
               <dt>FAX番号</dt>
@@ -66,18 +72,21 @@
               <dd class="oneline-dd"><%= yoyakus[0].address %></dd>
             </dl>
           </div>
-          <form method="POST" name="yoyakusform" action="/updyoyakus/<%= yoyakus[0].id_search %>_<%= yoyakus[0].id_customer %>">
+          <form method="POST" name="yoyakusform" action="/updyoyakus/<%= yoyakus[0].id_kessai %>">
             <!-- 共通項目 -->
             <div class="yoyaku-dl">
               <dt>予約年月日</dt>
               <dd><input class="yoyaku-input" type="text" name="yyyymmdd_yoyaku" value="<%= yoyakus[0].yyyymmdd_yoyaku %>" /></dd>
             </div>
+            <input type="hidden" name="id_search" value="<%= yoyakus[0].id_search %>" />  
+            <input type="hidden" name="id_customer" value="<%= yoyakus[0].id_customer %>" />  
             <input type="hidden" name="status_shiharai" value="<%= yoyakus[0].status_shiharai %>" />
             <input type="hidden" name="id_kanri" value="<%= yoyakus[0].id_kanri %>" />
-            <input type="hidden" name="nm_riyousha" value="<%= yoyakus[0].nm_riyousha %>" />
+            <input type="hidden" name="nm_riyou" value="<%= yoyakus[0].nm_riyou %>" />
             <input type="hidden" name="no_keiyaku" value="<%= yoyakus[0].no_keiyaku %>" />
             <input type="hidden" name="nm_keiyaku" value="<%= yoyakus[0].nm_keiyaku %>" />
-            <input type="hidden" name="nm_tantousha" value="<%= yoyakus[0].nm_tantousha %>" />
+            <input type="hidden" name="nm_tantou" value="<%= yoyakus[0].nm_tantou %>" />
+            <input type="hidden" name="nm_nyuryoku" value="<%= yoyakus[0].nm_nyuryoku %>" />
             <input type="hidden" name="telno" value="<%= yoyakus[0].telno %>" />
             <input type="hidden" name="faxno" value="<%= yoyakus[0].faxno %>" />
             <input type="hidden" name="email" value="<%= yoyakus[0].email %>" />
@@ -245,10 +254,13 @@
     btnAddLine.addEventListener("click", () => {
 
       const all_yoyakus = document.getElementsByClassName("yoyakus-yoyaku");
-      const last_yoyaku = all_yoyakus[all_yoyakus.length - 1];
+      // const last_yoyaku = all_yoyakus[all_yoyakus.length - 1];
       const newRow = getNewRow(`AddNewLine${addCount}`);
+      const first_yoyaku = all_yoyakus[0];
       addCount += 1;
-      last_yoyaku.after(newRow);
+      first_yoyaku.before(newRow);
+      // addCount += 1;
+      // last_yoyaku.after(newRow);
     });
 
     // 予約情報の削除（指定した行の削除）
@@ -294,7 +306,7 @@
     const getNewRow = (id) => {
       
       const div = document.createElement("div");
-      div.classList.add("yoyaku-dl", "yoyakus-yoyaku");
+      div.classList.add("yoyaku-dl", "add-yoyakus-yoyaku");
       div.setAttribute("id", id);
 
       // 会議室名/備品

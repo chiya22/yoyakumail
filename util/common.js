@@ -1,3 +1,7 @@
+const retSqlValue = (value) => {
+  return (value ? `"${value}"` : null);
+}
+
 const getYYYYMMDD = (date) => {
 
   let tmp;
@@ -117,6 +121,7 @@ const isDate = (str) => {
 
 
 module.exports = {
+  retSqlValue,
   getYYYYMMDD,
   getTodayTime,
   getBeforeday,

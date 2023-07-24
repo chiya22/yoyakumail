@@ -14,20 +14,22 @@ if (process.env.NODE_ENV !== "production") {
 
 /**
  * 決済情報からメール情報を作成し、決済情報へ範囲する
- * 顧客情報IDが設定されている場合は、1件の決済情報を対象とする
- * 顧客情報IDが設定されていない場合は、検索情報IDに紐づくすべての決済情報を対象とする
+ * 決済情報IDが設定されている場合は、1件の決済情報を対象とする
+ * 検索情報IDが設定されている場合は、検索情報IDに紐づくすべての決済情報を対象とする（１件から複数件）
  * 
- * @param {*} id_search 
- * @param {*} id_customer 
+ * @param {*} id_search 検索情報ID
+ * @param {*} id_kessai 決済情報ID
  */
-const setMailContent = async (id_search, id_customer = null) => {
+const setMailContent = async (id_search, id_kessai = null) => {
 
-  if (id_customer) {
+  if (id_kessai) {
 
     // 決済情報を取得する（1件）
-    const kessai = await m_kessais.findPKey(id_search, id_customer);
+    const kessai = await m_kessais.findPKey(id_kessai);
+
     // メール文を作成
-    const inObj = await makeMailBody(id_search, id_customer, kessai);
+    const inObj = await makeMailBody(kessai);
+
     // 決済情報を更新する
     await m_kessais.updatekessaisByMailinfo(inObj);
 
@@ -41,7 +43,7 @@ const setMailContent = async (id_search, id_customer = null) => {
     kessais.forEach((kessai) => {
       (async () => {
         // メール文を作成
-        inObj = await makeMailBody(id_search, kessai.id_customer, kessai);
+        inObj = await makeMailBody(kessai);
         // 決済情報を更新
         await m_kessais.updatekessaisByMailinfo(inObj);
       })();
@@ -51,19 +53,16 @@ const setMailContent = async (id_search, id_customer = null) => {
 }
 
 /**
- * 引数で取得した検索情報IDに紐づく予約情報と、
- * 引数で取得した検索情報ID、顧客情報IDに紐づく決済情報をもとに、
+ * 引数で渡した決済情報ををもとに、
  * メール文章を作成し、メール情報が格納されたオブジェクトを返却する
  * 
- * @param {*} id_search 検索情報ID
- * @param {*} id_customer 顧客情報ID
  * @param {*} kessai 決済情報
- * @returns inObj メールタイトル、メール本文が格納されたオブジェクト
+ * @returns inObj 決済情報ID、メールタイトル、メール本文が格納されたオブジェクト
  */
-const makeMailBody = async (id_search, id_customer, kessai) => {
+const makeMailBody = async (kessai) => {
   
   // 予約情報取得
-  let yoyakus = await m_yoyakus.findByIdSearchAndCustomer(id_search, id_customer);
+  let yoyakus = await m_yoyakus.findByIdKessai(kessai.id);
 
   //　予約情報から明細情報を作成する
   let meisai = '';
@@ -86,6 +85,7 @@ const makeMailBody = async (id_search, id_customer, kessai) => {
   mailbody_before += "下記の内容にて承りましたのでご確認ください。\r\n"
   mailbody_before += "\r\n"
 
+  // ◆契約者名の編集
   // （表示名：XXX）があれば削除する　例）■　１２３４　株式会社ＡＡＡ（表示名：ＢＢＢ）　⇒　■　１２３４　株式会社ＡＡＡ
   let nm_keiyaku = kessai.nm_keiyaku;
   if (nm_keiyaku.indexOf("（表示") !== -1) {
@@ -100,9 +100,12 @@ const makeMailBody = async (id_search, id_customer, kessai) => {
     nm_keiyaku = nm_keiyaku.slice(5);
   }
 
+  // ◆担当者名の編集
+  const s_nm_tantou = kessai.nm_tantou?kessai.nm_tantou:"";
+
   // 会社名と担当者名が同一の場合は、会社名のみを宛先名として出力する
-  if (nm_keiyaku.trim().replace(" ","").replace("　","") !== kessai.nm_tantousha.trim().replace(" ","").replace("　","")) {
-    mailbody_before += "ご利用者名： " + nm_keiyaku.trim() + " " + kessai.nm_tantousha.trim() + "　様\r\n"
+  if (nm_keiyaku.trim().replace(" ","").replace("　","") !== s_nm_tantou.trim().replace(" ","").replace("　","")) {
+    mailbody_before += "ご利用者名： " + nm_keiyaku.trim() + " " + s_nm_tantou.trim() + "　様\r\n"
   } else {
     mailbody_before += "ご利用者名： " + nm_keiyaku.trim() + "　様\r\n"
   }
@@ -192,8 +195,9 @@ const makeMailBody = async (id_search, id_customer, kessai) => {
   mailbody_after += "　（土日祝休み）\r\n"
 
   let inObj = {};
-  inObj.id_customer = id_customer;
-  inObj.id_search = id_search;
+  inObj.id = kessai.id;
+  // inObj.id_customer = kessai.id_customer;
+  // inObj.id_search = kessai.id_search;
   inObj.mail_subject = "会議室・ミーティングルーム予約確認書及びご請求書";
   inObj.mail_body = mailbody_before + mailbody + mailbody_after;
   inObj.mail_body_cvs = mailbody_before + mailbody_cvs + mailbody_after;
@@ -217,36 +221,39 @@ const sendMailByIdSearch = async ( id_search )=> {
     if ((kessais[i].isSendMail === '1') && (kessais[i].yyyymmddhhmmss_sended_mail == null)) {
 
       // 請求書PDFファイルパスを組み立て
-      let filename = `${kessais[i].id_search}-${no_keiyaku}-${kessais[i].yyyymmdd_yoyaku}-${kessais[i].yyyymmdd_uketuke}.pdf`
+      let filename = `${kessais[i].id_search}-${no_keiyaku}-${kessais[i].yyyymmdd_yoyaku}-${kessais[i].yyyymmdd_uketuke}-${kessais[i].id}.pdf`
 
       // コンビニ決済有無によりbody部の設定をわける
-        if (kessais[i].isCvs === '1') {
-          send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body_cvs, kessais[i].id_search, filename, kessais[i].isPDF);
-        } else {
-          send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body, kessais[i].id_search, filename, kessais[i].isPDF);
-        }
+      if (kessais[i].isCvs === '1') {
+        send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body_cvs, kessais[i].id_search, filename, kessais[i].isPDF);
+      } else {
+        send(kessais[i].email, kessais[i].mail_subject, kessais[i].mail_body, kessais[i].id_search, filename, kessais[i].isPDF);
+      }
       
-        // メール送信時間を設定
-        await m_kessais.updatekessaiToSendMail(id_search,kessais[i].id_customer,common.getTodayTime());
+      // メール送信時間を設定
+      await m_kessais.updatekessaiToSendMail(kessais[i].id, common.getTodayTime());
 
-        // 送信後sleep
-        await common.sleep(5000);
+      // 送信後sleep
+      await common.sleep(5000);
     }
   }
 };
 
-//  決済情報をもとに、メールを再送信する
-const sendMail = async ( id_search, id_customer)=> {
+/**
+ * 決済情報をもとに、メールを再送信する
+ * @param {*} id 決済情報ID
+ */
+const sendMail = async (id_kessai)=> {
 
   // 対象となる決済情報を取得
-  const kessai = await m_kessais.findPKey(id_search, id_customer);
+  const kessai = await m_kessais.findPKey(id_kessai);
 
   // 対象となる予約情報よりIDを抽出する
-  const yoyakus = await m_yoyakus.findByIdSearchAndCustomer(id_search, id_customer);
+  const yoyakus = await m_yoyakus.findByIdKessai(id_kessai);
   const no_keiyaku = yoyakus[0].no_keiyaku;
 
   // 請求書PDFのファイル名を組み立てる
-  const filename = `${kessai.id_search}-${no_keiyaku}-${kessai.yyyymmdd_yoyaku}-${kessai.yyyymmdd_uketuke}.pdf`;
+  const filename = `${kessai.id_search}-${no_keiyaku}-${kessai.yyyymmdd_yoyaku}-${kessai.yyyymmdd_uketuke}-${kessai.id}.pdf`;
 
   if (kessai.isCvs === '1') {
     send(kessai.email, kessai.mail_subject, kessai.mail_body_cvs, kessai.id_search, filename, kessai.isPDF);
@@ -256,7 +263,7 @@ const sendMail = async ( id_search, id_customer)=> {
 
   // メール送信時間を設定
   const setTimeValue = kessai.yyyymmddhhmmss_resended_mail? `${kessai.yyyymmddhhmmss_resended_mail}|${common.getTodayTime()}`: common.getTodayTime();
-  await m_kessais.updatekessaiToReSendMail(id_search,id_customer,setTimeValue);
+  await m_kessais.updatekessaiToReSendMail(kessai.id,setTimeValue);
   await logger.info(`送信先：${kessai.nm_keiyaku} <${kessai.email}>`);
   
 };

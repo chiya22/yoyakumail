@@ -9,6 +9,7 @@ const readline = require("readline");
 const common = require("./common");
 
 const m_yoyakus = require("../model/yoyakus");
+const m_sq = require("../model/sq");
 
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
@@ -103,6 +104,11 @@ const dlyoyakuinfo = async (yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd
 };
 
 // ダウンロードディレクトリにあるファイル群を読み込む
+
+/**
+ * 予約システムよりダウンロードしてきた予約情報ファイルを読込み予約情報として登録する
+ * @param {*} yyyymmddhhmmss_proc 
+ */
 const filetodb = (yyyymmddhhmmss_proc) => {
 
   let targetfilename = "";
@@ -114,76 +120,69 @@ const filetodb = (yyyymmddhhmmss_proc) => {
 
       targetfilename = filename;
 
-      // id設定用プレフィックス
-      let max_id_yoyaku = 1;
-
       // csvファイルはShift-JISのため
-      const src = fs.createReadStream(process.env.YOYAKU_DL_PATH + "\\" + filename).pipe(iconv.decodeStream("Shift_JIS"));
+      // const src = fs.createReadStream(process.env.YOYAKU_DL_PATH + "\\" + filename).pipe(iconv.decodeStream("Shift_JIS"));
+      const file = fs.readFileSync(process.env.YOYAKU_DL_PATH + "\\" + filename);
+      const data = iconv.decode(Buffer.from(file), "Shift_JIS");
+      const lines = data.split("\n");
 
-      // 1行ごとに読み込む
-      const rl = readline.createInterface({
-        input: src,
-        output: process.stdout,
-        terminal: false,
-      });
+      let retObjYoyakuSq = {};
 
-      // 1行ごとの処理
-      rl.on("line", (chunk) => {
+      (async () => {
 
-        const linecontents = chunk.split(",");
+        // 各行に対する処理
+        for (let i=0; i<lines.length; i++) {
 
-        // ヘッダーは飛ばす
-        if (linecontents[0] !== "管理ID" && linecontents[0] !== "") {
-          // 予約情報用オブジェクト
-          let inObj = {};
-          inObj.id = "Y" + yyyymmddhhmmss_proc + ("00000" + max_id_yoyaku).slice(-5);
-          inObj.id_search = "Y" + yyyymmddhhmmss_proc;
-          inObj.id_kanri = linecontents[0];
-          inObj.nm_room = linecontents[1];
-          inObj.yyyymmdd_yoyaku = linecontents[2].replace(/\//g, "");
-          inObj.time_start = linecontents[3];
-          inObj.time_end = linecontents[4];
-          inObj.price = linecontents[5] ? linecontents[5] : 0;
-          inObj.yyyymmdd_uketuke = linecontents[6].replace(/\//g, "");
-          inObj.status_shiharai = linecontents[7];
-          inObj.nm_nyuryoku = common.hankaku2Zenkaku(linecontents[8]);
-          inObj.nm_riyousha = common.hankaku2Zenkaku(linecontents[9]);
-          inObj.nm_room_seishiki = linecontents[10];
-          inObj.type_room = linecontents[11];
-          inObj.no_keiyakusha = linecontents[12];
-          inObj.nm_keiyakusha = common.hankaku2Zenkaku(linecontents[13]);
-          inObj.nm_tantousha = common.hankaku2Zenkaku(linecontents[14]);
-          inObj.telno = linecontents[15].replace("‐","-");
-          inObj.faxno = linecontents[16].replace("‐","-");
-          inObj.email = linecontents[17];
-          inObj.kubun = linecontents[18];
-          inObj.address = linecontents[19];
-          inObj.quantity = linecontents[20] ? linecontents[20] : 0;
-          inObj.tanka = linecontents[21] ? linecontents[21] : 0;
-          inObj.caution = linecontents[22];
-          inObj.memo = linecontents[23];
-          inObj.yyyymmddhhmmss_created = yyyymmddhhmmss_proc;
-          inObj.id_customer = "R" + inObj.id_kanri + "-" + inObj.yyyymmdd_uketuke + "-" + inObj.yyyymmdd_yoyaku;
+          let linecontents = lines[i].split(",");
+          // 先頭行ではない、または、空行ではない場合
+          if (linecontents[0] !== "管理ID" && linecontents[0] !== "") {
 
-          (async () => {
+            // 予約情報用オブジェクト
+            let inObj = {};
+            inObj.id_kessai = 0;
+            inObj.id_search = "S" + yyyymmddhhmmss_proc;
+            inObj.id_kanri = linecontents[0];
+            inObj.nm_room = linecontents[1];
+            inObj.yyyymmdd_yoyaku = linecontents[2].replace(/\//g, "");
+            inObj.time_start = linecontents[3];
+            inObj.time_end = linecontents[4];
+            inObj.price = linecontents[5] ? linecontents[5] : 0;
+            inObj.yyyymmdd_uketuke = linecontents[6].replace(/\//g, "");
+            inObj.status_shiharai = linecontents[7];
+            inObj.nm_nyuryoku = common.hankaku2Zenkaku(linecontents[8]);
+            inObj.nm_riyou = common.hankaku2Zenkaku(linecontents[9]);
+            inObj.nm_room_seishiki = linecontents[10];
+            inObj.type_room = linecontents[11];
+            inObj.no_keiyaku = linecontents[12];
+            inObj.nm_keiyaku = common.hankaku2Zenkaku(linecontents[13]);
+            inObj.nm_tantou = common.hankaku2Zenkaku(linecontents[14]);
+            inObj.telno = linecontents[15].replace("‐","-");
+            inObj.faxno = linecontents[16].replace("‐","-");
+            inObj.email = linecontents[17];
+            inObj.kubun = linecontents[18];
+            inObj.address = linecontents[19];
+            inObj.quantity = linecontents[20] ? linecontents[20] : 0;
+            inObj.tanka = linecontents[21] ? linecontents[21] : 0;
+            inObj.caution = linecontents[22];
+            inObj.memo = linecontents[23];
+            inObj.yyyymmddhhmmss_created = yyyymmddhhmmss_proc;
+            inObj.id_customer = "R" + inObj.id_kanri + "-" + inObj.yyyymmdd_uketuke + "-" + inObj.yyyymmdd_yoyaku;
+
+            retObjYoyakuSq = await m_sq.selectSqYoyaku();
+            inObj.id = retObjYoyakuSq.id;
+            logger.info("★" + inObj.id + ":" + inObj.nm_riyousha)
             await m_yoyakus.insert(inObj);
-          })();
-          // logger.info(`予約情報ID：${inObj.id}`);
 
-          // id設定用プレフィックスに+1
-          max_id_yoyaku += 1;
-
-        }
-      });
-
-      // 終了時には処理した対象ファイルをリネームする
-      src.on("end", () => {
-        fs.rename(process.env.YOYAKU_DL_PATH + "\\" + targetfilename, process.env.YOYAKU_DL_PATH + "\\old_" + common.getTodayTime() + "_" + targetfilename, (err) => {
-          if (err) {
-            logger.info(`${targetfilename}ファイルは存在しません：${new Date()}`);
-            throw err;
           }
-        });
+        }
+      })();
+
+      // 処理終了後はファイルをリネーム
+      fs.rename(process.env.YOYAKU_DL_PATH + "\\" + targetfilename, process.env.YOYAKU_DL_PATH + "\\old_" + common.getTodayTime() + "_" + targetfilename, (err) => {
+        if (err) {
+          logger.info(`${targetfilename}ファイルは存在しません：${new Date()}`);
+          throw err;
+        }
       });
     }
   })

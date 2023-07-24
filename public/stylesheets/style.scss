@@ -3,6 +3,7 @@ $list-color: #c9daeb;
 $list-hover-color: #85b4d0;
 $second-color: #8a8a8a;
 $background-color: #d3eced;
+$add-list-color: #FFECCC;
 
 html {
   overflow-y: scroll;
@@ -71,8 +72,15 @@ pre {
     }
   }
 }
-
-
+// ヘッダーアイコン
+.header-neo {
+  color:#fff;
+  background-color: #ff0000;
+  display: inline;
+  padding: 7px 10px 5px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+}
 
 // メイン領域
 .main {
@@ -227,6 +235,19 @@ pre {
     background-color: $list-hover-color;
   }
 }
+.add-yoyakus-yoyaku {
+  display: inline-block;
+  letter-spacing: 0.8px;
+  background-color: $add-list-color;
+  padding: 10px;
+  margin: 10px 0;
+  font-size: 12px;
+  width: 100%;
+  border-radius: 10px;
+  &:hover {
+    background-color: $list-hover-color;
+  }
+}
 // 予約一覧情報　備品情報領域
 .yoyakus-bihin {
   color: $base-color;
@@ -242,6 +263,18 @@ pre {
     background-color: $list-hover-color;
   }
 }
+// 予約一覧情報コピー印
+.yoyakus-yoyaku-copy {
+  color:#fff;
+  background-color: #ff0000;
+  border: none;
+  display: inline;
+  padding: 2px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  margin: 0;
+}
+
 // 予約情報　タイトル
 // 決済情報　タイトル
 // メール情報タイトル
@@ -298,6 +331,7 @@ pre {
     background-color: $list-hover-color;
   }
 }
+
 // 決済一覧情報　決済情報のチェックボックス
 .kessais-kessai-checkbox {
   margin-bottom:5px;
@@ -337,6 +371,16 @@ pre {
 .kessais-kessai-resendmail {
   padding-top: 20px;
   text-align: right;
+}
+// 決済一覧情報コピー印
+.kessais-kessai-copy {
+  color:#fff;
+  background-color: #ff0000;
+  border: none;
+  display: inline;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 12px;
 }
 
 // 決済情報メール件名

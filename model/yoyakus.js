@@ -20,6 +20,16 @@ const find = async () => {
   }
 };
 
+// 決済情報IDで抽出
+const findByIdKessai = async ( id_kessai ) => {
+  try {
+    const retObj = await knex.from("yoyakus").where("id_kessai",id_kessai).orderBy("id", "asc");
+    return retObj;
+  } catch (err) {
+    throw err;
+  }
+};
+
 // 検索条件IDで抽出
 const findByIdSearch = async ( id_search ) => {
   try {
@@ -40,7 +50,6 @@ const findByIdSearchAndCustomer = async ( id_search, id_customer ) => {
   }
 };
 
-// 
 /**
  * 検索情報ID内のMAXのIDを取得する
  * @param {*} id_search 
@@ -62,6 +71,8 @@ const insert = async (inObj) => {
     const query =
       'insert into yoyakus values ("' +
       inObj.id +
+      '","' +
+      inObj.id_kessai +
       '","' +
       inObj.id_search +
       '", "' +
@@ -85,17 +96,17 @@ const insert = async (inObj) => {
       '", "' +
       inObj.nm_nyuryoku +
       '", "' +
-      inObj.nm_riyousha +
+      inObj.nm_riyou +
       '", "' +
       inObj.nm_room_seishiki +
       '", "' +
       inObj.type_room +
       '", "' +
-      inObj.no_keiyakusha +
+      inObj.no_keiyaku +
       '", "' +
-      inObj.nm_keiyakusha +
+      inObj.nm_keiyaku +
       '", "' +
-      inObj.nm_tantousha +
+      inObj.nm_tantou +
       '", "' +
       inObj.telno.replace(/\s+/g,"") +
       '", "' +
@@ -126,6 +137,25 @@ const insert = async (inObj) => {
   }
 };
 
+/**
+ * 検索情報IDとお客様情報IDをもとに検索した予約情報に、決済情報IDを設定する
+ * @param {*} id 
+ * @param {*} id_search 
+ * @param {*} id_customer 
+ * @returns 
+ */
+const updateByIdSearchAndIdCustomer = async (id, id_search, id_customer) => {
+  try {
+    const query = `update yoyakus set id_kessai = "${id}" where id_search = "${id_search}" and id_customer ="${id_customer}"`;
+    logger.info(query);
+    const retObj = await knex.raw(query);
+    return retObj[0];
+  } catch (err) {
+    logger.error(err.message);
+    throw err;
+  }
+}
+
 const remove = async (id) => {
   try {
     const query = 'delete from yoyakus where id = "' + id + '"';
@@ -138,9 +168,30 @@ const remove = async (id) => {
   }
 };
 
-const removeByIdSearch = async (id) => {
+/**
+ * 決済情報IDをキーに対象となる予約情報を削除する
+ * @param {*} id_kessai 決済情報ID
+ */
+const removeByIdKessai = async (id_kessai) => {
   try {
-    const query = 'delete from yoyakus where id_search = "' + id + '"';
+    const query = `delete from yoyakus where id_kessai = "${id_kessai}"`;
+    // logger.info(query);
+    const retObj = await knex.raw(query);
+    return retObj[0];
+  } catch (err) {
+    logger.error(err.message);
+    throw err;
+  }
+};
+
+/**
+ * 検索情報IDをキーに対象となる予約情報を削除する
+ * @param {*} id_search 検索情報ID 
+ * @returns 
+ */
+const removeByIdSearch = async (id_search) => {
+  try {
+    const query = 'delete from yoyakus where id_search = "' + id_search + '"';
     logger.info(query);
     const retObj = await knex.raw(query);
     return retObj[0];
@@ -170,11 +221,14 @@ const removeByIdSearchAndIdCustomer = async (id_search, id_customer) => {
 module.exports = {
   find,
   findPKey,
+  findByIdKessai,
   findByIdSearch,
   findByIdSearchAndCustomer,
   findMaxId,
   insert,
+  updateByIdSearchAndIdCustomer,
   remove,
+  removeByIdKessai,
   removeByIdSearch,
   removeByIdSearchAndIdCustomer,
 };

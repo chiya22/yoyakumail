@@ -24,13 +24,15 @@
     <% } %>
       <form method="post" action="/kessai/save">
         <div class="area_header">
-          <a class="btn-back" href="<%= `/kessai/${kessai.id_search}_${kessai.id_customer}` %>">戻る</a>
-          <input type="hidden" name="id_search" value="<%= kessai.id_search %>">
-          <input type="hidden" name="id_customer" value="<%= kessai.id_customer %>">
-          <input type="hidden" name="isCvs" value="<%= kessai.isCvs %>">
+          <a class="btn-back" href="<%= `/kessai/${kessai.id}` %>">戻る</a>
+          <input type="hidden" name="id" value="<%= kessai.id %>">
+          <!-- <input type="hidden" name="isCvs" value="<%= kessai.isCvs %>"> -->
           <input type="submit" value="保存" class="btn-action">
         </div>
         <div class="kessai-title">
+          <% if (yoyakus[0].nm_nyuryoku.slice(0,3) === "コピー") { %>
+            <div class="kessais-kessai-copy" >COPY</div>
+          <% } %>
           【決済情報】<%= kessai.id_cutomer %> <%= kessai.nm_keiyaku %>　
           <%= `${kessai.yyyymmdd_yoyaku.slice(0,4)}年${kessai.yyyymmdd_yoyaku.slice(4,6)}月${kessai.yyyymmdd_yoyaku.slice(6,8)}日  ${kessai.price.toLocaleString()}円`　%>
         </div>
@@ -62,7 +64,7 @@
           <dt>契約名</dt>
           <dd class="oneline-dd"><%= kessai.nm_keiyaku %></dd>
           <dt>担当者名</dt>
-          <dd><%= kessai.nm_tantousha %></dd>
+          <dd><%= kessai.nm_tantou %></dd>
           <dt>予約年月日</dt>
           <dd><%= kessai.yyyymmdd_yoyaku %></dd>
           <dt>受付年月日</dt>
@@ -88,13 +90,19 @@
               <% } else { %>
                 <p class="tag"><%= yoyaku.status_shiharai %></p>
               <% } %>
-              <!-- <%= yoyaku.no_keiyaku %> <%= yoyaku.nm_riyousha %> |  -->
+              <!-- <%= yoyaku.no_keiyaku %> <%= yoyaku.nm_riyou %> |  -->
               <%= yoyaku.nm_room_seishiki %> | 
               <%= `${yoyaku.yyyymmdd_yoyaku.slice(0,4)}年${yoyaku.yyyymmdd_yoyaku.slice(4,6)}月${yoyaku.yyyymmdd_yoyaku.slice(6,8)}日` %> <%= `${yoyaku.time_start.slice(0,2)}:${yoyaku.time_start.slice(2,4)}` %>-<%= `${yoyaku.time_end.slice(0,2)}:${yoyaku.time_end.slice(2,4)}` %> | 
               <%= `${yoyaku.price.toLocaleString()}円` %>
             </dd>
           <% }) %>
         </dl>
+        <%
+        let isCvsChecked = "";
+        if (kessai.isCvs === "1") {
+          isCvsChecked = "checked";
+        }
+        %>
         <div class="yoyaku-title">【メール情報】</div>
         <dl class="mail-dl">
           <dt>メールアドレス</dt>
@@ -106,10 +114,10 @@
           <div class="oneline-dd"><%= kessai.yyyymmddhhmmss_sended_mail %></div>
           <dt>メール再送信年月日時分秒</dt>
           <div class="oneline-dd"><%= kessai.yyyymmddhhmmss_resended_mail %></div>
-          <dt><%= `${kessai.isCvs === '1'?'メール本文（コンビニ決済用）':'メール本文'}` %></dt>
-          <dd class="oneline-dd"></dd>
+          <dt id="mailbody_title"><%= `${kessai.isCvs === '1'?'メール本文（コンビニ決済用）':'メール本文'}` %></dt>
+          <dd class="oneline-dd"><input type="checkbox" name="isCvs" id="_isCvs" value="1" <%= isCvsChecked %> /><label class="checkbox_label" for="_isCvs">コンビニ決済</label></dd>
           <dt></dt>
-          <% if (kessai.isCvs === '1'){ %>
+          <% if (kessai.isCvs === "1"){ %>
             <dd class="oneline-dd">
               <textarea name="mail_body" class="mail_body_edit" cols="100" rows="80"><%= kessai.mail_body_cvs %></textarea>
             </dd>
@@ -120,9 +128,35 @@
           <% } %>
         </dl>
       </form>
+      <textarea style="display:none" id="mail_body_normal"><%= kessai.mail_body %></textarea>
+      <textarea style="display:none" id="mail_body_cvs"><%= kessai.mail_body_cvs %></textarea>
     </div>
   </div>
 </body>
 <%- include("./common/javascripts.ejs") %>
+<script>
+  const isCvs = document.getElementById("_isCvs");
+  const mail_body_normal = document.getElementById("mail_body_normal")
+  const mail_body_cvs = document.getElementById("mail_body_cvs")
+  const mailbody = document.getElementsByClassName("mail_body_edit")[0]
+  const mailtitle = document.getElementById("mailbody_title");
+  isCvs.addEventListener("click", () => {
+    if (!isCvs.checked) {
+      isCvs.value = ""
+      // メール本文（コンビニ決済用）の編集内容を退避
+      mail_body_cvs.value = mailbody.value;
+      // メール本文を復元
+      mailbody.value = mail_body_normal.value;
+      mailtitle.innerHTML = "メール本文";
+    } else {
+      isCvs.value = "1"
+      // メール本文の編集内容を退避
+      mail_body_normal.value = mailbody.value;
+      // メール本文（コンビニ決済用）を復元
+      mailbody.value = mail_body_cvs.value;
+      mailtitle.innerHTML = "メール本文（コンビニ決済用）";
+    }
+  })
+</script>
 
 </html>
