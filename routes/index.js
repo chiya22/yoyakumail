@@ -245,7 +245,7 @@ router.get("/kessaiscreate/:id", (req, res) => {
             // 決済情報がある場合は削除する
             await m_kessais.remove(id_search);
             
-            req.flash("error", `決済情報の取得に取得しました。時間をおいて再度処理を行ってください。(${id_search})`);
+            req.flash("error", `決済情報の取得に失敗しました。時間をおいて再度処理を行ってください。(${id_search})`);
             res.redirect("/");
           }
         }
@@ -463,7 +463,7 @@ router.post("/updyoyakus/:id", (req, res) => {
             // 決済情報がある場合は削除する
             await m_kessais.remove(id_kessai_new);
 
-            req.flash("error", `決済情報の取得に取得しました。時間をおいて再度処理を行ってください。(${id_kessai_new})`);
+            req.flash("error", `決済情報の取得に失敗しました。時間をおいて再度処理を行ってください。(${id_kessai_new})`);
             res.redirect("/");
           }
         }
