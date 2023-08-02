@@ -170,7 +170,6 @@ const filetodb = (yyyymmddhhmmss_proc) => {
 
             retObjYoyakuSq = await m_sq.selectSqYoyaku();
             inObj.id = retObjYoyakuSq.id;
-            logger.info("★" + inObj.id + ":" + inObj.nm_riyousha)
             await m_yoyakus.insert(inObj);
 
           }

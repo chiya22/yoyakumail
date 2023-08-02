@@ -110,7 +110,7 @@ const insert = async (inObj) => {
       ',' +
       common.retSqlValue(inObj.yyyymmddhhmmss_resended_mail) + 
       ')';
-    logger.info(query);
+    // logger.info(query);
     const retObj = await knex.raw(query);
     return retObj[0];
   } catch (err) {
@@ -168,7 +168,7 @@ const selectFromYoyakus = async (id_search, id_kessai = null) => {
     } else {
       query += `y.id_search HAVING y.id_search = "${id_search}"`
     }
-    logger.info(query);
+    // logger.info(query);
     const retObj = await knex.raw(query);
     return retObj[0];
   } catch(err) {

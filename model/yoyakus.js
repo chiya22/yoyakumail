@@ -128,7 +128,7 @@ const insert = async (inObj) => {
       '", "' +
       inObj.yyyymmddhhmmss_created +
       '")';
-    logger.info(query);
+    // logger.info(query);
     const retObj = await knex.raw(query);
     return retObj[0];
   } catch (err) {
@@ -147,7 +147,7 @@ const insert = async (inObj) => {
 const updateByIdSearchAndIdCustomer = async (id, id_search, id_customer) => {
   try {
     const query = `update yoyakus set id_kessai = "${id}" where id_search = "${id_search}" and id_customer ="${id_customer}"`;
-    logger.info(query);
+    // logger.info(query);
     const retObj = await knex.raw(query);
     return retObj[0];
   } catch (err) {
@@ -159,7 +159,7 @@ const updateByIdSearchAndIdCustomer = async (id, id_search, id_customer) => {
 const remove = async (id) => {
   try {
     const query = 'delete from yoyakus where id = "' + id + '"';
-    logger.info(query);
+    // logger.info(query);
     const retObj = await knex.raw(query);
     return retObj[0];
   } catch (err) {
@@ -192,7 +192,7 @@ const removeByIdKessai = async (id_kessai) => {
 const removeByIdSearch = async (id_search) => {
   try {
     const query = 'delete from yoyakus where id_search = "' + id_search + '"';
-    logger.info(query);
+    // logger.info(query);
     const retObj = await knex.raw(query);
     return retObj[0];
   } catch (err) {

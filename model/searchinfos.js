@@ -47,7 +47,7 @@ const insert = async (inObj) => {
       '", "' +
       inObj.yyyymmddhhmmss_created_yoyakus +
       '")';
-    logger.info(query);
+    // logger.info(query);
     const retObj = await knex.raw(query);
     return retObj[0];
   } catch (err) {
@@ -67,7 +67,7 @@ const updateStatusAndTime = async (id, status, yyyymmddhhmmss) => {
     } else if (status ==='3') {
       query = 'update searchinfos set status = "' + status + '", yyyymmddhhmmss_sended_mails = "' + yyyymmddhhmmss + '" where id = "' + id + '"';
     }
-    logger.info(query);
+    // logger.info(query);
     const retObj = await knex.raw(query);
     return retObj
   } catch (err) {
