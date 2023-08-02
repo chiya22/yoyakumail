@@ -31,12 +31,12 @@ const outputFile = async (id_search, id_kessai = null) => {
   let content = "";
   if (id_kessai) {
     const kessai = await m_kessais.findPKey(id_kessai);
-    content += kessai.id + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + kessai.nm_customer_2 + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
+    content += kessai.id + "_" + kessai.id_customer + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + (kessai.nm_customer_2===null?'':kessai.nm_customer_2) + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
     // content += kessai.id_customer + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + kessai.nm_customer_2 + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
   } else {
     const kessais = await m_kessais.findByIdSearch(id_search);
     kessais.forEach( kessai => {
-      content += kessai.id + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + kessai.nm_customer_2 + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
+      content += kessai.id + "_" + kessai.id_customer + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + (kessai.nm_customer_2===null?'':kessai.nm_customer_2) + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
       // content += kessai.id_customer + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + kessai.nm_customer_2 + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
     });
   }
@@ -282,7 +282,7 @@ const updkessaiinfo = async (id_search, dlfilename) => {
 
         inObj = {};
         // inObj.id_customer = linecontents[0];
-        inObj.id = linecontents[0];
+        inObj.id = linecontents[0].split("_")[0];
         inObj.id_search = id_search;
         inObj.result = linecontents[7];
         inObj.id_data = linecontents[8];
