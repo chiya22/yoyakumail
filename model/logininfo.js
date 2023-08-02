@@ -17,7 +17,7 @@ const update = async (password) => {
 
   try {
     const query = 'update logininfo set password = "' + password + '"';
-    logger.info(query);
+    // logger.info(query);
     const retObj = await knex.raw(query);
     return retObj
   } catch (err) {
