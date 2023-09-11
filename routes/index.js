@@ -189,6 +189,16 @@ router.get("/kessaiscreate/:id", (req, res) => {
         // 決済情報IDを採番し、決済情報を登録する
         const retObjKessaiSq = await m_sq.selectSqKessai();
         retObjkessais[i].id = retObjKessaiSq.id;
+
+        // 消費税率によって集計地を設定する
+        // ※予約システムから取得した時点での予約情報の場合はすべて10%
+        retObjkessais[i].price_10per_total = retObjkessais[i].price / (1.1);
+        retObjkessais[i].tax_10per_total = retObjkessais[i].price / (1 + 0.1) * 0.1;
+        retObjkessais[i].price_8per_total = 0;
+        retObjkessais[i].tax_8per_total = 0;
+        retObjkessais[i].price_0per_total = 0;
+        retObjkessais[i].tax_0per_total = 0;
+        
         await m_kessais.insert(retObjkessais[i]);
 
         // 予約情報に決済情報IDを設定する
@@ -286,8 +296,9 @@ router.post("/updyoyakus/:id", (req, res) => {
       const time_end_list = Array.isArray(req.body.time_end) ? req.body.time_end : [req.body.time_end];
       const price_list = Array.isArray(req.body.price) ? req.body.price : [req.body.price];
       const quantity_list = Array.isArray(req.body.quantity) ? req.body.quantity : [req.body.quantity];
-      const type_room_list = req.body.type_list.split(","); // 通常会議室：0、ミーティングルーム：1、プロジェクトルーム：2、備品：9
-      const nm_nyuryoku_list = req.body.nm_nyuryoku
+      const type_room_list = req.body.type_list.split(","); // 通常会議室：0、ミーティングルーム：1、プロジェクトルーム：2、備品：9、その他：Z
+      const per_tax_list = req.body.tax_list.split(","); // 10%：10、8%：8、0%：0
+      // const nm_nyuryoku_list = req.body.nm_nyuryoku
 
       // 予約年月日が日付変換できるかチェック
       if (!common.isDate(req.body.yyyymmdd_yoyaku)) {
@@ -324,12 +335,22 @@ router.post("/updyoyakus/:id", (req, res) => {
       }
 
       // 価格が数値であるかチェック
+      let totalPrice = 0;
       for (let j = 0; j < price_list.length; j++) {
-        if ((!Number.isInteger(Number(price_list[j]))) || (Number(price_list[j]) < 0) || (Number(price_list[j]) > 9999999999)) {
-          req.flash("error", "価格は11桁以内の正の数値で入力してください。 " + (j + 1) + "行目：" + price_list[j]);
+        // if ((!Number.isInteger(Number(price_list[j]))) || (Number(price_list[j]) < 0) || (Number(price_list[j]) > 9999999999)) {
+        if ((!Number.isInteger(Number(price_list[j]))) || (Number(price_list[j]) > 9999999999)) {
+            // req.flash("error", "価格は11桁以内の正の数値で入力してください。 " + (j + 1) + "行目：" + price_list[j]);
+          req.flash("error", "価格は11桁以内の数値で入力してください。 " + (j + 1) + "行目：" + price_list[j]);
           res.redirect(`/yoyakus/edit/${id_kessai}`);
           return;
+        } else {
+          totalPrice += Number(price_list[j]);
         }
+      }
+      if (totalPrice < 0) {
+        req.flash("error", `請求金額がマイナスになっています。（請求金額：${totalPrice}）`);
+        res.redirect(`/yoyakus/edit/${id_kessai}`);
+        return;
       }
 
       // 数量が数値であるかチェック
@@ -370,8 +391,9 @@ router.post("/updyoyakus/:id", (req, res) => {
         inObjYoyaku.time_end = time_end_list[i];
         inObjYoyaku.price = price_list[i];
         inObjYoyaku.nm_room_seishiki = nm_room_list[i];
-        inObjYoyaku.type_room = type_room_list[i]; // 通常会議室：0、ミーティングルーム：1、プロジェクトルーム：2、備品：9
+        inObjYoyaku.type_room = type_room_list[i]; // 通常会議室：0、ミーティングルーム：1、プロジェクトルーム：2、備品：9、その他：Z
         inObjYoyaku.quantity = quantity_list[i];
+        inObjYoyaku.per_tax = per_tax_list[i];
         inObjYoyaku.yyyymmddhhmmss_created = common.getTodayTime();
 
         // 共通項目のためリストの最初の項目値を設定
@@ -408,6 +430,20 @@ router.post("/updyoyakus/:id", (req, res) => {
 
       // 新しい決済情報を登録する
       retObjkessai[0].id = id_kessai_new;
+
+      // 予約情報より各税率の料金合計を取得する
+      const price_10per = await m_yoyakus.findPriceByKbnPerAndIdKessai(10,id_kessai_new);
+      const price_8per = await m_yoyakus.findPriceByKbnPerAndIdKessai(8,id_kessai_new);
+      const price_0per = await m_yoyakus.findPriceByKbnPerAndIdKessai(0,id_kessai_new);
+
+      // 各税率の税抜き料金と消費税料金を設定する
+      retObjkessai[0].price_10per_total = price_10per.length === 1? Math.ceil(price_10per[0].price / (1.1)): 0;
+      retObjkessai[0].tax_10per_total = price_10per.length === 1? price_10per[0].price - Math.ceil(price_10per[0].price / (1.1)): 0;
+      retObjkessai[0].price_8per_total =  price_8per.length === 1? Math.ceil(price_8per[0].price / (1.08)): 0;
+      retObjkessai[0].tax_8per_total = price_8per.length === 1? price_8per[0].price - Math.ceil(price_8per[0].price / (1.08) ): 0;
+      retObjkessai[0].price_0per_total =  price_0per.length === 1? price_0per[0].price: 0;
+      retObjkessai[0].tax_0per_total = 0
+
       await m_kessais.insert(retObjkessai[0]);
 
       // 既存予約情報の削除

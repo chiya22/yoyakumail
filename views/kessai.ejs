@@ -83,7 +83,17 @@
         <dt>請求書PDF添付対象</dt>
         <dd><%= kessai.isPDF %></dd>
         <dt>請求書PDF</dt>
-        <dd><a href="/static/pdf/<%= kessai.id_search %>/<%= kessai.id_search %>-<%= no_keiyaku %>-<%= kessai.yyyymmdd_yoyaku %>-<%= kessai.yyyymmdd_uketuke %>-<%= kessai.id %>.pdf">請求書</a></dd>
+        <dd class="oneline-dd"><a href="/static/pdf/<%= kessai.id_search %>/<%= kessai.id_search %>-<%= no_keiyaku %>-<%= kessai.yyyymmdd_yoyaku %>-<%= kessai.yyyymmdd_uketuke %>-<%= kessai.id %>.pdf">請求書</a></dd>
+        <dt>10%料金</dt>
+        <dd><%= kessai.price_10per_total %></dd>
+        <dt>10%消費税</dt>
+        <dd><%= kessai.tax_10per_total %></dd>
+        <dt>8%料金</dt>
+        <dd><%= kessai.price_8per_total %></dd>
+        <dt>8%消費税</dt>
+        <dd><%= kessai.tax_8per_total %></dd>
+        <dt>0%料金</dt>
+        <dd><%= kessai.price_0per_total %></dd>
       </dl>
       <div class="yoyaku-title">【予約情報】
         <a class="btn-action" href="<%= `/yoyakus/edit/${kessai.id}` %>">予約編集</a>

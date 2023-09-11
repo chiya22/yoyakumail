@@ -66,6 +66,30 @@ const findMaxId = async ( id_search ) => {
   }
 };
 
+/**
+ * 税率と決済IDより、対象予約情報の料金合計をもとめる
+ * 
+ * @param {*} kbn_per 税率
+ * @param {*} id_kessai 決済情報のID
+ * @returns 料金合計
+ */
+const findPriceByKbnPerAndIdKessai = async (kbn_per, id_kessai) => {
+  try {
+    const query = `select sum(y.price) as price from yoyakus y group by y.per_tax, y.id_kessai having y.per_tax = ${kbn_per} and y.id_kessai = ${id_kessai}`;
+    // logger.info(query);
+    const retObj = await knex.raw(query);
+    return retObj[0];
+  } catch (err) {
+    throw err;
+  }
+}
+
+/**
+ * 予約情報の登録
+ * 
+ * @param {*} inObj 
+ * @returns 
+ */
 const insert = async (inObj) => {
   try {
     const query =
@@ -127,7 +151,9 @@ const insert = async (inObj) => {
       inObj.memo +
       '", "' +
       inObj.yyyymmddhhmmss_created +
-      '")';
+      '", ' + 
+      inObj.per_tax +
+      ')';
     // logger.info(query);
     const retObj = await knex.raw(query);
     return retObj[0];
@@ -218,6 +244,7 @@ const removeByIdSearchAndIdCustomer = async (id_search, id_customer) => {
   }
 };
 
+
 module.exports = {
   find,
   findPKey,
@@ -225,10 +252,11 @@ module.exports = {
   findByIdSearch,
   findByIdSearchAndCustomer,
   findMaxId,
+  findPriceByKbnPerAndIdKessai,
   insert,
   updateByIdSearchAndIdCustomer,
   remove,
   removeByIdKessai,
   removeByIdSearch,
-  removeByIdSearchAndIdCustomer,
+  removeByIdSearchAndIdCustomer
 };

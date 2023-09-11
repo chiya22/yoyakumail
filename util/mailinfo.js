@@ -79,10 +79,11 @@ const makeMailBody = async (kessai) => {
   let mailbody_cvs = '';
   let mailbody_after = '';
 
-  mailbody_before += "＜会議室・ミーティングルーム予約確認書及びご請求書＞\r\n";
+  mailbody_before += "＜会議室・ミーティングルーム予約確認書＞\r\n";
   mailbody_before += "この度はちよだプラットフォームスクウェア会議室を\r\n";
   mailbody_before += "ご予約いただきありがとうございます。\r\n"
   mailbody_before += "下記の内容にて承りましたのでご確認ください。\r\n"
+  mailbody_before += "ご請求書は別途添付しております。\r\n"
   mailbody_before += "\r\n"
 
   // ◆契約者名の編集

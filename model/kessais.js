@@ -109,6 +109,18 @@ const insert = async (inObj) => {
       common.retSqlValue(inObj.yyyymmddhhmmss_sended_mail) +
       ',' +
       common.retSqlValue(inObj.yyyymmddhhmmss_resended_mail) + 
+      ',' +
+      common.retSqlValue(inObj.price_10per_total) + 
+      ',' +
+      common.retSqlValue(inObj.tax_10per_total) + 
+      ',' +
+      common.retSqlValue(inObj.price_8per_total) + 
+      ',' +
+      common.retSqlValue(inObj.tax_8per_total) + 
+      ',' +
+      common.retSqlValue(inObj.price_0per_total) + 
+      ',' +
+      common.retSqlValue(inObj.tax_0per_total) + 
       ')';
     // logger.info(query);
     const retObj = await knex.raw(query);
@@ -155,20 +167,26 @@ const selectFromYoyakus = async (id_search, id_kessai = null) => {
       NULL as mail_body,
       NULL as mail_body_cvs,
       NULL as yyyymmddhhmmss_sended_mail,
-      NULL as yyyymmddhhmmss_resended_mail
+      NULL as yyyymmddhhmmss_resended_mail,
+      0 as price_10per_total,
+      0 as tax_10per_total,
+      0 as price_8per_total,
+      0 as tax_8per_total,
+      0 as price_0per_total,
+      0 as tax_0per_total 
       FROM yoyakus y 
       GROUP BY y.id_customer, 
       "800", 
       y.nm_tantou, 
       y.telno, 
-      DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 8 DAY),"%Y%m%d"), 
+      DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 8 DAY),"%Y%m%d"),
       `
     if (id_kessai) {
       query += `y.id_kessai HAVING y.id_kessai = "${id_kessai}"`
     } else {
       query += `y.id_search HAVING y.id_search = "${id_search}"`
     }
-    // logger.info(query);
+    logger.info(query);
     const retObj = await knex.raw(query);
     return retObj[0];
   } catch(err) {

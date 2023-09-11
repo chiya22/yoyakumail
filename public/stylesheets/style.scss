@@ -73,13 +73,15 @@ pre {
   }
 }
 // ヘッダーアイコン
-.header-neo {
-  color:#fff;
-  background-color: #ff0000;
+.header-invoice {
+  color:#f93115;
+  // background-color: #ffbb05;
   display: inline;
   padding: 7px 10px 5px 12px;
   border-radius: 15px;
   font-size: 12px;
+  font-weight: 800;
+  border: 3px solid #f93115;
 }
 
 // メイン領域

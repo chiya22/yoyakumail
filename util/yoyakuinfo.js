@@ -167,6 +167,8 @@ const filetodb = (yyyymmddhhmmss_proc) => {
             inObj.memo = linecontents[23];
             inObj.yyyymmddhhmmss_created = yyyymmddhhmmss_proc;
             inObj.id_customer = "R" + inObj.id_kanri + "-" + inObj.yyyymmdd_uketuke + "-" + inObj.yyyymmdd_yoyaku;
+            // 予約情報からダウンロードしてきた場合はすべて10%
+            inObj.per_tax = 10;
 
             retObjYoyakuSq = await m_sq.selectSqYoyaku();
             inObj.id = retObjYoyakuSq.id;

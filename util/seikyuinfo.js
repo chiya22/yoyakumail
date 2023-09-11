@@ -29,11 +29,22 @@ const createSeikyuPDF = async (id_kessai) => {
   //　予約情報から請求書（PDF）出力情報を作成する
   let meisais = [];
   let bihinmeisais = [];
+  let othermeisais = [];
   let bihinIndx = true;
+  let otherIndx = true;
   let roomIndx = true;
   let no_keiyaku = "";
   yoyakus.forEach( (yoyaku) => {
       no_keiyaku = yoyaku.no_keiyaku;
+      
+      // 税率が8%の場合と、0％の場合で明細名のマークを設定する
+      let per_tax_mark = "";
+      if (yoyaku.per_tax === 0) {
+        per_tax_mark = "※2"
+      } else if (yoyaku.per_tax === 8) {
+        per_tax_mark = "※1"
+      }
+
       if (yoyaku.type_room === '9') {
           // 備品の場合
           // 最初の備品の場合はインデックスを挿入する
@@ -46,11 +57,39 @@ const createSeikyuPDF = async (id_kessai) => {
             bihinmeisais.push(objBihinIndx);
           }
           let objBihin = {}
-          objBihin.name = yoyaku.nm_room + "×" + yoyaku.quantity
+
+          objBihin.name = yoyaku.nm_room + "×" + yoyaku.quantity + "   " + per_tax_mark;
           objBihin.time = yoyaku.time_start.slice(0,2) + ":" + yoyaku.time_start.slice(-2) + "-" + yoyaku.time_end.slice(0,2) + ":" + yoyaku.time_end.slice(-2)
           objBihin.price = yoyaku.price.toLocaleString() + "円"
+          objBihin.type_room = yoyaku.type_room;
           bihinmeisais.push(objBihin);
-      } else {
+        } else if (yoyaku.type_room === 'Z') {
+          // その他の場合
+          // 最初のその他の場合はインデックスを挿入する
+          if (otherIndx) {
+            let objOtherIndx = {}
+            objOtherIndx.name = "項目名"
+            objOtherIndx.time = "　　"
+            objOtherIndx.price = "料金"
+            otherIndx = false;
+            othermeisais.push(objOtherIndx);
+          }
+          let objOther = {}
+          if (yoyaku.quantity > 1) {
+            objOther.name = yoyaku.nm_room + "×" + yoyaku.quantity + "   " + per_tax_mark;
+          } else {
+            objOther.name = yoyaku.nm_room + "   " + per_tax_mark;
+          }
+          objOther.time = ""
+          // objOther.time = yoyaku.time_start.slice(0,2) + ":" + yoyaku.time_start.slice(-2) + "-" + yoyaku.time_end.slice(0,2) + ":" + yoyaku.time_end.slice(-2)
+          if (yoyaku.price < 0) {
+            objOther.price = `${yoyaku.price.toLocaleString()}円`
+          } else {
+            objOther.price = yoyaku.price.toLocaleString() + "円"
+          }
+          objOther.type_room = yoyaku.type_room;
+          othermeisais.push(objOther);
+        } else {
           // 部屋の場合
           // 最初の備品の場合はインデックスを挿入する
           if (roomIndx) {
@@ -62,13 +101,15 @@ const createSeikyuPDF = async (id_kessai) => {
             meisais.push(objRoomIndx);
           }
           let objRoom = {}
-          objRoom.name = yoyaku.nm_room
+          objRoom.name = yoyaku.nm_room + "   " + per_tax_mark;
           objRoom.time = yoyaku.time_start.slice(0,2) + ":" + yoyaku.time_start.slice(-2) + "-" + yoyaku.time_end.slice(0,2) + ":" + yoyaku.time_end.slice(-2)
           objRoom.price = yoyaku.price.toLocaleString() + "円"
+          objRoom.type_room = yoyaku.type_room;
           meisais.push(objRoom);
       }
   });
   meisais = meisais.concat(bihinmeisais);
+  meisais = meisais.concat(othermeisais);
 
   // 契約者名
   // （表示名：XXX）があれば削除する　例）■　１２３４　株式会社ＡＡＡ（表示名：ＢＢＢ）　⇒　■　１２３４　株式会社ＡＡＡ
@@ -87,7 +128,8 @@ const createSeikyuPDF = async (id_kessai) => {
 
   // ▼▼▼　PDF　▼▼▼
   // テンプレートSVGを取得し、独自SVGを作成する
-  let stdin = fs.readFileSync("public/template/A4.svg","utf8").toString();
+  let stdin = fs.readFileSync("public/template/A4-invoice.svg","utf8").toString();
+//  let stdin = fs.readFileSync("public/template/A4.svg","utf8").toString();
   let dom = new JSDOM(stdin);
   let document = dom.window.document;
 
@@ -120,39 +162,70 @@ const createSeikyuPDF = async (id_kessai) => {
 
   // ご利用金額合計
   const price_total = document.querySelector("#__price_total > tspan");
-  setRightPositionForPrice(price_total, kessai.price.toLocaleString() + "円");
+  price_total.setAttribute("x","540");
+  price_total.textContent = kessai.price.toLocaleString() + "円";
+  // setRightPositionForPrice(price_total, kessai.price.toLocaleString() + "円");
+
+  // ご利用金額　税率ごとの料金と消費税を設定
+  const price_10per_total = document.querySelector("#__price_10per_total > tspan");
+  price_10per_total.setAttribute("x","199");
+  price_10per_total.textContent = kessai.price_10per_total? kessai.price_10per_total.toLocaleString() + "円": "";
+  const tax_10per_total = document.querySelector("#__tax_10per_total > tspan");
+  tax_10per_total.setAttribute("x","199");
+  tax_10per_total.textContent = kessai.tax_10per_total? kessai.tax_10per_total.toLocaleString() + "円": "";
+  const price_8per_total = document.querySelector("#__price_8per_total > tspan");
+  price_8per_total.setAttribute("x","358");
+  price_8per_total.textContent = kessai.price_8per_total? kessai.price_8per_total.toLocaleString() + "円": "";
+  const tax_8per_total = document.querySelector("#__tax_8per_total > tspan");
+  tax_8per_total.setAttribute("x","358");
+  tax_8per_total.textContent = kessai.tax_8per_total? kessai.tax_8per_total.toLocaleString() + "円": "";
+  const price_0per_total = document.querySelector("#__price_0per_total > tspan");
+  price_0per_total.setAttribute("x","512");
+  price_0per_total.textContent = kessai.price_0per_total? kessai.price_0per_total.toLocaleString() + "円": "";
 
   // 名前、時間、料金
   let indx = 1;
   let targetfiledname = '';
   let targetobj;
   meisais.forEach( (meisai) => {
+
+      // ▼会場名/付帯設備名/項目名
       targetfiledname = "#__name_room_" + indx + " > tspan"
       targetobj = document.querySelector(targetfiledname);
-      if ((meisai.name === "付帯設備名") || (meisai.name === "会場名")) {
+      if ((meisai.name === "付帯設備名") || (meisai.name === "会場名") || (meisai.name === "項目名")) {
           targetobj.setAttribute("x","163");
       }
       meisai.name = meisai.name.replace("ミーティングR","ミーティングルーム")
       meisai.name = meisai.name.replace("プロジェクトR","プロジェクトルーム")
       meisai.name = meisai.name.replace("プレゼンＲ","プレゼンテーションルーム")
       targetobj.textContent = meisai.name;
+
+      // ▼時間
       targetfiledname = "#__time_" + indx + " > tspan"
       targetobj = document.querySelector(targetfiledname);
       if (meisai.time === "時間帯") {
-          targetobj.setAttribute("x","357");
+        targetobj.setAttribute("x","357");
+        targetobj.textContent = meisai.time;
+      } else if (meisai.time === "項目名") {
+        targetobj.textContent = "";
+      } else {
+        targetobj.textContent = meisai.time;
       }
-      targetobj.textContent = meisai.time;
+      // ▼料金
       targetfiledname = "#__price_" + indx + " > tspan"
       targetobj = document.querySelector(targetfiledname);
       if (meisai.price === "料金") {
-          targetobj.setAttribute("x","467");
-          targetobj.textContent = meisai.price;
+        targetobj.setAttribute("x","500");
+        targetobj.textContent = meisai.price;
       } else {
-          setRightPositionForPrice(targetobj, meisai.price);
+        targetobj.setAttribute("x","540");
+        targetobj.textContent = meisai.price;
+        // setRightPositionForPrice(targetobj, meisai.price);
       }
       indx += 1;
   })
-  for (let i=indx; i<18; i++) {
+  for (let i=indx; i<16; i++) {
+  // for (let i=indx; i<18; i++) {
     targetfiledname = "#__name_room_" + i + " > tspan"
     targetobj = document.querySelector(targetfiledname);
     targetobj.textContent = '';
@@ -209,37 +282,6 @@ const createSeikyuPDF = async (id_kessai) => {
   pdfDoc.pipe(fs.createWriteStream(`${filepath}/${filename}.pdf`));
   pdfDoc.end();
   
-}
-
-/**
- * 料金フィールドに右詰めで金額を設定する
- * 
- * @param {*} obj 設定対象フィールド
- * @param {*} string 設定値
- */
-const setRightPositionForPrice = (obj, string) => {
-    // const maxsize = encodeURI(obj.textContent).replace(/%../g,"x").length;
-    // const stringsize = encodeURI(string).replace(/%../g,"x").length;
-    const stringsize = string.length;
-    let xposition = 0;
-    if (stringsize <= 4) {
-        // 「,」が4つ
-        xposition = (20-stringsize-4)*6 + (4*3)
-    } else if ((stringsize >= 5) && (stringsize <= 8)) {
-        // 「,」が3つ
-        xposition = (20-stringsize-3)*6 + (3*3)
-    } else if ((stringsize >= 9) && (stringsize <= 12)) {
-        // 「,」が3つ
-        xposition = (20-stringsize-2)*6 + (3*2)
-    } else if ((stringsize >= 13) && (stringsize <= 16)) {
-        // 「,」が3つ
-        xposition = (20-stringsize-1)*6 + (3*1)
-    } else {
-        xposition = (20-stringsize)*6
-    }
-    obj.textContent = string;
-    xposition = Number(obj.getAttribute("x")) + xposition
-    obj.setAttribute("x", xposition);
 }
 
 module.exports = {

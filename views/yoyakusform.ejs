@@ -92,6 +92,7 @@
             <input type="hidden" name="email" value="<%= yoyakus[0].email %>" />
             <input type="hidden" name="address" value="<%= yoyakus[0].address %>" />  
             <input type="hidden" name="type_list" value="">
+            <input type="hidden" name="tax_list" value="">
             <% yoyakus.forEach( yoyaku => { %>
             <div class="yoyaku-dl yoyakus-yoyaku" id="<%= yoyaku.id %>">
               <dt>会議室名/備品名</dt>
@@ -119,10 +120,14 @@
               let type1checked = (yoyaku.type_room === "1"?"checked":"")
               let type2checked = (yoyaku.type_room === "2"?"checked":"")
               let type9checked = (yoyaku.type_room === "9"?"checked":"")
+              let typeZchecked = (yoyaku.type_room === "Z"?"checked":"")
+              let tax10checked = (yoyaku.per_tax === 10?"checked":"")
+              let tax8checked = (yoyaku.per_tax === 8?"checked":"")
+              let tax0checked = (yoyaku.per_tax === 0?"checked":"")
                %>
               <dt>タイプ</dt>
               <dd class="oneline-dd">
-                <fieldset>
+                <fieldset class="type_room">
                   <input id="item-1-<%= yoyaku.id %>" class="radio-inline__input" type="radio" name="type_room_<%= yoyaku.id %>" value="0" <%= type0checked %>/>
                   <label for="item-1-<%= yoyaku.id %>" class="radio-inline__label">
                       会議室
@@ -139,8 +144,29 @@
                   <label for="item-4-<%= yoyaku.id %>" class="radio-inline__label">
                       備品
                   </label>
-                </fieldset>
+                  <input id="item-5-<%= yoyaku.id %>" class="radio-inline__input" type="radio" name="type_room_<%= yoyaku.id %>"" value="Z" <%= typeZchecked %>/>
+                  <label for="item-5-<%= yoyaku.id %>" class="radio-inline__label">
+                      その他
+                </label>
+              </fieldset>
               </dd>
+              <dt>税率</dt>
+              <dd class="oneline-dd">
+                <fieldset class="per_tax">
+                  <input id="item-per-tax-1-<%= yoyaku.id %>" class="radio-inline__input" type="radio" name="per_tax_<%= yoyaku.id %>" value="10" <%= tax10checked %>/>
+                  <label for="item-per-tax-1-<%= yoyaku.id %>" class="radio-inline__label">
+                      10%
+                  </label>
+                  <input id="item-per-tax-2-<%= yoyaku.id %>" class="radio-inline__input" type="radio" name="per_tax_<%= yoyaku.id %>"" value="8" <%= tax8checked %>/>
+                  <label for="item-per-tax-2-<%= yoyaku.id %>" class="radio-inline__label">
+                      8%
+                  </label>
+                  <input id="item-per-tax-3-<%= yoyaku.id %>" class="radio-inline__input" type="radio" name="per_tax_<%= yoyaku.id %>"" value="0" <%= tax0checked %>/>
+                  <label for="item-per-tax-3-<%= yoyaku.id %>" class="radio-inline__label">
+                      0%
+                  </label>
+                </fieldset>
+              </dd>              
             </div>
             <% }) %>
           </form>
@@ -193,13 +219,22 @@
           errMsg += '終了時間はhhmm形式で入力してください。('+ (i+1) + '行目)</br>'
         }
       }
-      // 数値チェック
+      // 数値チェック　＋　請求金額チェック
       const price_list = document.querySelectorAll("form > div > dd > input[name='price']");
+      let totalPrice = 0;
       for (let i=0; i < price_list.length; i++) {
-        if ((!Number.isInteger(Number(price_list[i].value))) || (Number(price_list[i].value) < 0) || (price_list[i].value.length > 11)){
-          errMsg += '価格は11桁以下の正の数値で入力してください。('+ (i+1) + '行目)</br>'
+        // if ((!Number.isInteger(Number(price_list[i].value))) || (Number(price_list[i].value) < 0) || (price_list[i].value.length > 11)){
+        if ((!Number.isInteger(Number(price_list[i].value))) || (price_list[i].value.length > 11)){
+          // errMsg += '価格は11桁以下の正の数値で入力してください。('+ (i+1) + '行目)</br>'
+          errMsg += '価格は11桁以下の数値で入力してください。('+ (i+1) + '行目)</br>'
+        } else {
+          totalPrice += Number(price_list[i].value);
         }
       }
+      if (totalPrice < 0) {
+          errMsg += `請求金額がマイナスになっています。（請求金額：${totalPrice}）</br>`
+      }
+
       const quantity_list = document.querySelectorAll("form > div > dd > input[name='quantity']");
       for (let i=0; i < quantity_list.length; i++) {
         if ((!Number.isInteger(Number(quantity_list[i].value))) || (Number(quantity_list[i].value) < 0) || (quantity_list[i].value.length > 11)){
@@ -208,7 +243,7 @@
       }
 
       //　タイプ取得
-      const type_room_list = document.querySelectorAll("form > div > dd > fieldset > input[type='radio']");
+      const type_room_list = document.querySelectorAll("form > div > dd > .type_room > input[type='radio']");
       const type_list = document.getElementsByName("type_list")[0];
       let type = [];
       for (let i=0; i<type_room_list.length; i++) {
@@ -217,6 +252,17 @@
         }
       }
       type_list.value = type;
+
+      //　税率取得
+      const per_tax_list = document.querySelectorAll("form > div > dd > .per_tax > input[type='radio']");
+      const tax_list = document.getElementsByName("tax_list")[0];
+      let tax = [];
+      for (let i=0; i<per_tax_list.length; i++) {
+        if (per_tax_list[i].checked) {
+          tax.push(per_tax_list[i].value);
+        }
+      }
+      tax_list.value = tax;
 
       // 確認ダイアログを非表示にする
       let msg_confirm = document.getElementsByClassName("msg_confirm")[0];
@@ -407,66 +453,139 @@
       dd.classList.add("oneline-dd");
 
       const fieldset = document.createElement("fieldset");
+      fieldset.classList.add("type_room");
 
       const radio1 = document.createElement("input");
       radio1.classList.add("radio-inline__input");
-      radio1.setAttribute("id", "item-1" + id);
+      radio1.setAttribute("id", "item-1-" + id);
       radio1.setAttribute("type", "radio");
-      radio1.setAttribute("name", "type_room" + id);
+      radio1.setAttribute("name", "type_room_" + id);
       radio1.setAttribute("value", "0");
       radio1.setAttribute("checked", "checked");
 
       const label1 = document.createElement("label");
       label1.classList.add("radio-inline__label");
-      label1.setAttribute("for", "item-1" + id);
+      label1.setAttribute("for", "item-1-" + id);
       label1.textContent = "会議室";
       fieldset.appendChild(radio1);
       fieldset.appendChild(label1);
 
       const radio2 = document.createElement("input");
       radio2.classList.add("radio-inline__input");
-      radio2.setAttribute("id", "item-2" + id);
+      radio2.setAttribute("id", "item-2-" + id);
       radio2.setAttribute("type", "radio");
-      radio2.setAttribute("name", "type_room" + id);
+      radio2.setAttribute("name", "type_room_" + id);
       radio2.setAttribute("value", "1");
 
       const label2 = document.createElement("label");
       label2.classList.add("radio-inline__label");
-      label2.setAttribute("for", "item-2" + id);
+      label2.setAttribute("for", "item-2-" + id);
       label2.textContent = "ミーティングルーム";
       fieldset.appendChild(radio2);
       fieldset.appendChild(label2);
 
       const radio3 = document.createElement("input");
       radio3.classList.add("radio-inline__input");
-      radio3.setAttribute("id", "item-3" + id);
+      radio3.setAttribute("id", "item-3-" + id);
       radio3.setAttribute("type", "radio");
-      radio3.setAttribute("name", "type_room" + id);
+      radio3.setAttribute("name", "type_room_" + id);
       radio3.setAttribute("value", "2");
 
       const label3 = document.createElement("label");
       label3.classList.add("radio-inline__label");
-      label3.setAttribute("for", "item-3" + id);
+      label3.setAttribute("for", "item-3-" + id);
       label3.textContent = "プロジェクトルーム";
       fieldset.appendChild(radio3);
       fieldset.appendChild(label3);
 
       const radio4 = document.createElement("input");
       radio4.classList.add("radio-inline__input");
-      radio4.setAttribute("id", "item-4" + id);
+      radio4.setAttribute("id", "item-4-" + id);
       radio4.setAttribute("type", "radio");
-      radio4.setAttribute("name", "type_room" + id);
+      radio4.setAttribute("name", "type_room_" + id);
       radio4.setAttribute("value", "9");
 
       const label4 = document.createElement("label");
       label4.classList.add("radio-inline__label");
-      label4.setAttribute("for", "item-4" + id);
+      label4.setAttribute("for", "item-4-" + id);
       label4.textContent = "備品";
       fieldset.appendChild(radio4);
       fieldset.appendChild(label4);
 
+      const radio5 = document.createElement("input");
+      radio5.classList.add("radio-inline__input");
+      radio5.setAttribute("id", "item-5-" + id);
+      radio5.setAttribute("type", "radio");
+      radio5.setAttribute("name", "type_room_" + id);
+      radio5.setAttribute("value", "Z");
+
+      const label5 = document.createElement("label");
+      label5.classList.add("radio-inline__label");
+      label5.setAttribute("for", "item-5-" + id);
+      label5.textContent = "その他";
+      fieldset.appendChild(radio5);
+      fieldset.appendChild(label5);
+
       dd.appendChild(fieldset);
       div.appendChild(dd);
+
+      // 税率
+      const dt_tax = document.createElement("dt");
+      dt_tax.textContent = "税率";
+      div.appendChild(dt_tax);
+
+      const dd_tax = document.createElement("dd");
+      dd_tax.classList.add("oneline-dd");
+
+      const fieldset_tax = document.createElement("fieldset");
+      fieldset_tax.classList.add("per_tax");
+
+      const radio1_tax = document.createElement("input");
+      radio1_tax.classList.add("radio-inline__input");
+      radio1_tax.setAttribute("id", "item-per-tax-1-" + id);
+      radio1_tax.setAttribute("type", "radio");
+      radio1_tax.setAttribute("name", "per_tax_" + id);
+      radio1_tax.setAttribute("value", "10");
+      radio1_tax.setAttribute("checked", "checked");
+
+      const label1_tax = document.createElement("label");
+      label1_tax.classList.add("radio-inline__label");
+      label1_tax.setAttribute("for", "item-per-tax-1-" + id);
+      label1_tax.textContent = "10%";
+      fieldset_tax.appendChild(radio1_tax);
+      fieldset_tax.appendChild(label1_tax);
+
+      const radio2_tax = document.createElement("input");
+      radio2_tax.classList.add("radio-inline__input");
+      radio2_tax.setAttribute("id", "item-per-tax-2-" + id);
+      radio2_tax.setAttribute("type", "radio");
+      radio2_tax.setAttribute("name", "per_tax_" + id);
+      radio2_tax.setAttribute("value", "8");
+
+      const label2_tax = document.createElement("label");
+      label2_tax.classList.add("radio-inline__label");
+      label2_tax.setAttribute("for", "item-per-tax-2-" + id);
+      label2_tax.textContent = "8%";
+      fieldset_tax.appendChild(radio2_tax);
+      fieldset_tax.appendChild(label2_tax);
+
+      const radio3_tax = document.createElement("input");
+      radio3_tax.classList.add("radio-inline__input");
+      radio3_tax.setAttribute("id", "item-per-tax-3-" + id);
+      radio3_tax.setAttribute("type", "radio");
+      radio3_tax.setAttribute("name", "per_tax_" + id);
+      radio3_tax.setAttribute("value", "0");
+
+      const label3_tax = document.createElement("label");
+      label3_tax.classList.add("radio-inline__label");
+      label3_tax.setAttribute("for", "item-per-tax-3-" + id);
+      label3_tax.textContent = "0%";
+      fieldset_tax.appendChild(radio3_tax);
+      fieldset_tax.appendChild(label3_tax);
+
+      dd_tax.appendChild(fieldset_tax);
+
+      div.appendChild(dd_tax);
 
       return div;
     }
