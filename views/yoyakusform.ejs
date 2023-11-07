@@ -80,7 +80,6 @@
             </div>
             <input type="hidden" name="id_search" value="<%= yoyakus[0].id_search %>" />  
             <input type="hidden" name="id_customer" value="<%= yoyakus[0].id_customer %>" />  
-            <input type="hidden" name="status_shiharai" value="<%= yoyakus[0].status_shiharai %>" />
             <input type="hidden" name="id_kanri" value="<%= yoyakus[0].id_kanri %>" />
             <input type="hidden" name="nm_riyou" value="<%= yoyakus[0].nm_riyou %>" />
             <input type="hidden" name="no_keiyaku" value="<%= yoyakus[0].no_keiyaku %>" />
@@ -166,7 +165,8 @@
                       0%
                   </label>
                 </fieldset>
-              </dd>              
+              </dd>
+              <input type="hidden" name="status_shiharai" value="<%= yoyaku.status_shiharai %>" />
             </div>
             <% }) %>
           </form>
@@ -237,7 +237,11 @@
 
       const quantity_list = document.querySelectorAll("form > div > dd > input[name='quantity']");
       for (let i=0; i < quantity_list.length; i++) {
-        if ((!Number.isInteger(Number(quantity_list[i].value))) || (Number(quantity_list[i].value) < 0) || (quantity_list[i].value.length > 11)){
+        if (quantity_list[i].value) {
+          if ((!Number.isInteger(Number(quantity_list[i].value))) || (Number(quantity_list[i].value) < 0) || (quantity_list[i].value.length > 11)){
+            errMsg += '数量は11桁以下の正の数値で入力してください。('+ (i+1) + '行目)</br>'
+          }
+        } else {
           errMsg += '数量は11桁以下の正の数値で入力してください。('+ (i+1) + '行目)</br>'
         }
       }
@@ -584,8 +588,13 @@
       fieldset_tax.appendChild(label3_tax);
 
       dd_tax.appendChild(fieldset_tax);
-
       div.appendChild(dd_tax);
+
+      const status_shiharai = document.createElement("input");
+      status_shiharai.setAttribute("type", "hidden");
+      status_shiharai.setAttribute("name", "status_shiharai");
+      status_shiharai.setAttribute("value", "未");
+      div.appendChild(status_shiharai);
 
       return div;
     }
