@@ -181,10 +181,11 @@ const selectFromYoyakus = async (id_search, id_kessai = null) => {
       y.telno, 
       DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 8 DAY),"%Y%m%d"),
       `
+    // 対象からプラットフォームサービス株式会社（R400027048）を除く
     if (id_kessai) {
-      query += `y.id_kessai HAVING y.id_kessai = "${id_kessai}"`
+      query += `y.id_kessai HAVING y.id_kessai = "${id_kessai}" AND left(y.id_customer,10) <> "R400027048"`
     } else {
-      query += `y.id_search HAVING y.id_search = "${id_search}"`
+      query += `y.id_search HAVING y.id_search = "${id_search}" AND left(y.id_customer,10) <> "R400027048"`
     }
     logger.info(query);
     const retObj = await knex.raw(query);
