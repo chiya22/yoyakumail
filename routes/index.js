@@ -296,6 +296,7 @@ router.post("/updyoyakus/:id", (req, res) => {
       const time_end_list = Array.isArray(req.body.time_end) ? req.body.time_end : [req.body.time_end];
       const price_list = Array.isArray(req.body.price) ? req.body.price : [req.body.price];
       const quantity_list = Array.isArray(req.body.quantity) ? req.body.quantity : [req.body.quantity];
+      const status_shiharai_list = Array.isArray(req.body.status_shiharai) ? req.body.status_shiharai: [req.body.status_shiharai]; //支払い状況
       const type_room_list = req.body.type_list.split(","); // 通常会議室：0、ミーティングルーム：1、プロジェクトルーム：2、備品：9、その他：Z
       const per_tax_list = req.body.tax_list.split(","); // 10%：10、8%：8、0%：0
       // const nm_nyuryoku_list = req.body.nm_nyuryoku
@@ -355,7 +356,13 @@ router.post("/updyoyakus/:id", (req, res) => {
 
       // 数量が数値であるかチェック
       for (let j = 0; j < quantity_list.length; j++) {
-        if ((!Number.isInteger(Number(quantity_list[j]))) || (Number(quantity_list[j]) < 0) || (Number(quantity_list[j]) > 9999999999)) {
+        if (quantity_list[j].value) {
+          if ((!Number.isInteger(Number(quantity_list[j]))) || (Number(quantity_list[j]) < 0) || (Number(quantity_list[j]) > 9999999999)) {
+            req.flash("error", "数量は11桁以内の正の数値で入力してください。 " + (j + 1) + "行目：" + quantity_list[j]);
+            res.redirect(`/yoyakus/edit/${id_kessai}`);
+            return;
+          }
+        } else {
           req.flash("error", "数量は11桁以内の正の数値で入力してください。 " + (j + 1) + "行目：" + quantity_list[j]);
           res.redirect(`/yoyakus/edit/${id_kessai}`);
           return;
@@ -394,6 +401,7 @@ router.post("/updyoyakus/:id", (req, res) => {
         inObjYoyaku.type_room = type_room_list[i]; // 通常会議室：0、ミーティングルーム：1、プロジェクトルーム：2、備品：9、その他：Z
         inObjYoyaku.quantity = quantity_list[i];
         inObjYoyaku.per_tax = per_tax_list[i];
+        inObjYoyaku.status_shiharai = status_shiharai_list[i];
         inObjYoyaku.yyyymmddhhmmss_created = common.getTodayTime();
 
         // 共通項目のためリストの最初の項目値を設定
@@ -402,10 +410,8 @@ router.post("/updyoyakus/:id", (req, res) => {
         inObjYoyaku.id_kanri = req.body.id_kanri;
         inObjYoyaku.yyyymmdd_yoyaku = req.body.yyyymmdd_yoyaku;
         inObjYoyaku.yyyymmdd_uketuke = common.getYYYYMMDD(new Date());
-        inObjYoyaku.status_shiharai = "未";
         inObjYoyaku.nm_nyuryoku = req.body.nm_nyuryoku.slice(0,3) === "コピー"?"コピーシステム補正":"システム補正";
-        inObjYoyaku.nm_riyou = req.body.nm_riyou
-        ;
+        inObjYoyaku.nm_riyou = req.body.nm_riyou;
         inObjYoyaku.no_keiyaku = req.body.no_keiyaku;
         inObjYoyaku.nm_keiyaku = req.body.nm_keiyaku;
         inObjYoyaku.nm_tantou = req.body.nm_tantou;
