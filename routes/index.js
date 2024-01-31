@@ -356,7 +356,7 @@ router.post("/updyoyakus/:id", (req, res) => {
 
       // 数量が数値であるかチェック
       for (let j = 0; j < quantity_list.length; j++) {
-        if (quantity_list[j].value) {
+        if (quantity_list[j]) {
           if ((!Number.isInteger(Number(quantity_list[j]))) || (Number(quantity_list[j]) < 0) || (Number(quantity_list[j]) > 9999999999)) {
             req.flash("error", "数量は11桁以内の正の数値で入力してください。 " + (j + 1) + "行目：" + quantity_list[j]);
             res.redirect(`/yoyakus/edit/${id_kessai}`);
