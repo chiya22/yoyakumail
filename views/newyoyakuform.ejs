@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>新規予約情報編集</title>
+    <%- include("./common/stylesheets.ejs") %>
+  </head>
+
+  <body>
+    <!-- 確認メッセージ -->
+    <div class="msg_confirm">
+      <div class="msgarea_confirm">
+        <p class="msgarea_text_confirm">登録します。よろしいですか？</p>
+        <button class="msgarea_okbtn">はい</button>
+        <button class="msgarea_ngbtn">いいえ</button>
+      </div>
+    </div>
+    <!-- 処理中メッセージ -->
+    <div class="msg">
+      <div class="msgarea">
+        <i class="bx bx-burst"><p class="msgarea__text">処理中です</p></i>
+      </div>
+    </div>
+    <%- include("./common/header.ejs", {isTop: false}); %>
+    <div class="main">
+      <div class="main__wrapper">
+        <!-- メッセージ -->
+        <% if (flashMessages) { %> <% if (flashMessages.success) { %>
+        <div class="flashes">
+          <div class="flash success"><%= flashMessages.success %></div>
+        </div>
+        <% } else if (flashMessages.error) { %>
+        <div class="flashes">
+          <div class="flash error"><%= flashMessages.error %></div>
+        </div>
+        <% } %> <% } %>
+        <div class="area_header">
+          <a class="btn-back" href="/">戻る</a>
+          <button class="btn-action" id="add-newyoyaku">登録</button>
+          <button id="addline" class="btn-action">行追加</button>
+        </div>
+        <!-- クライアントエラーメッセージ領域　-->
+        <div class="flashes" style="visibility:hidden">
+          <div id="client_error" class="flash error"></div>
+        </div>
+        <div class="area_yoyakus">
+          <form method="POST" name="yoyakusform" action="/newyoyaku/add">
+            <div style="margin-bottom: 30px">
+              <div class="yoyaku-title">
+                【予約情報】
+              </div>
+              <dl class="yoyaku-dl">
+                <dt>契約番号<span style="color:red"> ＊</span></dt>
+                <dd><input class="yoyaku-input" type="text"  name="no_keiyaku" /></dd>
+                <dt>契約者名<span style="color:red"> ＊</span></dt>
+                <dd><input class="yoyaku-input" type="text"  name="nm_keiyaku" /></dd>
+              </dl>
+            </div>
+            <input type="hidden" name="type_list" value="">
+            <input type="hidden" name="tax_list" value="">
+            <!-- 共通項目 -->
+            <div class="yoyaku-dl">
+              <dt>予約年月日<span style="color:red"> ＊</span></dt>
+              <dd><input class="yoyaku-input" type="text" placeholder="yyyymmdd形式" name="yyyymmdd_yoyaku" /></dd>
+            </div>
+            <div class="yoyaku-dl yoyakus-yoyaku" id="AddNewLine">
+              <dt>会議室名/備品名<span style="color:red"> ＊</span></dt>
+              <dd class="oneline-dd">
+                <input class="yoyaku-input" type="text" name="nm_room" /><span class="btn-action" style="margin-left: 10px" onClick="delyoyaku(this)">削除</span>
+              </dd>
+              <dt>開始時間</dt>
+              <dd>
+                <input class="yoyaku-input" type="text" placeholder="hhmm形式" name="time_start" />
+              </dd>
+              <dt>終了時間</dt>
+              <dd>
+                <input class="yoyaku-input" type="text" placeholder="hhmm形式" name="time_end" />
+              </dd>
+              <dt>価格<span style="color:red"> ＊</span></dt>
+              <dd>
+                <input class="yoyaku-input" type="text" name="price" />
+              </dd>
+              <dt>数量<span style="color:red"> ＊</span></dt>
+              <dd>
+                <input class="yoyaku-input" type="text" name="quantity" />
+              </dd>
+              <dt>タイプ<span style="color:red"> ＊</span></dt>
+              <dd class="oneline-dd">
+                <fieldset class="type_room">
+                  <input id="item-1-AddNewLine" class="radio-inline__input" type="radio" name="type_room_AddNewLine" value="0" checked />
+                  <label for="item-1-AddNewLine" class="radio-inline__label">
+                      会議室
+                  </label>
+                  <input id="item-2-AddNewLine" class="radio-inline__input" type="radio" name="type_room_AddNewLine" value="1" />
+                  <label for="item-2-AddNewLine" class="radio-inline__label">
+                      ミーティングルーム
+                  </label>
+                  <input id="item-3-AddNewLine" class="radio-inline__input" type="radio" name="type_room_AddNewLine" value="2" />
+                  <label for="item-3-AddNewLine" class="radio-inline__label">
+                      プロジェクトルーム
+                  </label>
+                  <input id="item-4-AddNewLine" class="radio-inline__input" type="radio" name="type_room_AddNewLine" value="9" />
+                  <label for="item-4-AddNewLine" class="radio-inline__label">
+                      備品
+                  </label>
+                  <input id="item-5-AddNewLine" class="radio-inline__input" type="radio" name="type_room_AddNewLine" value="Z" />
+                  <label for="item-5-AddNewLine" class="radio-inline__label">
+                      その他
+                </label>
+              </fieldset>
+              </dd>
+              <dt>税率<span style="color:red"> ＊</span></dt>
+              <dd class="oneline-dd">
+                <fieldset class="per_tax">
+                  <input id="item-per-tax-1-AddNewLine" class="radio-inline__input" type="radio" name="per_tax_AddNewLine" value="10" checked />
+                  <label for="item-per-tax-1-AddNewLine" class="radio-inline__label">
+                      10%
+                  </label>
+                  <input id="item-per-tax-2-AddNewLine" class="radio-inline__input" type="radio" name="per_tax_AddNewLine" value="8" />
+                  <label for="item-per-tax-2-AddNewLine" class="radio-inline__label">
+                      8%
+                  </label>
+                  <input id="item-per-tax-3-AddNewLine" class="radio-inline__input" type="radio" name="per_tax_AddNewLine" value="0" />
+                  <label for="item-per-tax-3-AddNewLine" class="radio-inline__label">
+                      0%
+                  </label>
+                </fieldset>
+              </dd>
+              <input type="hidden" name="status_shiharai" />
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+  <%- include("./common/javascripts.ejs") %>
+  <script>
+    // 「登録」ボタンを押した場合
+    const btn_upd = document.getElementById("add-newyoyaku");
+    btn_upd.addEventListener("click", () => {
+      scrollTo(0, 0);
+      let msg = document.getElementsByClassName("msg_confirm")[0];
+      msg.style.visibility = "visible";
+    });
+
+    // 確認ダイアログで「OK」を押した場合
+    let okbtn = document.getElementsByClassName("msgarea_okbtn")[0];
+    okbtn.addEventListener("click", () => {
+
+      let errMsg = '';
+
+      // 契約番号チェック
+      const no_keiyaku = document.getElementsByName("no_keiyaku")[0].value;
+      console.log(no_keiyaku)
+      if ((!Number.isInteger(Number(no_keiyaku))) || (no_keiyaku.length !== 5)) {
+        errMsg += '契約番号は5桁の数値で入力してください。</br>'
+      }
+
+      // 契約者名チェック
+      const nm_keiyaku = document.getElementsByName("nm_keiyaku")[0].value;
+      if (!nm_keiyaku) {
+        errMsg += '契約社名は必ず入力してください。</br>'
+      }
+
+      // 日付チェック
+      const yyyymmdd_yoyaku = document.getElementsByName("yyyymmdd_yoyaku")[0];
+      if (!isDate(yyyymmdd_yoyaku.value)) {
+        errMsg += '予約年月日はyyyymmdd形式で入力してください。</br>'
+      }
+
+      // 部屋名/備品名チェック
+      const nm_room_list = document.querySelectorAll("form > div > dd > input[name='nm_room']");
+      for (let i=0; i < nm_room_list.length; i++) {
+        if (!nm_room_list[i].value){
+          errMsg += '部屋名/備品名は必ず入力してください。('+ (i+1) + '行目)</br>'
+        }
+      }
+      // 時間チェック
+      // const time_start_list = document.querySelectorAll()
+      // const time_start_list = document.querySelectorAll("form > div > dd > input[name='time_start']");
+      // for (let i=0; i < time_start_list.length; i++) {
+      //   if (!isTime(time_start_list[i].value)){
+      //     errMsg += '開始時間はhhmm形式で入力してください。('+ (i+1) + '行目)</br>'
+      //   }
+      // }
+      // const time_end_list = document.querySelectorAll("form > div > dd > input[name='time_end']");
+      // for (let i=0; i < time_end_list.length; i++) {
+      //   if (!isTime(time_end_list[i].value)){
+      //     errMsg += '終了時間はhhmm形式で入力してください。('+ (i+1) + '行目)</br>'
+      //   }
+      // }
+      // 数値チェック　＋　請求金額チェック
+      const price_list = document.querySelectorAll("form > div > dd > input[name='price']");
+      let totalPrice = 0;
+      for (let i=0; i < price_list.length; i++) {
+        // if ((!Number.isInteger(Number(price_list[i].value))) || (Number(price_list[i].value) < 0) || (price_list[i].value.length > 11)){
+        if ((!Number.isInteger(Number(price_list[i].value))) || (price_list[i].value.length > 11)){
+          // errMsg += '価格は11桁以下の正の数値で入力してください。('+ (i+1) + '行目)</br>'
+          errMsg += '価格は11桁以下の数値で入力してください。('+ (i+1) + '行目)</br>'
+        } else {
+          totalPrice += Number(price_list[i].value);
+        }
+      }
+      if (totalPrice < 0) {
+          errMsg += `請求金額がマイナスになっています。（請求金額：${totalPrice}）</br>`
+      }
+
+      const quantity_list = document.querySelectorAll("form > div > dd > input[name='quantity']");
+      for (let i=0; i < quantity_list.length; i++) {
+        if (quantity_list[i].value) {
+          if ((!Number.isInteger(Number(quantity_list[i].value))) || (Number(quantity_list[i].value) < 0) || (quantity_list[i].value.length > 11)){
+            errMsg += '数量は11桁以下の正の数値で入力してください。('+ (i+1) + '行目)</br>'
+          }
+        } else {
+          errMsg += '数量は11桁以下の正の数値で入力してください。('+ (i+1) + '行目)</br>'
+        }
+      }
+
+      //　タイプ取得
+      const type_room_list = document.querySelectorAll("form > div > dd > .type_room > input[type='radio']");
+      const type_list = document.getElementsByName("type_list")[0];
+      let type = [];
+      for (let i=0; i<type_room_list.length; i++) {
+        if (type_room_list[i].checked) {
+          type.push(type_room_list[i].value);
+        }
+      }
+      type_list.value = type;
+
+      //　税率取得
+      const per_tax_list = document.querySelectorAll("form > div > dd > .per_tax > input[type='radio']");
+      const tax_list = document.getElementsByName("tax_list")[0];
+      let tax = [];
+      for (let i=0; i<per_tax_list.length; i++) {
+        if (per_tax_list[i].checked) {
+          tax.push(per_tax_list[i].value);
+        }
+      }
+      tax_list.value = tax;
+
+      // 確認ダイアログを非表示にする
+      let msg_confirm = document.getElementsByClassName("msg_confirm")[0];
+      msg_confirm.style.visibility = "hidden";
+
+      if (errMsg) {
+        // エラーありの場合
+        // エラーメッセージ追加領域
+        const errMsgField = document.getElementById("client_error");
+        errMsgField.innerHTML = errMsg
+        errMsgField.style.visibility = "visible";
+        return
+
+      } else {
+        // エラーなしの場合
+        // 処理中メッセージ領域を表示させる
+        scrollTo(0, 0);
+        let msg = document.getElementsByClassName("msg")[0];
+        msg.style.visibility = "visible";
+        document.yoyakusform.submit();
+      }
+    });
+    // 確認ダイアログで「NG」を押した場合
+    let ngbtn = document.getElementsByClassName("msgarea_ngbtn")[0];
+    ngbtn.addEventListener("click", () => {
+      let msg = document.getElementsByClassName("msg_confirm")[0];
+      msg.style.visibility = "hidden";
+    });
+
+    // 行追加時にid属性に設定する値として使用する
+    let addCount = 0;
+
+    // 予約情報の追加（最後の行をコピーして追加）
+    const btnAddLine = document.getElementById("addline");
+    btnAddLine.addEventListener("click", () => {
+
+      const all_yoyakus = document.getElementsByClassName("yoyakus-yoyaku");
+      // const last_yoyaku = all_yoyakus[all_yoyakus.length - 1];
+      const newRow = getNewRow(`AddNewLine${addCount}`);
+      const first_yoyaku = all_yoyakus[0];
+      addCount += 1;
+      first_yoyaku.before(newRow);
+      // addCount += 1;
+      // last_yoyaku.after(newRow);
+    });
+
+    // 予約情報の削除（指定した行の削除）
+    const delyoyaku = (e) => {
+      const parent = e.parentNode.parentNode;
+      const target = document.getElementById(parent.id);
+      target.remove();
+    };
+
+    /**
+     * hhmm形式の文字列が時間に変換できるかチェックする
+     * @param {*} str hhmm形式
+     * @returns true：時間に変換可能、false：時間に変換不可
+     */
+    const isTime = (str) => {
+      return str.match(/^([01]?[0-9]|2[0-3])([0-5][0-9])$/) !== null;
+    };
+
+    /**
+     * yyyymmdd形式の文字列が日付に変換できるかチェックする
+     * @param {*} str yyyymmdd形式
+     * @returns true：日付に変換可能、false：日付に変換不可
+     */
+    const isDate = (str) => {
+      if (str.length !== 8) {
+        return false
+      }
+      const arr = (str.substr(0, 4) + '/' + str.substr(4, 2) + '/' + str.substr(6, 2)).split('/');
+      if (arr.length !== 3) return false;
+      const date = new Date(arr[0], arr[1] - 1, arr[2]);
+      if (arr[0] !== String(date.getFullYear()) || arr[1] !== ('0' + (date.getMonth() + 1)).slice(-2) || arr[2] !== ('0' + date.getDate()).slice(-2)) {
+        return false;
+      } else {
+        return true;
+      }
+    };
+
+    /**
+     * 追加する行のオブジェクトを作成し返却する
+     * @param {*} id 追加行のID
+     * @returns obj：追加行のオブジェクト 
+     */
+    const getNewRow = (id) => {
+      
+      const div = document.createElement("div");
+      div.classList.add("yoyaku-dl", "add-yoyakus-yoyaku");
+      div.setAttribute("id", id);
+
+      // 会議室名/備品
+      const dt1 = document.createElement("dt");
+      dt1.textContent = "会議室名/備品名";
+      dt1.placefolder = ""
+      const span_dt1 = document.createElement('span');
+      span_dt1.style.color = 'red';
+      span_dt1.textContent = ' ＊';
+      dt1.appendChild(span_dt1);
+      div.appendChild(dt1);
+
+      const dd1 = document.createElement("dd");
+      dd1.classList.add("oneline-dd");
+
+      const input1 = document.createElement("input");
+      input1.classList.add("yoyaku-input");
+      input1.setAttribute("type", "text");
+      input1.setAttribute("name", "nm_room");
+      input1.setAttribute("value", "");
+      dd1.appendChild(input1);
+
+      const span1 = document.createElement("span");
+      span1.classList.add("btn-action");
+      span1.style.marginLeft = "10px";
+      span1.textContent = "削除";
+      span1.onclick = function() {
+        delyoyaku(this);
+      };
+      dd1.appendChild(span1);
+
+      div.appendChild(dd1);
+
+      // 開始時間
+      const dt2 = document.createElement("dt");
+      dt2.textContent = "開始時間";
+      div.appendChild(dt2);
+
+      const dd2 = document.createElement("dd");
+
+      const input2 = document.createElement("input");
+      input2.classList.add("yoyaku-input");
+      input2.setAttribute("type", "text");
+      input2.setAttribute("name", "time_start");
+      input2.setAttribute("value", "");
+      input2.placeholder = 'yyyymmdd形式';
+      dd2.appendChild(input2);
+
+      div.appendChild(dd2);
+
+      // 終了時間
+      const dt3 = document.createElement("dt");
+      dt3.textContent = "終了時間";
+      div.appendChild(dt3);
+
+      const dd3 = document.createElement("dd");
+
+      const input3 = document.createElement("input");
+      input3.classList.add("yoyaku-input");
+      input3.setAttribute("type", "text");
+      input3.setAttribute("name", "time_end");
+      input3.setAttribute("value", "");
+      input3.placeholder = 'yyyymmdd形式';
+      dd3.appendChild(input3);
+
+      div.appendChild(dd3);
+
+      // 価格
+      const dt4 = document.createElement("dt");
+      dt4.textContent = "価格";
+      const span_dt4 = document.createElement('span');
+      span_dt4.style.color = 'red';
+      span_dt4.textContent = ' ＊';
+      dt4.appendChild(span_dt4);
+      div.appendChild(dt4);
+
+      const dd4 = document.createElement("dd");
+
+      const input4 = document.createElement("input");
+      input4.classList.add("yoyaku-input");
+      input4.setAttribute("type", "text");
+      input4.setAttribute("name", "price");
+      input4.setAttribute("value", "");
+      dd4.appendChild(input4);
+
+      div.appendChild(dd4);
+
+      // 数量
+      const dt5 = document.createElement("dt");
+      dt5.textContent = "数量";
+      const span_dt5 = document.createElement('span');
+      span_dt5.style.color = 'red';
+      span_dt5.textContent = ' ＊';
+      dt5.appendChild(span_dt5);
+      div.appendChild(dt5);
+
+      const dd5 = document.createElement("dd");
+
+      const input5 = document.createElement("input");
+      input5.classList.add("yoyaku-input");
+      input5.setAttribute("type", "text");
+      input5.setAttribute("name", "quantity");
+      input5.setAttribute("value", "");
+      dd5.appendChild(input5);
+
+      div.appendChild(dd5);
+
+      // タイプ
+      const dt = document.createElement("dt");
+      dt.textContent = "タイプ";
+      const span_dt = document.createElement('span');
+      span_dt.style.color = 'red';
+      span_dt.textContent = ' ＊';
+      dt.appendChild(span_dt);
+      div.appendChild(dt);
+
+      const dd = document.createElement("dd");
+      dd.classList.add("oneline-dd");
+
+      const fieldset = document.createElement("fieldset");
+      fieldset.classList.add("type_room");
+
+      const radio1 = document.createElement("input");
+      radio1.classList.add("radio-inline__input");
+      radio1.setAttribute("id", "item-1-" + id);
+      radio1.setAttribute("type", "radio");
+      radio1.setAttribute("name", "type_room_" + id);
+      radio1.setAttribute("value", "0");
+      radio1.setAttribute("checked", "checked");
+
+      const label1 = document.createElement("label");
+      label1.classList.add("radio-inline__label");
+      label1.setAttribute("for", "item-1-" + id);
+      label1.textContent = "会議室";
+      fieldset.appendChild(radio1);
+      fieldset.appendChild(label1);
+
+      const radio2 = document.createElement("input");
+      radio2.classList.add("radio-inline__input");
+      radio2.setAttribute("id", "item-2-" + id);
+      radio2.setAttribute("type", "radio");
+      radio2.setAttribute("name", "type_room_" + id);
+      radio2.setAttribute("value", "1");
+
+      const label2 = document.createElement("label");
+      label2.classList.add("radio-inline__label");
+      label2.setAttribute("for", "item-2-" + id);
+      label2.textContent = "ミーティングルーム";
+      fieldset.appendChild(radio2);
+      fieldset.appendChild(label2);
+
+      const radio3 = document.createElement("input");
+      radio3.classList.add("radio-inline__input");
+      radio3.setAttribute("id", "item-3-" + id);
+      radio3.setAttribute("type", "radio");
+      radio3.setAttribute("name", "type_room_" + id);
+      radio3.setAttribute("value", "2");
+
+      const label3 = document.createElement("label");
+      label3.classList.add("radio-inline__label");
+      label3.setAttribute("for", "item-3-" + id);
+      label3.textContent = "プロジェクトルーム";
+      fieldset.appendChild(radio3);
+      fieldset.appendChild(label3);
+
+      const radio4 = document.createElement("input");
+      radio4.classList.add("radio-inline__input");
+      radio4.setAttribute("id", "item-4-" + id);
+      radio4.setAttribute("type", "radio");
+      radio4.setAttribute("name", "type_room_" + id);
+      radio4.setAttribute("value", "9");
+
+      const label4 = document.createElement("label");
+      label4.classList.add("radio-inline__label");
+      label4.setAttribute("for", "item-4-" + id);
+      label4.textContent = "備品";
+      fieldset.appendChild(radio4);
+      fieldset.appendChild(label4);
+
+      const radio5 = document.createElement("input");
+      radio5.classList.add("radio-inline__input");
+      radio5.setAttribute("id", "item-5-" + id);
+      radio5.setAttribute("type", "radio");
+      radio5.setAttribute("name", "type_room_" + id);
+      radio5.setAttribute("value", "Z");
+
+      const label5 = document.createElement("label");
+      label5.classList.add("radio-inline__label");
+      label5.setAttribute("for", "item-5-" + id);
+      label5.textContent = "その他";
+      fieldset.appendChild(radio5);
+      fieldset.appendChild(label5);
+
+      dd.appendChild(fieldset);
+      div.appendChild(dd);
+
+      // 税率
+      const dt_tax = document.createElement("dt");
+      dt_tax.textContent = "税率";
+      const span_dt_tax = document.createElement('span');
+      span_dt_tax.style.color = 'red';
+      span_dt_tax.textContent = ' ＊';
+      dt_tax.appendChild(span_dt_tax);
+      div.appendChild(dt_tax);
+
+      const dd_tax = document.createElement("dd");
+      dd_tax.classList.add("oneline-dd");
+
+      const fieldset_tax = document.createElement("fieldset");
+      fieldset_tax.classList.add("per_tax");
+
+      const radio1_tax = document.createElement("input");
+      radio1_tax.classList.add("radio-inline__input");
+      radio1_tax.setAttribute("id", "item-per-tax-1-" + id);
+      radio1_tax.setAttribute("type", "radio");
+      radio1_tax.setAttribute("name", "per_tax_" + id);
+      radio1_tax.setAttribute("value", "10");
+      radio1_tax.setAttribute("checked", "checked");
+
+      const label1_tax = document.createElement("label");
+      label1_tax.classList.add("radio-inline__label");
+      label1_tax.setAttribute("for", "item-per-tax-1-" + id);
+      label1_tax.textContent = "10%";
+      fieldset_tax.appendChild(radio1_tax);
+      fieldset_tax.appendChild(label1_tax);
+
+      const radio2_tax = document.createElement("input");
+      radio2_tax.classList.add("radio-inline__input");
+      radio2_tax.setAttribute("id", "item-per-tax-2-" + id);
+      radio2_tax.setAttribute("type", "radio");
+      radio2_tax.setAttribute("name", "per_tax_" + id);
+      radio2_tax.setAttribute("value", "8");
+
+      const label2_tax = document.createElement("label");
+      label2_tax.classList.add("radio-inline__label");
+      label2_tax.setAttribute("for", "item-per-tax-2-" + id);
+      label2_tax.textContent = "8%";
+      fieldset_tax.appendChild(radio2_tax);
+      fieldset_tax.appendChild(label2_tax);
+
+      const radio3_tax = document.createElement("input");
+      radio3_tax.classList.add("radio-inline__input");
+      radio3_tax.setAttribute("id", "item-per-tax-3-" + id);
+      radio3_tax.setAttribute("type", "radio");
+      radio3_tax.setAttribute("name", "per_tax_" + id);
+      radio3_tax.setAttribute("value", "0");
+
+      const label3_tax = document.createElement("label");
+      label3_tax.classList.add("radio-inline__label");
+      label3_tax.setAttribute("for", "item-per-tax-3-" + id);
+      label3_tax.textContent = "0%";
+      fieldset_tax.appendChild(radio3_tax);
+      fieldset_tax.appendChild(label3_tax);
+
+      dd_tax.appendChild(fieldset_tax);
+      div.appendChild(dd_tax);
+
+      const status_shiharai = document.createElement("input");
+      status_shiharai.setAttribute("type", "hidden");
+      status_shiharai.setAttribute("name", "status_shiharai");
+      status_shiharai.setAttribute("value", "未");
+      div.appendChild(status_shiharai);
+
+      return div;
+    }
+
+  </script>
+</html>
