@@ -24,14 +24,18 @@
     <% } %>
       <div class="area_header">
         <a class="btn-back" href="<%= `/kessais/${kessai.id_search}` %>">戻る</a>
-        <a class="btn-action" href="<%= `/kessai/copy/${kessai.id}` %>">複製</a>
-        <a class="btn-action" href="<%= `/kessai/remove/${kessai.id}` %>">削除</a>
-        <a class="btn-action" href="<%= `/kessai/edit/${kessai.id}` %>">メール文編集</a>
-        <% if ((!kessai.yyyymmddhhmmss_resended_mail) && (!kessai.yyyymmddhhmmss_sended_mail) && (searchinfo.yyyymmddhhmmss_sended_mails)) { %>
-          <a class="btn-action" href="/kessai/sendmail/<%= kessai.id %>">メール送信</a>
+        <% if (searchinfo.status !== "4") { %>
+          <a class="btn-action" href="<%= `/kessai/copy/${kessai.id}` %>">複製</a>
         <% } %>
-        <% if ((kessai.yyyymmddhhmmss_sended_mail) || (kessai.yyyymmddhhmmss_resended_mail)) { %>
-          <a class="btn-action" href="/kessai/sendmail/<%= kessai.id %>">メール再送信</a>
+        <a class="btn-action" href="<%= `/kessai/remove/${kessai.id}` %>">削除</a>
+        <% if (searchinfo.status !== "4") { %>
+          <a class="btn-action" href="<%= `/kessai/edit/${kessai.id}` %>">メール文編集</a>
+          <% if ((!kessai.yyyymmddhhmmss_resended_mail) && (!kessai.yyyymmddhhmmss_sended_mail) && (searchinfo.yyyymmddhhmmss_sended_mails)) { %>
+            <a class="btn-action" href="/kessai/sendmail/<%= kessai.id %>">メール送信</a>
+          <% } %>
+          <% if ((kessai.yyyymmddhhmmss_sended_mail) || (kessai.yyyymmddhhmmss_resended_mail)) { %>
+            <a class="btn-action" href="/kessai/sendmail/<%= kessai.id %>">メール再送信</a>
+          <% } %>
         <% } %>
       </div>
       <% let isCopy = yoyakus[0].nm_nyuryoku.slice(0,3) === "コピー"?true:false; %>
@@ -95,6 +99,7 @@
         <dt>0%料金</dt>
         <dd><%= kessai.price_0per_total %></dd>
       </dl>
+      <% if (searchinfo.status !== "4") { %>
       <div class="yoyaku-title">【予約情報】
         <a class="btn-action" href="<%= `/yoyakus/edit/${kessai.id}` %>">予約編集</a>
       </div>
@@ -138,6 +143,7 @@
         <% } %>
       </dl>
     </div>
+    <% } %>
   </div>
 </body>
 <%- include("./common/javascripts.ejs") %>

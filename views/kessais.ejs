@@ -24,13 +24,20 @@
       <% } %>
     <div class="area_header">
         <a class="btn-back" href="/">戻る</a>
-        <% if (!searchinfo.yyyymmddhhmmss_sended_mails) { %>
-          <input class="btn-action updatekessai" type="button" value="更新" />
+        <% if (searchinfo.status !== "4") { %>
+          <% if (!searchinfo.yyyymmddhhmmss_sended_mails) { %>
+            <input class="btn-action updatekessai" type="button" value="更新" />
+            <% } %>
         <% } %>
         <div class="area_searchinfo">
-          <p class="searchinfo-title"><%= `${searchinfo.id.slice(1,5)}年${searchinfo.id.slice(5,7)}月${searchinfo.id.slice(7,9)}日　${searchinfo.id.slice(9,11)}時${searchinfo.id.slice(11,13)}分${searchinfo.id.slice(13,15)}秒` %></p>
+        <p class="searchinfo-title"><%= `${searchinfo.id.slice(1,5)}年${searchinfo.id.slice(5,7)}月${searchinfo.id.slice(7,9)}日　${searchinfo.id.slice(9,11)}時${searchinfo.id.slice(11,13)}分${searchinfo.id.slice(13,15)}秒` %></p>
+        <% if (searchinfo.status === "4") { %>
+          <p class="searchinfo_text"><span class="label">登録日／更新日</span><%= `${searchinfo.yyyymmdd_addupd_start.slice(0,4)}年${searchinfo.yyyymmdd_addupd_start.slice(4,6)}月${searchinfo.yyyymmdd_addupd_start.slice(6,8)}日` %></p>
+          <p class="searchinfo_text"><span class="label">利用日</span><%= `${searchinfo.yyyymmdd_riyou_start.slice(0,4)}年${searchinfo.yyyymmdd_riyou_start.slice(4,6)}月${searchinfo.yyyymmdd_riyou_start.slice(6,8)}日` %></p>
+        <% } else { %>
           <p class="searchinfo_text"><span class="label">登録日／更新日</span><%= `${searchinfo.yyyymmdd_addupd_start.slice(0,4)}年${searchinfo.yyyymmdd_addupd_start.slice(4,6)}月${searchinfo.yyyymmdd_addupd_start.slice(6,8)}日` %>～<%= `${searchinfo.yyyymmdd_addupd_end.slice(0,4)}年${searchinfo.yyyymmdd_addupd_end.slice(4,6)}月${searchinfo.yyyymmdd_addupd_end.slice(6,8)}日` %></p>
           <p class="searchinfo_text"><span class="label">利用日</span><%= `${searchinfo.yyyymmdd_riyou_start.slice(0,4)}年${searchinfo.yyyymmdd_riyou_start.slice(4,6)}月${searchinfo.yyyymmdd_riyou_start.slice(6,8)}日` %>～<%= `${searchinfo.yyyymmdd_riyou_end.slice(0,4)}年${searchinfo.yyyymmdd_riyou_end.slice(4,6)}月${searchinfo.yyyymmdd_riyou_end.slice(6,8)}日` %></p>
+        <% } %>
         </div>
     </div>
       <div class="area_kessais">
@@ -61,14 +68,20 @@
                   <% if (isCopy) { %>
                     <div class="kessais-kessai-copy" >COPY</div>
                   <% } %>
-                  <input type="checkbox" name="_isCvs" id="_isCvs<%= kessai.id %>" value="1" <%= isCvsChecked %> <%= isDisabled %> /><label class="checkbox_label" for="_isCvs<%= kessai.id %>">コンビニ決済</label>
-                  <input type="checkbox" name="_isSendMail" id="_isSendMail<%= kessai.id %>" value="1" <%= isSendMailChecked %> <%= isDisabled %> /><label class="checkbox_label" for="_isSendMail<%= kessai.id %>">メール送信</label>
-                  <input type="checkbox" name="_isPDF" id="_isPDF<%= kessai.id %>" value="1" <%= isPDFChecked %> <%= isDisabled %> /><label class="checkbox_label" for="_isPDF<%= kessai.id %>">PDF添付</label>
+                  <% if (searchinfo.status !== "4") { %>
+                    <input type="checkbox" name="_isCvs" id="_isCvs<%= kessai.id %>" value="1" <%= isCvsChecked %> <%= isDisabled %> /><label class="checkbox_label" for="_isCvs<%= kessai.id %>">コンビニ決済</label>
+                    <input type="checkbox" name="_isSendMail" id="_isSendMail<%= kessai.id %>" value="1" <%= isSendMailChecked %> <%= isDisabled %> /><label class="checkbox_label" for="_isSendMail<%= kessai.id %>">メール送信</label>
+                    <input type="checkbox" name="_isPDF" id="_isPDF<%= kessai.id %>" value="1" <%= isPDFChecked %> <%= isDisabled %> /><label class="checkbox_label" for="_isPDF<%= kessai.id %>">PDF添付</label>
+                  <% } %>
                 </div>
                 <a href="/kessai/<%= kessai.id %>">
                   <div class="kessais-kessai-title"><%= kessai.nm_keiyaku %></div>
                   <div class="kessais-kessai-content">
-                    <%= `${kessai.yyyymmdd_yoyaku.slice(0,4)}年${kessai.yyyymmdd_yoyaku.slice(4,6)}月${kessai.yyyymmdd_yoyaku.slice(6,8)}日 | ${kessai.price.toLocaleString()}円 | 支払期限日：${kessai.yyyymmdd_kigen.slice(0,4)}年${kessai.yyyymmdd_kigen.slice(4,6)}月${kessai.yyyymmdd_kigen.slice(6,8)}日` %>
+                    <% if (searchinfo.status === "4") { %>
+                      <%= `${kessai.yyyymmdd_yoyaku.slice(0,4)}年${kessai.yyyymmdd_yoyaku.slice(4,6)}月${kessai.yyyymmdd_yoyaku.slice(6,8)}日 | ${kessai.price.toLocaleString()}円` %>
+                    <% } else { %>
+                      <%= `${kessai.yyyymmdd_yoyaku.slice(0,4)}年${kessai.yyyymmdd_yoyaku.slice(4,6)}月${kessai.yyyymmdd_yoyaku.slice(6,8)}日 | ${kessai.price.toLocaleString()}円 | 支払期限日：${kessai.yyyymmdd_kigen.slice(0,4)}年${kessai.yyyymmdd_kigen.slice(4,6)}月${kessai.yyyymmdd_kigen.slice(6,8)}日` %>
+                    <% } %>
                   </div>
                   <div class="kessais-kessai-yoyakus">
                     <p class="kessais-kessai-yoyakus-title"> === 予約情報 ===</p>
