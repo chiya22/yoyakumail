@@ -273,20 +273,31 @@ const sendMail = async (id_kessai)=> {
 // メール送信
 const send = (mail_to,title, content, id_search, filename, isPDF) => {
 
+  // ▼Gmail送信用
   // 認証情報
-  const auth = {
-      type         : 'OAuth2',
-      user         : process.env.MAIL_USER,
-      clientId     : process.env.CLIENT_ID,
-      clientSecret : process.env.CLIENT_SECRET,
-      refreshToken : process.env.REFRESH_TOKEN
-  };
-
+  // const auth = {
+  //     type         : 'OAuth2',
+  //     user         : process.env.MAIL_USER,
+  //     clientId     : process.env.CLIENT_ID,
+  //     clientSecret : process.env.CLIENT_SECRET,
+  //     refreshToken : process.env.REFRESH_TOKEN
+  // };
   // トランスポート
+  // const smtp_config = {
+  //     service : 'gmail',
+  //     auth    : auth
+  // };
+
+  // ▼XServer送信用
   const smtp_config = {
-      service : 'gmail',
-      auth    : auth
-  };    
+    host: process.env.XSERVER_HOST_NAME,
+    port: '465',
+    secure: true,
+    auth: {
+        user: process.env.XSERVER_USER_NAME,
+        pass: process.env.XSERVER_PASSWORD,
+    }
+  };
 
   let transporter = nodemailer.createTransport(smtp_config);
 
@@ -294,11 +305,12 @@ const send = (mail_to,title, content, id_search, filename, isPDF) => {
   let message = {
     from: process.env.MAIL_FROM,
     // テスト用として宛先を強制的に変更
-    to: 'yoshida@yamori.jp',
-    // to: mail_to,
+    // to: 'yoshida@yamori.jp',
+    // bcc: 'cps.concierge@gmail.com',
+    to: mail_to,
     // テスト用として件名に【テスト】を追加
-    subject: `【吉田 | 請求書電子化テスト】${title}`,
-    // subject: title,
+    // subject: `【吉田 | 請求書電子化テスト】${title}`,
+    subject: title,
     text: content,
   };
 
@@ -320,42 +332,9 @@ const send = (mail_to,title, content, id_search, filename, isPDF) => {
   });
 };
 
-// XServerを使用してメール送信
-const sendByXserer = (title, content) => {
-
-    // トランスポート
-    const smtp_config = {
-        host: process.env.MAIL_ADMIN_HOST,
-        port: process.env.MAIL_ADMIN_PORT,
-        secure: true,
-        auth: {
-            user: process.env.MAIL_ADMIN_USER,
-            pass: process.env.MAIL_ADMIN_PASSWORD,
-        },
-    };    
-
-    let transporter = nodemailer.createTransport(smtp_config);
-
-    // メール情報
-    let message = {
-        from: process.env.MAIL_ADMIN_FROM,
-        to: process.env.MAIL_ADMIN_TO,
-        subject: title,
-        text: content,
-    };
-
-    // メール送信
-    transporter.sendMail(message, function (err, response) {
-        if (err) {
-            logger.info(`[err]${err}`);
-        }
-    });
-}
-
 module.exports = {
   setMailContent,
   sendMailByIdSearch,
   sendMail,
   send,
-  sendByXserer,
 };
