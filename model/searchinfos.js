@@ -20,14 +20,14 @@ const find = async () => {
   }
 };
 
-// const findlimit = async (num) => {
-//   try {
-//     const retObj = await knex.from("searchinfos").orderBy("id", "desc").limit(num);
-//     return retObj;
-//   } catch (err) {
-//     throw err;
-//   }
-// };
+const findlimit = async (num) => {
+  try {
+    const retObj = await knex.from("searchinfos").orderBy("id", "desc").limit(num);
+    return retObj;
+  } catch (err) {
+    throw err;
+  }
+};
 
 const insert = async (inObj) => {
   try {
@@ -88,7 +88,7 @@ const remove = async (id) => {
 
 module.exports = {
   find,
-  // findlimit,
+  findlimit,
   findPKey,
   insert,
   updateStatusAndTime,
