@@ -7,11 +7,13 @@ const m_kessais = require("../model/kessais");
 const m_logininfo = require("../model/logininfo");
 const m_sq = require("../model/sq");
 
-
 const common = require("../util/common");
 const yoyakuinfo = require("../util/yoyakuinfo");
 const kessaiinfo = require("../util/kessaiinfo");
 const mailinfo = require("../util/mailinfo");
+
+const seikyuinfo = require("../util/seikyuinfo");
+
 
 const fs = require("fs");
 
@@ -801,5 +803,260 @@ router.get("/kessai/sendmail/:id", (req, res) => {
     }
   })();
 });
+
+
+/**
+ * 新規予約登録情報画面（newyoyakuform）へ遷移する
+ *
+*/
+router.get("/newyoyaku/new", (req, res) => {
+  (async () => {
+    res.render("newyoyakuform", {
+    });
+  })();
+});
+
+/**
+ * 新規予約情報から予約情報を登録し、登録した予約情報をもとに決済情報を作成する
+ *
+ * ▼
+ * 新規予約情報登録画面（newyoyakusform）から呼び出される
+ */
+router.post("/newyoyaku/add", (req, res) => {
+  (async () => {
+    try {
+
+      if (!req.body.nm_room) {
+        req.flash("error", "予約情報を入力してください。");
+        res.redirect(`/newyoyaku/new`);
+        return;
+      }
+
+      if ((!Number.isInteger(Number(req.body.no_keiyaku))) || (req.body.no_keiyaku.length !== 5)) {
+        req.flash("error", "契約番号は5桁の数値で入力してください。" + req.body.no_keiyaku);
+        res.redirect(`/newyoyaku/new`);
+        return;
+      }
+
+      // 契約者名チェック
+      if (!req.body.nm_keiyaku) {
+        req.flash("error", "契約者名は必ず入力してください。" + req.body.nm_keiyaku);
+        res.redirect(`/newyoyaku/new`);
+        return;
+      }
+
+      // 明細
+      const nm_room_list = Array.isArray(req.body.nm_room) ? req.body.nm_room : [req.body.nm_room];
+      const time_start_list = Array.isArray(req.body.time_start) ? req.body.time_start : [req.body.time_start];
+      const time_end_list = Array.isArray(req.body.time_end) ? req.body.time_end : [req.body.time_end];
+      const price_list = Array.isArray(req.body.price) ? req.body.price : [req.body.price];
+      const quantity_list = Array.isArray(req.body.quantity) ? req.body.quantity : [req.body.quantity];
+      const type_room_list = req.body.type_list.split(","); // 通常会議室：0、ミーティングルーム：1、プロジェクトルーム：2、備品：9、その他：Z
+      const per_tax_list = req.body.tax_list.split(","); // 10%：10、8%：8、0%：0
+
+      // 予約年月日が日付変換できるかチェック
+      if (!common.isDate(req.body.yyyymmdd_yoyaku)) {
+        req.flash("error", "予約情報の予約年月日はyyyymmdd形式で入力してください。" + req.body.yyyymmdd_yoyaku);
+        res.redirect(`/newyoyaku/new`);
+        return;
+      }
+
+      // 部屋名/備品名が入力されているかチェック
+      for (let j = 0; j < nm_room_list; j++) {
+        if (!nm_room_list[j]) {
+          req.flash("error", "部屋名/備品名は必ず入力してください。 " + (j + 1) + "行目：" + nm_room_list[j]);
+          res.redirect(`/newyoyaku/new`);
+          return;
+        }
+      }
+
+      // 開始時間は時間変換できるかチェック
+      for (let j = 0; j < time_start_list.length; j++) {
+        if (time_start_list[j]) {
+          if (!common.isTime(time_start_list[j])) {
+            req.flash("error", "予約情報の開始時間はhhmm形式で入力してください。 " + (j + 1) + "行目：" + time_start_list[j]);
+            res.redirect(`/newyoyaku/new`);
+            return;
+          }
+        }
+      }
+
+      // 終了時間は時間変換できるかチェック
+      for (let j = 0; j < time_end_list.length; j++) {
+        if (time_end_list[j]) {
+          if (!common.isTime(time_end_list[j])) {
+            req.flash("error", "予約情報の終了時間はhhmm形式で入力してください。 " + (j + 1) + "行目：" + time_end_list[j]);
+            res.redirect(`/newyoyaku/new`);
+            return;
+          }
+        }
+      }
+
+      // 価格が数値であるかチェック
+      let totalPrice = 0;
+      for (let j = 0; j < price_list.length; j++) {
+        // if ((!Number.isInteger(Number(price_list[j]))) || (Number(price_list[j]) < 0) || (Number(price_list[j]) > 9999999999)) {
+        if ((!Number.isInteger(Number(price_list[j]))) || (Number(price_list[j]) > 9999999999)) {
+            // req.flash("error", "価格は11桁以内の正の数値で入力してください。 " + (j + 1) + "行目：" + price_list[j]);
+          req.flash("error", "価格は11桁以内の数値で入力してください。 " + (j + 1) + "行目：" + price_list[j]);
+          res.redirect(`/newyoyaku/new`);
+          return;
+        } else {
+          totalPrice += Number(price_list[j]);
+        }
+      }
+      if (totalPrice < 0) {
+        req.flash("error", `請求金額がマイナスになっています。（請求金額：${totalPrice}）`);
+        res.redirect(`/newyoyaku/new`);
+        return;
+      }
+
+      // 数量が数値であるかチェック
+      for (let j = 0; j < quantity_list.length; j++) {
+        if (quantity_list[j]) {
+          if ((!Number.isInteger(Number(quantity_list[j]))) || (Number(quantity_list[j]) < 0) || (Number(quantity_list[j]) > 9999999999)) {
+            req.flash("error", "数量は11桁以内の正の数値で入力してください。 " + (j + 1) + "行目：" + quantity_list[j]);
+            res.redirect(`/newyoyaku/new`);
+            return;
+          }
+        } else {
+          req.flash("error", "数量は11桁以内の正の数値で入力してください。 " + (j + 1) + "行目：" + quantity_list[j]);
+          res.redirect(`/newyoyaku/new`);
+          return;
+        }
+      }
+
+      // ▼検索情報を作成
+      const yyyymmddhhmmss_proc = common.getTodayTime();
+      let inObjSearch = {};
+      inObjSearch.id = "S" + yyyymmddhhmmss_proc;
+      inObjSearch.yyyymmdd_addupd_start = common.getYYYYMMDD(new Date());
+      inObjSearch.yyyymmdd_addupd_end = "";
+      inObjSearch.yyyymmdd_riyou_start = req.body.yyyymmdd_yoyaku;
+      inObjSearch.yyyymmdd_riyou_end = "";
+      inObjSearch.status = "4"; // 手作成のステータスとして「4」を設定　リファレンス）1：請求情報取得済み、2：決済情報取得済み、3：メール送信済み
+      inObjSearch.yyyymmddhhmmss_created_yoyakus = yyyymmddhhmmss_proc;
+      inObjSearch.yyyymmddhhmmss_created_kessais = yyyymmddhhmmss_proc;
+      await m_searchinfos.insert(inObjSearch);
+
+      // 決済情報IDを取得(id_kessai)
+      const retObjKessaiSq = await m_sq.selectSqKessai();
+      const id_kessai_new = retObjKessaiSq.id;
+
+      // ▼予約情報を作成
+      const id_kanri = "9" + ("0000000" + id_kessai_new).slice(-8); // 管理IDは「先頭9＋決済番号」とする
+      const id_customer = "R" + id_kanri + "-" + req.body.yyyymmdd_yoyaku + "-" + common.getYYYYMMDD(new Date());
+
+      for (let i = 0; i < nm_room_list.length; i++) {
+
+        // 追加用予約情報オブジェクト
+        let inObjYoyaku = {};
+
+        // 新しい予約情報IDを採番する(id)
+        const retObjYoyakuSq = await m_sq.selectSqYoyaku();
+        inObjYoyaku.id = retObjYoyakuSq.id;
+
+        // フォームからの入力値を設定する
+        inObjYoyaku.nm_room = nm_room_list[i];
+        inObjYoyaku.time_start = time_start_list[i];
+        inObjYoyaku.time_end = time_end_list[i];
+        inObjYoyaku.price = price_list[i];
+        inObjYoyaku.nm_room_seishiki = nm_room_list[i];
+        inObjYoyaku.type_room = type_room_list[i]; // 通常会議室：0、ミーティングルーム：1、プロジェクトルーム：2、備品：9、その他：Z
+        inObjYoyaku.quantity = quantity_list[i];
+        inObjYoyaku.per_tax = per_tax_list[i];
+        inObjYoyaku.status_shiharai = "未";
+        inObjYoyaku.yyyymmddhhmmss_created = common.getTodayTime();
+
+        // 共通項目のためリストの最初の項目値を設定
+        inObjYoyaku.id_search = inObjSearch.id;
+        inObjYoyaku.yyyymmdd_yoyaku = req.body.yyyymmdd_yoyaku;
+        inObjYoyaku.yyyymmdd_uketuke = common.getYYYYMMDD(new Date());
+        inObjYoyaku.id_kanri = id_kanri;
+        inObjYoyaku.id_customer = id_customer;
+        inObjYoyaku.nm_nyuryoku = "手作成";
+        inObjYoyaku.nm_riyou = "";
+        inObjYoyaku.no_keiyaku = req.body.no_keiyaku;
+        inObjYoyaku.nm_keiyaku = req.body.nm_keiyaku;
+        inObjYoyaku.nm_tantou = "";
+        inObjYoyaku.telno = "";
+        inObjYoyaku.faxno = "";
+        inObjYoyaku.email = "";
+        inObjYoyaku.kubun = "";
+        inObjYoyaku.address = "";
+        inObjYoyaku.tanka = 0;
+        inObjYoyaku.caution = "";
+        inObjYoyaku.memo = "";
+        inObjYoyaku.yyyymmddhhmmss_created = common.getTodayTime();
+
+        // 決済情報IDを設定する
+        inObjYoyaku.id_kessai = id_kessai_new;
+
+        // 予約情報の登録
+        await m_yoyakus.insert(inObjYoyaku);
+      }
+
+      // ▼決済情報の作成
+      let retObjkessai = {};
+      retObjkessai.id = id_kessai_new;
+      retObjkessai.id_customer = id_customer;
+      retObjkessai.id_search = inObjSearch.id;
+      retObjkessai.to_pay = "800";
+      retObjkessai.nm_customer_1 = "";
+      retObjkessai.nm_customer_2 = "";
+      retObjkessai.telno = "";
+      const retPrice = await m_yoyakus.findPriceByIdKessai(id_kessai_new);
+      retObjkessai.price =  retPrice[0].price;
+      retObjkessai.yyyymmdd_kigen = "";
+      retObjkessai.result = "";
+      retObjkessai.id_data = "";
+      retObjkessai.url_cvs = "";
+      retObjkessai.message = "";
+      retObjkessai.nm_keiyaku = req.body.nm_keiyaku;
+      retObjkessai.nm_tantou = "";
+      retObjkessai.yyyymmdd_yoyaku = req.body.yyyymmdd_yoyaku;
+      retObjkessai.yyyymmdd_uketuke = common.getYYYYMMDD(new Date());
+      retObjkessai.email = "";
+      retObjkessai.isCvs = "";
+      retObjkessai.isSendMail = "";
+      retObjkessai.isPDF = "";
+      retObjkessai.mail_subject = "";
+      retObjkessai.mail_body = "";
+      retObjkessai.mail_body_cvs = "";
+      // retObjkessai.yyyymmddhhmmss_sended_mail
+      // retObjkessai.yyyymmddhhmmss_resended_mail
+
+      // 予約情報より各税率の料金合計を取得する
+      const price_10per = await m_yoyakus.findPriceByKbnPerAndIdKessai(10,id_kessai_new);
+      const price_8per = await m_yoyakus.findPriceByKbnPerAndIdKessai(8,id_kessai_new);
+      const price_0per = await m_yoyakus.findPriceByKbnPerAndIdKessai(0,id_kessai_new);
+
+      // 各税率の税抜き料金と消費税料金を設定する
+      retObjkessai.price_10per_total = price_10per.length === 1? Math.ceil(price_10per[0].price / (1.1)): 0;
+      retObjkessai.tax_10per_total = price_10per.length === 1? price_10per[0].price - Math.ceil(price_10per[0].price / (1.1)): 0;
+      retObjkessai.price_8per_total =  price_8per.length === 1? Math.ceil(price_8per[0].price / (1.08)): 0;
+      retObjkessai.tax_8per_total = price_8per.length === 1? price_8per[0].price - Math.ceil(price_8per[0].price / (1.08) ): 0;
+      retObjkessai.price_0per_total =  price_0per.length === 1? price_0per[0].price: 0;
+      retObjkessai.tax_0per_total = 0
+
+      // 決済情報の登録
+      await m_kessais.insert(retObjkessai);
+
+      // ▼請求書PDFの作成
+      await seikyuinfo.createSeikyuPDF(retObjkessai.id);
+
+      req.flash("success", `予約情報・決済情報を登録しました。(${inObjSearch.id})`);
+      res.redirect(`/`);
+
+    } catch (error) {
+      console.log(error);
+      req.flash("error", error.message);
+      res.redirect("/");
+    }
+  })();
+});
+
+
+
 
 module.exports = router;
