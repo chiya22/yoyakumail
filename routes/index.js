@@ -27,7 +27,8 @@ const logger = log4js.configure("./config/log4js-config.json").getLogger();
  */
 router.get("/", (req, res) => {
   (async () => {
-    const searchinfos = await m_searchinfos.find();
+    const searchinfos = await m_searchinfos.findlimit(100);
+    // const searchinfos = await m_searchinfos.find();
     const logininfo = await m_logininfo.find();
 
     const curYyyymmdd = common.getTodayTime().slice(0, 8);
