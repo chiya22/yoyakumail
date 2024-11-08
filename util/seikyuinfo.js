@@ -59,7 +59,11 @@ const createSeikyuPDF = async (id_kessai) => {
           let objBihin = {}
 
           objBihin.name = yoyaku.nm_room + "×" + yoyaku.quantity + "   " + per_tax_mark;
-          objBihin.time = yoyaku.time_start.slice(0,2) + ":" + yoyaku.time_start.slice(-2) + "-" + yoyaku.time_end.slice(0,2) + ":" + yoyaku.time_end.slice(-2)
+          if (yoyaku.time_start) {
+            objBihin.time = yoyaku.time_start.slice(0,2) + ":" + yoyaku.time_start.slice(-2) + "-" + yoyaku.time_end.slice(0,2) + ":" + yoyaku.time_end.slice(-2)
+          } else {
+            objBihin.time = "";
+          }
           objBihin.price = yoyaku.price.toLocaleString() + "円"
           objBihin.type_room = yoyaku.type_room;
           bihinmeisais.push(objBihin);
@@ -187,6 +191,7 @@ const createSeikyuPDF = async (id_kessai) => {
   let indx = 1;
   let targetfiledname = '';
   let targetobj;
+
   meisais.forEach( (meisai) => {
 
       // ▼会場名/付帯設備名/項目名
