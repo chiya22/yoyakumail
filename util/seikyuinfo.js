@@ -106,7 +106,11 @@ const createSeikyuPDF = async (id_kessai) => {
           }
           let objRoom = {}
           objRoom.name = yoyaku.nm_room + "   " + per_tax_mark;
-          objRoom.time = yoyaku.time_start.slice(0,2) + ":" + yoyaku.time_start.slice(-2) + "-" + yoyaku.time_end.slice(0,2) + ":" + yoyaku.time_end.slice(-2)
+          if (yoyaku.time_start) {
+            objRoom.time = yoyaku.time_start.slice(0,2) + ":" + yoyaku.time_start.slice(-2) + "-" + yoyaku.time_end.slice(0,2) + ":" + yoyaku.time_end.slice(-2)
+          } else {
+            objRoom.time = ""
+          }
           objRoom.price = yoyaku.price.toLocaleString() + "円"
           objRoom.type_room = yoyaku.type_room;
           meisais.push(objRoom);
