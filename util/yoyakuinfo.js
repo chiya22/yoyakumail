@@ -89,7 +89,7 @@ const dlyoyakuinfo = async (yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd
   await client.send('Page.setDownloadBehavior', {
       behavior: 'allow',
  // the download path can be set to a folder in your project root
-      downloadPath: 'c:\\download\\yoyakumail'
+      downloadPath: process.env.YOYAKU_DL_PATH
   });
 
   

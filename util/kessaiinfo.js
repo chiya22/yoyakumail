@@ -215,9 +215,9 @@ const dlkessaiinfo = async (key) => {
   const client = await page.target().createCDPSession()
   await client.send('Page.setDownloadBehavior', {
       behavior: 'allow',
- // the download path can be set to a folder in your project root
-      downloadPath: 'c:\\download\\yoyakumail'
-  });
+      // the download path can be set to a folder in your project root
+      downloadPath: process.env.KESSAI_DL_PATH
+});
 
   // 検索ボタンをクリック
   await page.click("#fra_main > center:nth-child(3) > form:nth-child(2) > table:nth-child(4) > tbody > tr > td > input[type=button]");
