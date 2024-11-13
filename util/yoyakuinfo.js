@@ -11,6 +11,8 @@ const common = require("./common");
 const m_yoyakus = require("../model/yoyakus");
 const m_sq = require("../model/sq");
 
+const setTimeout = require("node:timers/promises").setTimeout;
+
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
@@ -30,20 +32,23 @@ const dlyoyakuinfo = async (yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd
   await page.type('input[name="in_opassword"]', process.env.YOYAKU_LOGIN_PASSWORD);
   await page.click("body > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(2) > tbody > tr > td:nth-child(2) > input");
 
-  await page.waitForTimeout(process.env.WAITTIME);
+  await setTimeout(process.env.WAITTIME);
+//  await page.waitForTimeout(process.env.WAITTIME);
   // await page.waitForNavigation({waitUntil: 'domcontentloaded'});
 
   // 「予約検索」をクリック
   const menu = await page.$("body > table > tbody > tr > td > table > tbody > tr > td > table:nth-child(2) > tbody > tr:nth-child(8) > td:nth-child(2) > input[type=image]:nth-child(9)");
   await menu.click();
 
-  await page.waitForTimeout(process.env.WAITTIME);
+  await setTimeout(process.env.WAITTIME);
+//  await page.waitForTimeout(process.env.WAITTIME);
 
   // 「新規予約確認」をクリック
   const shinki = await page.$("body > div:nth-child(4) > table:nth-child(3) > tbody > tr > th:nth-child(3) > a");
   await shinki.click();
 
-  await page.waitForTimeout(process.env.WAITTIME);
+  await setTimeout(process.env.WAITTIME);
+//  await page.waitForTimeout(process.env.WAITTIME);
 
   // 登録日/更新日の設定
   const yyyymm_addupd_start = yyyymmdd_addupd_start.slice(0, 6);
@@ -67,7 +72,8 @@ const dlyoyakuinfo = async (yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd
   // 「検索」ボタンをクリック
   await page.click("body > div:nth-child(4) > form > table:nth-child(1) > tbody > tr > td:nth-child(4) > input");
 
-  await page.waitForTimeout(process.env.WAITTIME);
+  await setTimeout(process.env.WAITTIME);
+  // await page.waitForTimeout(process.env.WAITTIME);
 
   // Promptが出たら必ずOKとする
   page.on("dialog", async (dialog) => {
@@ -75,11 +81,18 @@ const dlyoyakuinfo = async (yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd
   });
 
   // ダウンロード先を修正
-  await page._client.send("Page.setDownloadBehavior", {
-    behavior: "allow",
-    downloadPath: "C:\\download\\yoyakumail",
+  // await page._client.send("Page.setDownloadBehavior", {
+  //   behavior: "allow",
+  //   downloadPath: "C:\\download\\yoyakumail",
+  // });
+  const client = await page.target().createCDPSession()
+  await client.send('Page.setDownloadBehavior', {
+      behavior: 'allow',
+ // the download path can be set to a folder in your project root
+      downloadPath: 'c:\\download\\yoyakumail'
   });
 
+  
   // 隠し項目へ値を設定
   // proc_flg
   await page.$eval('input[name="proc_flg"]', (el) => (el.value = "download"));
@@ -97,7 +110,8 @@ const dlyoyakuinfo = async (yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd
   await page.$eval('form[name="formlist"]', (form) => form.submit());
 
   await logger.info(`予約情報をダウンロードしました`);
-  await page.waitForTimeout(process.env.WAITTIME);
+  await setTimeout(process.env.WAITTIME);
+//  await page.waitForTimeout(process.env.WAITTIME);
   await browser.close();
 
   logger.info(`予約情報ダウンロード終了`);
