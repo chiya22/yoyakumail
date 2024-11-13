@@ -92,6 +92,7 @@ router.post("/yoyakus", (req, res) => {
       inObjSearch.yyyymmdd_riyou_end = yyyymmdd_riyou_end;
       inObjSearch.status = "1";
       inObjSearch.yyyymmddhhmmss_created_yoyakus = yyyymmddhhmmss_proc;
+      inObjSearch.yyyymmddhhmmss_created_kessais = "";
       await m_searchinfos.insert(inObjSearch);
       logger.info(`検索条件情報ID：${inObjSearch.id}`);
 
@@ -154,7 +155,8 @@ router.get("/searchdelete/:id", (req, res) => {
       // 請求書PDFが存在する場合は削除する
       const dirpath = `public/pdf/${req.params.id}`;
       if (fs.existsSync(dirpath)) {
-        fs.rmdirSync(dirpath, { recursive: true });
+        // fs.rmdirSync(dirpath, { recursive: true });
+        fs.rmSync(dirpath, { recursive: true });
       }
       
       // 検索条件情報の一覧を取得する
