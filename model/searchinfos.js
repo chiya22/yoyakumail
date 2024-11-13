@@ -32,7 +32,7 @@ const findlimit = async (num) => {
 const insert = async (inObj) => {
   try {
     const query =
-      'insert into searchinfos ( id, yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd_riyou_start, yyyymmdd_riyou_end, status, yyyymmddhhmmss_created_yoyakus ) values ("' +
+      'insert into searchinfos ( id, yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd_riyou_start, yyyymmdd_riyou_end, status, yyyymmddhhmmss_created_yoyakus, yyyymmddhhmmss_created_kessais ) values ("' +
       inObj.id +
       '","' +
       inObj.yyyymmdd_addupd_start +
@@ -46,6 +46,8 @@ const insert = async (inObj) => {
       inObj.status +
       '", "' +
       inObj.yyyymmddhhmmss_created_yoyakus +
+      '", "' +
+      inObj.yyyymmddhhmmss_created_kessais +
       '")';
     // logger.info(query);
     const retObj = await knex.raw(query);
