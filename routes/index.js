@@ -761,8 +761,12 @@ router.get("/kessais/sendmail/:id", (req, res) => {
       // 決済情報の一覧を取得する
       const kessais = await m_kessais.findByIdSearch(id_search);
 
+      // すべての決済情報がCSV対象かどうか判定
+      const allCvs = kessais.every(k => k.isCvs === "1");
+
       // 1件でもコンビニ決済用のURLが取得できていればOK
-      if (kessais[0].url_cvs) {
+      // もしくは、すべてCSV対象でなければメール送信可能
+      if ((kessais[0].url_cvs) || !allCvs) {
         // メール送信
         await mailinfo.sendMailByIdSearch(id_search);
 
