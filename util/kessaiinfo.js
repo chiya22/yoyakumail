@@ -266,7 +266,6 @@ const dlkessaiinfo = async (key) => {
 
 /**
  * 電算システムよりダウンロードした決済結果データをもとに決済テーブルへ反映させる
- * ※請求書PDFファイルを作成し格納する
  * 
  * ＜注意＞
  * 検索情報IDは反映対象の決済情報を特定する際に使用される
@@ -311,10 +310,7 @@ const updkessaiinfo = async (id_search, dlfilename) => {
         inObj.id_data = linecontents[8];
         inObj.url_cvs = linecontents[9];
         inObj.message = linecontents[10];
-
-        // 請求書のPDFファイルを作成し、そのパス情報を取得する
-        seikyuinfo.createSeikyuPDF(inObj.id);
-        
+     
         (async () => {
           // 決済情報へ反映する
           await m_kessais.updatekessaisBydlinfo(inObj);
