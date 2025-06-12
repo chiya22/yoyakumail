@@ -40,6 +40,18 @@ const findByIdSearch = async ( id_search ) => {
   }
 };
 
+// 検索条件IDで決済IDを抽出
+const findIdKessaiByIdSearch = async ( id_search ) => {
+  try {
+    const query = `select y.id_kessai from yoyakus y where y.id_search = "${id_search}" group by y.id_kessai`;
+    logger.info(query);
+    const retObj = await knex.raw(query);
+    return retObj[0];
+  } catch (err) {
+    throw err;
+  }
+};
+
 // お客様IDで抽出
 const findByIdSearchAndCustomer = async ( id_search, id_customer ) => {
   try {
@@ -268,6 +280,7 @@ module.exports = {
   findPKey,
   findByIdKessai,
   findByIdSearch,
+  findIdKessaiByIdSearch,
   findByIdSearchAndCustomer,
   findMaxId,
   findPriceByIdKessai,
