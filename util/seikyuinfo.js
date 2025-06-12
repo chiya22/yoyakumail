@@ -119,6 +119,12 @@ const createSeikyuPDF = async (id_kessai) => {
   meisais = meisais.concat(bihinmeisais);
   meisais = meisais.concat(othermeisais);
 
+  // ここで明細行数チェックを追加
+  if (meisais.length > 16) {
+    logger.error(`請求書PDF作成エラー: 明細行数が16行を超えています（${meisais.length}行）: 決済ID=${id_kessai}`);
+    throw new Error(`請求書PDFの明細行数が16行を超えています（${meisais.length}行）。明細を減らしてください。`);
+  }
+
   // 契約者名
   // （表示名：XXX）があれば削除する　例）■　１２３４　株式会社ＡＡＡ（表示名：ＢＢＢ）　⇒　■　１２３４　株式会社ＡＡＡ
   let nm_keiyaku = kessai.nm_keiyaku;
@@ -296,4 +302,3 @@ const createSeikyuPDF = async (id_kessai) => {
 module.exports = {
     createSeikyuPDF,
   };
-  
