@@ -221,6 +221,7 @@ router.get("/kessaiscreate/:id", (req, res) => {
         console.log(retValue.replace(/\s+/g, ""));
         req.flash("error", retValue.replace(/\s+/g, ""));
         res.redirect("/");
+        return;
       } else {
         // 電算システムでURLが付与されるまで待機
         // await common.sleep(process.env.WAITTIME);
@@ -232,13 +233,25 @@ router.get("/kessaiscreate/:id", (req, res) => {
           console.log(retValue.replace(/\s+/g, ""));
           req.flash("error", retValue.replace(/\s+/g, ""));
           res.redirect("/");
+          return;
         } else {
 
           // ダウンロードしたファイルより、テーブルへ情報を反映する
-          //　※請求書PDFも作成する
           await kessaiinfo.updkessaiinfo(id_search, retValue);
 
-          await common.sleep(5000);
+          //  検索情報IDをキーに予約情報リストを取得し、その予約情報リストに紐づく決済IDのリストを作成する
+          const result_rows = await m_yoyakus.findIdKessaiByIdSearch(id_search);
+
+          //　それぞれの請求情報に対する請求書PDFを作成し、決済情報へ反映する
+          try{
+            for (const result_row of result_rows) {
+              await seikyuinfo.createSeikyuPDF(result_row.id_kessai);
+            }
+          } catch (err) {
+            req.flash("error", err.message); // ← ここでエラーメッセージを画面に渡す
+            res.redirect("/");
+            return
+          }
 
           // 検索IDをキーに決済情報を取得する
           const retObj = await m_kessais.findByIdSearch(id_search);
@@ -767,7 +780,8 @@ router.get("/kessais/sendmail/:id", (req, res) => {
       // 1件でもコンビニ決済用のURLが取得できていればOK
       // もしくは、すべてCSV対象でなければメール送信可能
       if ((kessais[0].url_cvs) || !allCvs) {
-        // メール送信
+
+        // メール送信        
         await mailinfo.sendMailByIdSearch(id_search);
 
         // 検索条件情報のステータスを更新する
@@ -1050,7 +1064,12 @@ router.post("/newyoyaku/add", (req, res) => {
       await m_kessais.insert(retObjkessai);
 
       // ▼請求書PDFの作成
-      await seikyuinfo.createSeikyuPDF(retObjkessai.id);
+      try {
+        await seikyuinfo.createSeikyuPDF(retObjkessai.id);
+      } catch (error) {
+        req.flash("error", error.message);
+        res.redirect("/");
+      }
 
       req.flash("success", `予約情報・決済情報を登録しました。(${inObjSearch.id})`);
       res.redirect(`/`);
