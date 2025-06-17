@@ -120,7 +120,7 @@ const createSeikyuPDF = async (id_kessai) => {
   meisais = meisais.concat(othermeisais);
 
   // ここで明細行数チェックを追加
-  if (meisais.length > 16) {
+  if (meisais.length > 15) {
     logger.error(`請求書PDF作成エラー: 明細行数が16行を超えています（${meisais.length}行）: 決済ID=${id_kessai}`);
     throw new Error(`請求書PDFの明細行数が16行を超えています（${meisais.length}行）。明細を減らしてください。`);
   }
