@@ -23,24 +23,34 @@ if (process.env.NODE_ENV !== "production") {
 /**
  * 決済情報IDまたは検索情報IDをキーに、決済情報をファイルへ出力する（電算システムアップロード用）
  * 決済情報IDが設定されている場合は、決済情報IDに紐づく決済情報が対象となる（１件）
- * 検索情報IDが設定されている場合は、検索情報IDに紐づくすべての決済情報が対象となる（１件から複数県）
+ * 検索情報IDが設定されている場合は、検索情報IDに紐づくすべての決済情報が対象となる（１件から複数件）
+ * 請求金額が0円の場合は、ファイルを出力せず、返却値に「null」を設定する
  * @param {*} id_search 検索情報ID
  * @param {*} id_kessai 決済情報ID
  * @returns 
  */
 const outputFile = async (id_search, id_kessai = null) => {
-
   let content = "";
+  let hasOutput = false;
   if (id_kessai) {
     const kessai = await m_kessais.findPKey(id_kessai);
-    content += kessai.id + "_" + kessai.id_customer + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + (kessai.nm_customer_2===null?'':kessai.nm_customer_2) + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
-    // content += kessai.id_customer + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + kessai.nm_customer_2 + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
+    if (kessai.price && Number(kessai.price) !== 0) {
+      content += kessai.id + "_" + kessai.id_customer + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + (kessai.nm_customer_2===null?'':kessai.nm_customer_2) + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
+      hasOutput = true;
+    }
   } else {
     const kessais = await m_kessais.findByIdSearch(id_search);
     kessais.forEach( kessai => {
-      content += kessai.id + "_" + kessai.id_customer + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + (kessai.nm_customer_2===null?'':kessai.nm_customer_2) + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
-      // content += kessai.id_customer + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + kessai.nm_customer_2 + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
+      if (kessai.price && Number(kessai.price) !== 0) {
+        content += kessai.id + "_" + kessai.id_customer + "," + kessai.to_pay + "," + kessai.nm_customer_1 + "," + (kessai.nm_customer_2===null?'':kessai.nm_customer_2) + "," + kessai.telno + "," + kessai.price + "," + kessai.yyyymmdd_kigen + "\r\n"
+        hasOutput = true;
+      }
     });
+  }
+
+  if (!hasOutput) {
+    // 出力対象がない場合はファイル出力をスキップし、nullを返却
+    return null;
   }
 
   const outFileName = process.env.KESSAI_UP_PATH + "\\kessaiinfo" + common.getTodayTime() + ".csv";
