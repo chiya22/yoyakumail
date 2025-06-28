@@ -212,74 +212,69 @@ router.get("/kessaiscreate/:id", (req, res) => {
 
       }
 
-      // ファイルへ書き出す
+      // 電算システムへCSVコード払い出ししてもらうための要求ファイルを書き出す
+      // 請求額が0円の場合は、nullが返却される
       const outFilePath = await kessaiinfo.outputFile(id_search);
-
-      // 電算システムへアップロードする
-      retValue = await kessaiinfo.upkessaiinfo(id_search, outFilePath);
-      if (retValue.includes("エラー")) {
-        console.log(retValue.replace(/\s+/g, ""));
-        req.flash("error", retValue.replace(/\s+/g, ""));
-        res.redirect("/");
-        return;
-      } else {
-        // 電算システムでURLが付与されるまで待機
-        // await common.sleep(process.env.WAITTIME);
-        await common.sleep(60000);
-        
-        // 電算システムよりダウンロードする
-        retValue = await kessaiinfo.dlkessaiinfo(id_search);
+      if (outFilePath !== null){
+        // 請求額が1円以上の場合は、電算システムへCSVコードを取得し、決済情報へ反映する
+        // 電算システムへアップロードする
+        retValue = await kessaiinfo.upkessaiinfo(id_search, outFilePath);
         if (retValue.includes("エラー")) {
           console.log(retValue.replace(/\s+/g, ""));
           req.flash("error", retValue.replace(/\s+/g, ""));
           res.redirect("/");
           return;
         } else {
-
-          // ダウンロードしたファイルより、テーブルへ情報を反映する
-          await kessaiinfo.updkessaiinfo(id_search, retValue);
-
-          //  検索情報IDをキーに予約情報リストを取得し、その予約情報リストに紐づく決済IDのリストを作成する
-          const result_rows = await m_yoyakus.findIdKessaiByIdSearch(id_search);
-
-          //　それぞれの請求情報に対する請求書PDFを作成し、決済情報へ反映する
-          try{
-            for (const result_row of result_rows) {
-              await seikyuinfo.createSeikyuPDF(result_row.id_kessai);
-            }
-          } catch (err) {
-            req.flash("error", err.message); // ← ここでエラーメッセージを画面に渡す
-            res.redirect("/");
-            return
-          }
-
-          // 検索IDをキーに決済情報を取得する
-          const retObj = await m_kessais.findByIdSearch(id_search);
+          // 電算システムでURLが付与されるまで待機
+          // await common.sleep(process.env.WAITTIME);
+          await common.sleep(30000);
           
-          // コンビニ決済用URLが取得できている場合
-          if (retObj[0].url_cvs) {
-
-            // メール文章を作成する
-            await mailinfo.setMailContent(id_search);
-            
-            // 検索条件情報のステータスを更新する
-            await m_searchinfos.updateStatusAndTime(id_search, "2", common.getTodayTime());
-
-            req.flash("success", `決済情報を取得しました。(${id_search})`);
+          // 電算システムよりダウンロードする
+          retValue = await kessaiinfo.dlkessaiinfo(id_search);
+          if (retValue.includes("エラー")) {
+            console.log(retValue.replace(/\s+/g, ""));
+            req.flash("error", retValue.replace(/\s+/g, ""));
             res.redirect("/");
+            return;
 
-          // コンビニ決済用URLが取得できていない場合
           } else {
-            // 決済情報がある場合は削除する
-            await m_kessais.remove(id_search);
-            
-            req.flash("error", `決済情報の取得に失敗しました。時間をおいて再度処理を行ってください。(${id_search})`);
-            res.redirect("/");
+
+            // await common.sleep(60000);
+            // ダウンロードしたファイルより、テーブルへ情報を反映する
+            // retValueは電算システムよりダウンロードしたファイル名
+            await kessaiinfo.updkessaiinfo(id_search, retValue);
+
+            //  検索情報IDをキーに予約情報リストを取得し、その予約情報リストに紐づく決済IDのリストを作成する
+            // const result_rows = await m_yoyakus.findIdKessaiByIdSearch(id_search);
+            const kessais = await m_kessais.findByIdSearch(id_search);
+
+              //　それぞれの請求情報に対する請求書PDFを作成し、決済情報へ反映する
+            try{
+              for (const kessai of kessais) {
+                await seikyuinfo.createSeikyuPDF(kessai.id);
+              }
+            } catch (err) {
+              req.flash("error", err.message); // ← ここでエラーメッセージを画面に渡す
+              res.redirect("/");
+              return
+            }
           }
         }
       }
+          
+      // メール文章を作成する
+      await mailinfo.setMailContent(id_search);
+        
+      // 検索条件情報のステータスを更新する
+      await m_searchinfos.updateStatusAndTime(id_search, "2", common.getTodayTime());
+
+      req.flash("success", `決済情報を取得しました。(${id_search})`);
+      res.redirect("/");
+
     } catch (error) {
-      req.flash("error", error.message);
+      // 決済情報がある場合は削除する
+      await m_kessais.remove(id_search);
+      req.flash("error", `決済情報の取得に失敗しました。時間をおいて再度処理を行ってください。(${id_search}：${error.message})`);
       res.redirect("/");
     }
   })();
@@ -479,58 +474,47 @@ router.post("/updyoyakus/:id", (req, res) => {
       // ファイルへ書き出す
       const outFilePath = await kessaiinfo.outputFile(id_search, id_kessai_new);
 
-      // 電算システムへアップロードする
-      retValue = await kessaiinfo.upkessaiinfo(`${id_kessai_new}`, outFilePath);
-      if (retValue.includes("エラー")) {
-        console.log(retValue.replace(/\s+/g, ""));
-        req.flash("error", retValue.replace(/\s+/g, ""));
-        res.redirect("/");
-      } else {
-        // 電算システムでURLが付与されるまで待機
-        // await common.sleep(process.env.WAITTIME);
-        await common.sleep(60000);
-
-        // 電算システムよりダウンロードする
-        retValue = await kessaiinfo.dlkessaiinfo(`${id_kessai_new}`);
+      // 請求額が0円の場合は電算システムよりCSV支払い用コードを取得しない
+      if (outFilePath !== null) {
+        // 請求額が1円以上の場合、電算システムへアップロードする
+        retValue = await kessaiinfo.upkessaiinfo(`${id_kessai_new}`, outFilePath);
         if (retValue.includes("エラー")) {
           console.log(retValue.replace(/\s+/g, ""));
           req.flash("error", retValue.replace(/\s+/g, ""));
           res.redirect("/");
-
         } else {
-          // ダウンロードしたファイルより、テーブルへ情報を反映する
-          // 検索情報IDのみ渡す　顧客情報IDはダウンロードファイルの中に含まれているため
-          await kessaiinfo.updkessaiinfo(id_search, retValue);
 
-          await common.sleep(5000);
+          // 電算システムでURLが付与されるまで待機
+          await common.sleep(60000);
 
-          // ▼コンビニ決済URLが取得できているかチェック！
-
-          // 検索IDをキーに決済情報を取得する
-          const retObj = await m_kessais.findPKey(id_kessai_new);
-
-          // コンビニ決済用URLが取得できている場合
-          if (retObj.url_cvs) {
-
-            // メール文章を作成する
-            await mailinfo.setMailContent(id_search, id_kessai_new);
-
-            req.flash("success", `予約情報を更新しました。(${id_kessai_new})`);
-            res.redirect(`/kessai/${id_kessai_new}`);
-
-          // コンビニ決済用URLが取得できていない場合
-          } else {
-            // 決済情報がある場合は削除する
-            await m_kessais.remove(id_kessai_new);
-
-            req.flash("error", `決済情報の取得に失敗しました。時間をおいて再度処理を行ってください。(${id_kessai_new})`);
+          // 電算システムよりダウンロードする
+          retValue = await kessaiinfo.dlkessaiinfo(`${id_kessai_new}`);
+          if (retValue.includes("エラー")) {
+            console.log(retValue.replace(/\s+/g, ""));
+            req.flash("error", retValue.replace(/\s+/g, ""));
             res.redirect("/");
+
+          } else {
+            // ダウンロードしたファイルより、テーブルへ情報を反映する
+            // 検索情報IDのみ渡す　顧客情報IDはダウンロードファイルの中に含まれているため
+            await kessaiinfo.updkessaiinfo(id_search, retValue);
           }
+
         }
       }
+
+      // メール文章を作成する
+      await mailinfo.setMailContent(id_search, id_kessai_new);
+
+      req.flash("success", `予約情報を更新しました。(${id_kessai_new})`);
+      res.redirect(`/kessai/${id_kessai_new}`);
+
     } catch (error) {
+
+      // エラーが発生し、決済情報がある場合は削除する
+      await m_kessais.remove(id_kessai_new);
       console.log(error);
-      req.flash("error", error.message);
+      req.flash("error", `決済情報の取得に失敗しました。時間をおいて再度処理を行ってください。(${id_kessai_new}：${error.message})`);
       res.redirect("/");
     }
   })();
@@ -1069,15 +1053,18 @@ router.post("/newyoyaku/add", (req, res) => {
       } catch (error) {
         req.flash("error", error.message);
         res.redirect("/");
+        return;
       }
 
       req.flash("success", `予約情報・決済情報を登録しました。(${inObjSearch.id})`);
       res.redirect(`/`);
+      return;
 
     } catch (error) {
       console.log(error);
       req.flash("error", error.message);
       res.redirect("/");
+      return;
     }
   })();
 });
