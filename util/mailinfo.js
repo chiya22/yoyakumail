@@ -118,42 +118,44 @@ const makeMailBody = async (kessai) => {
   mailbody_before += "ご利用料金合計： " + kessai.price.toLocaleString() + "円(税込)\r\n"
   mailbody_before += "\r\n"
 
-  // メール本文（コンビニ決済対象）
-  mailbody_cvs += "使用料は、【7日以内】に下記の手順に従い、\r\n"
-  mailbody_cvs += "コンビニ決済、銀行振込または現金にてお願いいたします。\r\n"
-  mailbody_cvs += "尚、必ずご利用時までにお支払いください。\r\n"
-  mailbody_cvs += "ご利用日が７日以内の場合、当日受付でもお支払いいただけます。\r\n"
-  mailbody_cvs += "\r\n"
-  mailbody_cvs += "【コンビニ決済】\r\n"
-  mailbody_cvs += "　下記URLより決済コードを取得の上、店頭にてお支払いください。\r\n"
-  mailbody_cvs += "　※手数料は発生しません。\r\n"
-  mailbody_cvs += "\r\n"
-  mailbody_cvs += "　" + kessai.url_cvs + "\r\n"
-  mailbody_cvs += "\r\n"
-  mailbody_cvs += "　※携帯電話等からもご利用いただけます。\r\n"
-  mailbody_cvs += "\r\n"
+  if (kessai.price !== 0) {
+    // メール本文（コンビニ決済対象）
+    mailbody_cvs += "使用料は、【7日以内】に下記の手順に従い、\r\n"
+    mailbody_cvs += "コンビニ決済、銀行振込または現金にてお願いいたします。\r\n"
+    mailbody_cvs += "尚、必ずご利用時までにお支払いください。\r\n"
+    mailbody_cvs += "ご利用日が７日以内の場合、当日受付でもお支払いいただけます。\r\n"
+    mailbody_cvs += "\r\n"
+    mailbody_cvs += "【コンビニ決済】\r\n"
+    mailbody_cvs += "　下記URLより決済コードを取得の上、店頭にてお支払いください。\r\n"
+    mailbody_cvs += "　※手数料は発生しません。\r\n"
+    mailbody_cvs += "\r\n"
+    mailbody_cvs += "　" + kessai.url_cvs + "\r\n"
+    mailbody_cvs += "\r\n"
+    mailbody_cvs += "　※携帯電話等からもご利用いただけます。\r\n"
+    mailbody_cvs += "\r\n"
 
-  // メール本文（コンビニ決済対象外）
-  mailbody += "使用料は、【7日以内】に下記の手順に従い、\r\n"
-  mailbody += "銀行振込または現金にてお願いいたします。\r\n"
-  mailbody += "尚、必ずご利用時までにお支払いください。\r\n"
-  mailbody += "ご利用日が７日以内の場合、当日受付でもお支払いいただけます。\r\n"
-  mailbody += "\r\n"
-  mailbody += "(コンビニ決済はオンライン予約の場合のみ承っております。)\r\n"
-  mailbody += "\r\n"
+    // メール本文（コンビニ決済対象外）
+    mailbody += "使用料は、【7日以内】に下記の手順に従い、\r\n"
+    mailbody += "銀行振込または現金にてお願いいたします。\r\n"
+    mailbody += "尚、必ずご利用時までにお支払いください。\r\n"
+    mailbody += "ご利用日が７日以内の場合、当日受付でもお支払いいただけます。\r\n"
+    mailbody += "\r\n"
+    mailbody += "(コンビニ決済はオンライン予約の場合のみ承っております。)\r\n"
+    mailbody += "\r\n"
 
-  // 共通部分
-  mailbody_after += "【銀行振込】\r\n"
-  mailbody_after += "　三菱UFJ銀行　東京営業部\r\n"
-  mailbody_after += "　普通　6974978　プラットフォームサービス(カ\r\n"
-  mailbody_after += "　※必ず、「利用登録NO.」もしくは「(冠称を除いた)利用登録名」にてお振込みください。\r\n"
-  mailbody_after += "　※振込手数料はご負担ください。\r\n"
-  mailbody_after += "\r\n"
-  mailbody_after += "【現金】\r\n"
-  mailbody_after += "　ちよだプラットフォームスクウェア・コンシェルジュまでお持ちください。\r\n"
-  mailbody_after += "　受付時間は平日10:00～17:00となっております。\r\n"
-  mailbody_after += "\r\n"
-  mailbody_after += "尚、本書面を以て料金が発生いたします。キャンセルは承っておりません。\r\n"
+    // 共通部分
+    mailbody_after += "【銀行振込】\r\n"
+    mailbody_after += "　三菱UFJ銀行　東京営業部\r\n"
+    mailbody_after += "　普通　6974978　プラットフォームサービス(カ\r\n"
+    mailbody_after += "　※必ず、「利用登録NO.」もしくは「(冠称を除いた)利用登録名」にてお振込みください。\r\n"
+    mailbody_after += "　※振込手数料はご負担ください。\r\n"
+    mailbody_after += "\r\n"
+    mailbody_after += "【現金】\r\n"
+    mailbody_after += "　ちよだプラットフォームスクウェア・コンシェルジュまでお持ちください。\r\n"
+    mailbody_after += "　受付時間は平日10:00～17:00となっております。\r\n"
+    mailbody_after += "\r\n"
+    mailbody_after += "尚、本書面を以て料金が発生いたします。キャンセルは承っておりません。\r\n"
+  }
   mailbody_after += "\r\n"
   mailbody_after += "●ご予約の誤り\r\n"
   mailbody_after += "お手数ですが、本日中に【TEL：03-5259-8400（平日10:00～17:00）】まで\r\n"
@@ -302,15 +304,23 @@ const send = (mail_to,title, content, id_search, filename, isPDF) => {
   let transporter = nodemailer.createTransport(smtp_config);
 
   // メール情報
+  let mail_to_value;
+  let mail_subject_value;
+
+  // テストモードかによって宛先を切り替える
+  if (process.env.TEST_MODE === "on") {
+    mail_to_value = process.env.MAIL_TO_TEST;
+    mail_subject_value = process.env.MAIL_SUBJECT_TEST + title;
+  } else {
+    mail_to_value = mail_to;
+    mail_subject_value = title;
+  }
+
   let message = {
     from: process.env.MAIL_FROM,
-    // テスト用として宛先を強制的に変更
-    // to: 'yoshida@yamori.jp',
-    // bcc: 'cps.concierge@gmail.com',
-    to: mail_to,
-    // テスト用として件名に【テスト】を追加
-    // subject: `【吉田 | 請求書電子化テスト】${title}`,
-    subject: title,
+    to: mail_to_value,
+    bcc: process.env.MAIL_CC_TEST,
+    subject: mail_subject_value,
     text: content,
   };
 
