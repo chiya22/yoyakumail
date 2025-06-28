@@ -72,7 +72,8 @@ const insert = async (inObj) => {
       ',' +
       common.retSqlValue(inObj.telno) +
       ',' +
-      common.retSqlValue(inObj.price) +
+      inObj.price +
+//      common.retSqlValue(inObj.price) +
       ',' +
       common.retSqlValue(inObj.yyyymmdd_kigen) +
       ',' +
@@ -110,17 +111,23 @@ const insert = async (inObj) => {
       ',' +
       common.retSqlValue(inObj.yyyymmddhhmmss_resended_mail) + 
       ',' +
-      common.retSqlValue(inObj.price_10per_total) + 
+//      common.retSqlValue(inObj.price_10per_total) + 
+      inObj.price_10per_total + 
       ',' +
-      common.retSqlValue(inObj.tax_10per_total) + 
+//      common.retSqlValue(inObj.tax_10per_total) + 
+      inObj.tax_10per_total + 
       ',' +
-      common.retSqlValue(inObj.price_8per_total) + 
+//      common.retSqlValue(inObj.price_8per_total) + 
+      inObj.price_8per_total + 
       ',' +
-      common.retSqlValue(inObj.tax_8per_total) + 
+//      common.retSqlValue(inObj.tax_8per_total) + 
+      inObj.tax_8per_total + 
       ',' +
-      common.retSqlValue(inObj.price_0per_total) + 
+//      common.retSqlValue(inObj.price_0per_total) + 
+      inObj.price_0per_total + 
       ',' +
-      common.retSqlValue(inObj.tax_0per_total) + 
+//      common.retSqlValue(inObj.tax_0per_total) + 
+      inObj.tax_0per_total + 
       ')';
     // logger.info(query);
     const retObj = await knex.raw(query);
