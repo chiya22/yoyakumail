@@ -9,7 +9,19 @@
     <%- include("./common/header.ejs", {isTop: false}); %>
     <div class="main">
       <div class="main__wrapper">
-        <div class="area_header">
+      <!-- メッセージ -->
+      <% if (flashMessages) { %>
+        <% if (flashMessages.success) { %>
+          <div class="flashes">
+            <div class="flash success"><%= flashMessages.success %></div>
+          </div>
+        <% } else if (flashMessages.error) { %>
+          <div class="flashes">
+            <div class="flash error"><%= flashMessages.error %></div>
+          </div>
+        <% } %>
+      <% } %>
+      <div class="area_header">
           <a class="btn-back" href="/">戻る</a>
           <div class="area_searchinfo">
             <p class="searchinfo-title"><%= `${searchinfo.id.slice(1,5)}年${searchinfo.id.slice(5,7)}月${searchinfo.id.slice(7,9)}日　${searchinfo.id.slice(9,11)}時${searchinfo.id.slice(11,13)}分${searchinfo.id.slice(13,15)}秒` %></p>
