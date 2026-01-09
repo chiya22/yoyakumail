@@ -134,8 +134,10 @@ router.get("/yoyakus/:id", (req, res) => {
 router.get("/yoyaku/:id", (req, res) => {
   (async () => {
     const yoyaku = await m_yoyakus.findPKey(req.params.id); // 予約情報
+    const searchinfo = await m_searchinfos.findPKey(yoyaku.id_search); // 検索情報
     res.render("yoyaku", {
       yoyaku: yoyaku,
+      searchinfo: searchinfo,
     });
   })();
 });
