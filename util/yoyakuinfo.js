@@ -32,7 +32,7 @@ const dlyoyakuinfo = async (yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd
   await page.type('input[name="in_opassword"]', process.env.YOYAKU_LOGIN_PASSWORD);
   await page.click("body > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(2) > tbody > tr > td:nth-child(2) > input");
 
-  await setTimeout(process.env.WAITTIME);
+  await setTimeout(Number(process.env.WAITTIME) || 3000);
 //  await page.waitForTimeout(process.env.WAITTIME);
   // await page.waitForNavigation({waitUntil: 'domcontentloaded'});
 
@@ -40,14 +40,14 @@ const dlyoyakuinfo = async (yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd
   const menu = await page.$("body > table > tbody > tr > td > table > tbody > tr > td > table:nth-child(2) > tbody > tr:nth-child(8) > td:nth-child(2) > input[type=image]:nth-child(9)");
   await menu.click();
 
-  await setTimeout(process.env.WAITTIME);
+  await setTimeout(Number(process.env.WAITTIME) || 3000);
 //  await page.waitForTimeout(process.env.WAITTIME);
 
   // 「新規予約確認」をクリック
   const shinki = await page.$("body > div:nth-child(4) > table:nth-child(3) > tbody > tr > th:nth-child(3) > a");
   await shinki.click();
 
-  await setTimeout(process.env.WAITTIME);
+  await setTimeout(Number(process.env.WAITTIME) || 3000);
 //  await page.waitForTimeout(process.env.WAITTIME);
 
   // 登録日/更新日の設定
@@ -72,7 +72,7 @@ const dlyoyakuinfo = async (yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd
   // 「検索」ボタンをクリック
   await page.click("body > div:nth-child(4) > form > table:nth-child(1) > tbody > tr > td:nth-child(4) > input");
 
-  await setTimeout(process.env.WAITTIME);
+  await setTimeout(Number(process.env.WAITTIME) || 3000);
   // await page.waitForTimeout(process.env.WAITTIME);
 
   // Promptが出たら必ずOKとする
@@ -110,7 +110,7 @@ const dlyoyakuinfo = async (yyyymmdd_addupd_start, yyyymmdd_addupd_end, yyyymmdd
   await page.$eval('form[name="formlist"]', (form) => form.submit());
 
   await logger.info(`予約情報をダウンロードしました`);
-  await setTimeout(process.env.WAITTIME);
+  await setTimeout(Number(process.env.WAITTIME) || 3000);
 //  await page.waitForTimeout(process.env.WAITTIME);
   await browser.close();
 

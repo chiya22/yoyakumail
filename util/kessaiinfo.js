@@ -77,7 +77,7 @@ const upkessaiinfo = async (key, upFilepath) => {
   // 電算システムへログイン
   await page.goto(process.env.KESSAI_URL, { waitUntil: "domcontentloaded" });
 
-  await setTimeout(process.env.WAITTIME);
+  await setTimeout(Number(process.env.WAITTIME) || 3000);
 //  await page.waitForTimeout(process.env.WAITTIME);
 
   // ログイン
@@ -87,20 +87,20 @@ const upkessaiinfo = async (key, upFilepath) => {
   await page.type('input[name="pass"]', logininfo.password);
   await page.click("#fra_maindsk > form > center > table:nth-child(5) > tbody > tr > td > input[type=submit]");
 
-  await setTimeout(process.env.WAITTIME);
+  await setTimeout(Number(process.env.WAITTIME) || 3000);
 //  await page.waitForTimeout(process.env.WAITTIME);
   // await page.waitForNavigation({waitUntil: 'domcontentloaded'});
 
   // 「ペーパレス決済」をクリック
   await page.click("#MENU2 > a");
 
-  await setTimeout(process.env.WAITTIME);
+  await setTimeout(Number(process.env.WAITTIME) || 3000);
 //  await page.waitForTimeout(process.env.WAITTIME);
 
   // 「依頼データアップロード」をクリック
   await page.click("#fra_menu2 > div:nth-child(3) > a");
   
-  await setTimeout(process.env.WAITTIME);
+  await setTimeout(Number(process.env.WAITTIME) || 3000);
 //  await page.waitForTimeout(process.env.WAITTIME);
 
   // コメントへ検索情報IDを設定する
@@ -110,7 +110,7 @@ const upkessaiinfo = async (key, upFilepath) => {
   const inputUploadfile = await page.$('input[type="file"]');
   inputUploadfile.uploadFile(upFilepath);
 
-  await setTimeout(process.env.WAITTIME);
+  await setTimeout(Number(process.env.WAITTIME) || 3000);
 //  await page.waitForTimeout(process.env.WAITTIME);
 
   // Promptが出たら必ずOKとする
@@ -121,7 +121,7 @@ const upkessaiinfo = async (key, upFilepath) => {
   // 「アップロード」をクリック
   await page.click("#fra_main > center:nth-child(2) > form > input[type=submit]:nth-child(5)");
 
-  await setTimeout(process.env.WAITTIME);
+  await setTimeout(Number(process.env.WAITTIME) || 3000);
 //  await page.waitForTimeout(process.env.WAITTIME);
 
   const errmsg = await page.evaluate( () => {
@@ -152,7 +152,7 @@ const upkessaiinfo = async (key, upFilepath) => {
 
     await logger.info(`決済依頼情報をアップロードしました`);
 
-    await setTimeout(process.env.WAITTIME);
+    await setTimeout(Number(process.env.WAITTIME) || 3000);
 //    await page.waitForTimeout(process.env.WAITTIME);
   
     // 「アップロード」が完了したらファイル名をoldにする
@@ -185,7 +185,7 @@ const dlkessaiinfo = async (key) => {
   // 電算システムへログイン
   await page.goto(process.env.KESSAI_URL, { waitUntil: "domcontentloaded" });
 
-  await setTimeout(process.env.WAITTIME);
+  await setTimeout(Number(process.env.WAITTIME) || 3000);
 //  await page.waitForTimeout(process.env.WAITTIME);
 
   // ログイン
@@ -195,19 +195,19 @@ const dlkessaiinfo = async (key) => {
   await page.type('input[name="pass"]', logininfo.password);
   await page.click("#fra_maindsk > form > center > table:nth-child(5) > tbody > tr > td > input[type=submit]");
 
-  await setTimeout(process.env.WAITTIME);
+  await setTimeout(Number(process.env.WAITTIME) || 3000);
 //  await page.waitForTimeout(process.env.WAITTIME);
 
   // 「ペーパレス決済」をクリック
   await page.click("#MENU2 > a");
 
-  await setTimeout(process.env.WAITTIME);
+  await setTimeout(Number(process.env.WAITTIME) || 3000);
 //  await page.waitForTimeout(process.env.WAITTIME);
 
   // 「結果データダウンロード」をクリック
   await page.click("#fra_menu2 > div:nth-child(5) > a");
   
-  await setTimeout(process.env.WAITTIME);
+  await setTimeout(Number(process.env.WAITTIME) || 3000);
 //  await page.waitForTimeout(process.env.WAITTIME);
 
   // コメントにKEYを設定
@@ -232,7 +232,7 @@ const dlkessaiinfo = async (key) => {
   // 検索ボタンをクリック
   await page.click("#fra_main > center:nth-child(3) > form:nth-child(2) > table:nth-child(4) > tbody > tr > td > input[type=button]");
 
-  await setTimeout(process.env.WAITTIME);
+  await setTimeout(Number(process.env.WAITTIME) || 3000);
 //  await page.waitForTimeout(process.env.WAITTIME);
 
   // エラーメッセージ表示領域より表示されているメッセージを取得
@@ -253,7 +253,7 @@ const dlkessaiinfo = async (key) => {
 
   } else {
 
-    await setTimeout(process.env.WAITTIME);
+    await setTimeout(Number(process.env.WAITTIME) || 3000);
 //    await page.waitForTimeout(process.env.WAITTIME);
 
     await page.click("#fra_main > center:nth-child(3) > form:nth-child(4) > table > tbody > tr:nth-child(2) > td:nth-child(1) > input[type=button]");
@@ -261,11 +261,11 @@ const dlkessaiinfo = async (key) => {
     // ファイル名取得
     const filename = await page.$eval("#fra_main > center:nth-child(3) > form:nth-child(4) > table > tbody > tr:nth-child(2) > td:nth-child(2)", el => el.innerHTML);
 
-    await setTimeout(process.env.WAITTIME);
+    await setTimeout(Number(process.env.WAITTIME) || 3000);
 //    await page.waitForTimeout(process.env.WAITTIME);
 
     await logger.info(`決済結果データをダウンロードしました`);
-    await setTimeout(process.env.WAITTIME);
+    await setTimeout(Number(process.env.WAITTIME) || 3000);
 //    await page.waitForTimeout(process.env.WAITTIME);
     await browser.close();
 
