@@ -143,6 +143,29 @@ router.get("/yoyaku/:id", (req, res) => {
 });
 
 /**
+ * 予約情報を削除する
+ * id：予約情報ID
+ */
+router.get("/yoyaku/delete/:id", (req, res) => {
+  (async () => {
+    try {
+      // 削除前に予約情報を取得して検索情報IDを取得
+      const yoyaku = await m_yoyakus.findPKey(req.params.id);
+      const id_search = yoyaku.id_search;
+
+      // 予約情報を削除
+      await m_yoyakus.remove(req.params.id);
+
+      req.flash("success", `予約情報を削除しました。(${req.params.id})`);
+      res.redirect(`/yoyakus/${id_search}`);
+    } catch (error) {
+      req.flash("error", error.message);
+      res.redirect("/");
+    }
+  })();
+});
+
+/**
  * 検索情報IDに紐づく情報（予約情報、決済情報、検索情報）を削除する
  * id：検索情報ID
  */
