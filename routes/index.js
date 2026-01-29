@@ -273,7 +273,7 @@ router.get("/kessaiscreate/:id", (req, res) => {
             // const result_rows = await m_yoyakus.findIdKessaiByIdSearch(id_search);
             const kessais = await m_kessais.findByIdSearch(id_search);
 
-              //　それぞれの請求情報に対する請求書PDFを作成し、決済情報へ反映する
+            //　それぞれの請求情報に対する請求書PDFを作成し、決済情報へ反映する
             try{
               for (const kessai of kessais) {
                 await seikyuinfo.createSeikyuPDF(kessai.id);
@@ -526,6 +526,14 @@ router.post("/updyoyakus/:id", (req, res) => {
           }
 
         }
+      }
+
+      // 請求書PDFを作成する
+      try {
+        await seikyuinfo.createSeikyuPDF(id_kessai_new);
+      } catch (error) {
+        req.flash("error", error.message);
+        res.redirect("/");
       }
 
       // メール文章を作成する
@@ -1076,6 +1084,8 @@ router.post("/newyoyaku/add", (req, res) => {
       try {
         await seikyuinfo.createSeikyuPDF(retObjkessai.id);
       } catch (error) {
+        // 【TODO】ここで登録している予約情報と決済情報をどうするかを考える必要がある
+        // 決済情報はうまく作成できていないから削除かな、予約情報は登録したままにするかな
         req.flash("error", error.message);
         res.redirect("/");
         return;
