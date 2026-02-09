@@ -192,10 +192,6 @@ const makeMailBody = async (kessai) => {
   mailbody_after += "○しまゆし○　TEL：03-5259-8051\r\n"
   mailbody_after += "　営業：平日10時～22時／土曜10時～14時\r\n"
   mailbody_after += "　（日祝休み）\r\n"
-  mailbody_after += "\r\n"
-  mailbody_after += "○ビジネスセンター○　TEL：03-5259-8020\r\n"
-  mailbody_after += "　営業：平日9時～19時\r\n"
-  mailbody_after += "　（土日祝休み）\r\n"
 
   let inObj = {};
   inObj.id = kessai.id;
